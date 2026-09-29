@@ -1,105 +1,56 @@
 {
-  "schemaVersion": "0.1",
-  "source": {
-    "name": "메이플 키우기 공식 전투 시스템 안내 · 동료 능력치",
-    "url": "https://maplestoryidle.nexon.com/ko/guide",
-    "updatedAt": "2026-09-22",
-    "verification": "official-summary"
+  "schemaVersion": "0.2",
+  "source": [
+    {
+      "name": "넥슨 공식 전투 시스템 안내",
+      "url": "https://maplestoryidle.nexon.com/ko/guide",
+      "verification": "official",
+      "updatedAt": "2026-09-22"
+    },
+    {
+      "name": "MapleIdleIndex 동료 장착·스킬 데이터",
+      "url": "https://mapleidleindex.com/calcv4/",
+      "verification": "external-client-data",
+      "clientVersion": "1.15.0",
+      "retrievedAt": "2026-09-30"
+    }
+  ],
+  "slotModel": {
+    "main": 1,
+    "sub": 6,
+    "total": 7,
+    "duplicateRule": "같은 종류·등급 중복 장착 금지"
   },
   "companionRules": {
-    "attackInheritance": {
-      "cap": 0.9,
-      "snapshot": "소환 시점 플레이어 전투 능력치 기준",
-      "levelDependent": true,
-      "promotionThresholds": [
-        30,
-        60,
-        100
-      ],
-      "status": "official"
-    },
-    "otherAttackStats": "동료의 그 외 공격 관련 능력치는 플레이어 값을 기준으로 사용",
-    "status": "official",
-    "usuallyNotApplied": [
-      "skillCooldownReduction",
-      "skillLevel",
-      "basicAttackTargetCount",
-      "buffDuration"
+    "summonSnapshot": "소환 시점 플레이어 전투 능력치 기준",
+    "linkedAttackInheritanceCap": 0.9,
+    "promotionThresholds": [
+      30,
+      60,
+      100
     ],
-    "dpsComparisonStatus": "provisional"
+    "ownAttack": "동료 자체 공격은 플레이어 스킬 1회 피해와 분리",
+    "collectionEffects": "OCR 기준 스탯에 이미 포함될 수 있으므로 별도 중복 합산 금지"
   },
-  "statImpact": {
-    "attack": "기본 공격량에 반영. 동료 공격력 계승은 별도 규칙으로 처리.",
-    "damage": "일반 데미지 계열에서 합산.",
-    "finalDamage": "최종 데미지 계열과 곱연산.",
-    "bossMonsterDamage": "보스 대상에만 적용.",
-    "normalMonsterDamage": "일반 몬스터 대상에만 적용.",
-    "criticalRate": "실제 치명타 확률 = 공격자 확률 - 대상 치명타 저항.",
-    "criticalDamage": "치명타가 발생한 공격에만 적용.",
-    "attackSpeed": "시간당 공격 횟수와 일부 연계 지연에 영향.",
-    "accuracy": "적 회피와의 차이로 MISS 확률에 영향.",
-    "defensePenetration": "대상 방어력에 반영. PvP에서도 공격 계열.",
-    "maxHpDefenseReceivedReduction": "DPS가 아니라 생존·통과 조건에 우선 반영."
+  "equippedEffectCategories": {
+    "attackPlus": "플레이어 공격력에 직접 반영되는 장착 스탯",
+    "bossDamage": "보스 대상에만 적용",
+    "normalDamage": "일반 몬스터 대상에만 적용",
+    "basicDamage": "기본 공격에만 적용",
+    "skillDamage": "스킬 공격에만 적용",
+    "attackSpeed": "최대 150%까지 남은 구간 체감 누적",
+    "hit": "명중·적 회피 조건 확인 전 정량 DPS 확정 금지",
+    "critRate": "대상 크리티컬 저항과 함께 계산",
+    "critDamage": "크리티컬 발생 공격에만 적용",
+    "minDamage": "최소 데미지 배율",
+    "maxDamage": "최대 데미지 배율",
+    "mainPct": "직업 주 스탯과 기준값 필요",
+    "statusDamage": "대상 상태이상 조건 필요"
   },
-  "contentGuides": {
-    "bossRaid": {
-      "priority": [
-        "accuracy",
-        "bossMonsterDamage",
-        "attackDamageFinalDamage",
-        "critical",
-        "attackSpeed"
-      ],
-      "adjustment": "squareRoot"
-    },
-    "normalFarm": {
-      "priority": [
-        "normalMonsterDamage",
-        "attackSpeed",
-        "basicAttackTargetCountOrArea",
-        "accuracy",
-        "attackDamage"
-      ],
-      "adjustment": "content-dependent"
-    },
-    "chapter": {
-      "priority": [
-        "bottleneckSplitBossOrNormal",
-        "survivalGate",
-        "accuracy",
-        "balancedDamage"
-      ],
-      "adjustment": "content-dependent"
-    },
-    "pvp": {
-      "priority": [
-        "attackDefensePenetrationDamage",
-        "finalDamageCritical",
-        "maxHpDefenseReceivedDamageReduction"
-      ],
-      "excluded": [
-        "bossMonsterDamage",
-        "normalMonsterDamage"
-      ],
-      "adjustment": [
-        "squareRoot",
-        "level",
-        "pvpDefense"
-      ]
-    },
-    "survivalUnlock": {
-      "priority": [
-        "maxHp",
-        "defense",
-        "receivedDamageReduction",
-        "accuracy",
-        "utility"
-      ],
-      "dps": "not-primary"
-    }
-  },
-  "notes": [
-    "공식 규칙과 동료별 실제 스킬 수치는 별도 데이터다. 동료별 스킬 수치가 확인되기 전에는 입력한 추가 기여도 기반 상대 비교로만 표시한다.",
-    "정확한 절대 DPS에는 캐릭터 기본 스탯, 적 방어력·회피, 스킬 계수, 소환 시점 스냅샷, 콘텐츠 조정이 필요하다."
+  "calculationBoundaries": [
+    "직업·등급·레벨별 장착 효과는 companion-runtime-data.json에서 읽는다.",
+    "활성·패시브 스킬은 해금 목록과 원시 Operation을 표시하되, 조건부 발동률·지속시간·소환 주기 없이는 실전 DPS에 자동 합산하지 않는다.",
+    "동료 자체 공격의 절대 DPS는 공격 주기·스킬 계수·소환 시점이 연결될 때까지 별도 항목으로 둔다.",
+    "현재 캐릭터 기준 스탯이 없으면 정적 상대 배율을 계산하지 않고 필요한 기준값을 표시한다."
   ]
 }
