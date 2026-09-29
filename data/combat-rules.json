@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "name": "메이플 키우기 공식 전투 시스템 안내",
+    "url": "https://maplestoryidle.nexon.com/ko/guide#gnbAllLayer",
+    "updatedAt": "2026-09-22",
+    "note": "업데이트에 따라 게임 내 최신 안내가 우선"
+  },
+  "scale": {
+    "permille": 1000,
+    "percentToValue": "displayPercent * 10",
+    "multiplier": "(1000 + value) / 1000"
+  },
+  "caps": {
+    "receivedDamageReduction": 950,
+    "defensePenetration": 1000,
+    "attackSpeed": 1500,
+    "skillCooldownReductionPercent": 1000,
+    "evasionChance": 700,
+    "debuffDurationReduction": 850
+  },
+  "softCaps": [
+    "받는 피해 감소",
+    "방어 관통력",
+    "스킬 재사용 대기시간 감소(%)",
+    "공격 속도"
+  ],
+  "cooldownRule": {
+    "belowSevenSecondsRatio": 0.5,
+    "minimumSeconds": 4
+  },
+  "generalDamageOrder": [
+    "기준 피해(보통 공격력)",
+    "방어 관통 후 방어력 반영",
+    "대상 받는 피해 증가·감소",
+    "데미지·데미지 증폭·보스/일반·기본 공격/스킬·스탯 비례",
+    "마스터리 및 기타 피해 증가",
+    "크리티컬·최소/최대 배율·상태이상 피해",
+    "최종 데미지",
+    "콘텐츠 전용 보정",
+    "스킬 계수"
+  ],
+  "basicDamageFormula": "attack * 5000 / (defenseAfterPenetration + 6000) * targetDamageTakenMultipliers * contentAdjustment * (1+damage) * (1+damageAmplification) * (1+bossOrNormalDamage) * (1+basicOrSkillDamage) * (1+statBasedDamage) * masteryAndOtherMultipliers * criticalMultiplier * minMaxMultiplier * statusMultiplier * finalDamageMultiplier * skillCoefficient",
+  "contentAdjustments": {
+    "arena": ["squareRootAdjustment", "levelAdjustment", "pvpDefenseAdjustment"],
+    "worldArena": ["squareRootAdjustment", "levelAdjustment", "pvpDefenseAdjustment"],
+    "colosseum": ["squareRootAdjustment", "levelAdjustment", "pvpDefenseAdjustment"],
+    "partyQuest": ["squareRootAdjustment"],
+    "bossAndGuildRaid": ["squareRootAdjustment"],
+    "guildTrainingGround": ["cubeRootAdjustment"]
+  },
+  "pvp": {
+    "offensiveStats": ["attack", "defensePenetration", "damage", "damageAmplification", "basicOrSkillDamage", "statBasedDamage", "criticalRate", "criticalDamage", "minDamage", "maxDamage", "finalDamage"],
+    "defensiveStats": ["maxHp", "defense", "receivedDamageReduction"],
+    "constants": {
+      "arena": 7206000000,
+      "colosseum": 4323600000,
+      "worldArena": 5764800000
+    },
+    "levelPenalty": {
+      "arenaAndWorldArena": [[31, 60, 0.005], [61, 100, 0.013], [101, null, 0.015]],
+      "colosseum": [[31, 60, 0.005], [61, 70, 0.013], [71, 100, 0.015], [101, null, 0.025]]
+    },
+    "preCombatStatsOnly": true,
+    "damageFormula": "sqrt(baseFormulaWithoutSkillCoefficient) * skillCoefficient * levelAdjustment * pvpDamageAdjustment * 2"
+  },
+  "specialDamage": [
+    "defenseIgnoringOrVeryHighPenetration",
+    "fixedDamage",
+    "maxHpBasedDamage",
+    "fixedDamageTaken",
+    "hpAdjustmentOrInstantDeath"
+  ],
+  "potions": {
+    "arena": {"hpPercent": 10, "mpPercent": 80},
+    "colosseum": {"hpPercent": 10, "mpPercent": 80},
+    "worldArena": {"hpPercent": 10, "mpPercent": 80},
+    "bossAndGuildRaid": {"hpCooldownSeconds": 30}
+  },
+  "companions": {
+    "attackInheritanceCap": 0.9,
+    "promotionThresholds": [30, 60, 100],
+    "summonSnapshot": true,
+    "usuallyNotApplied": ["skillCooldownReduction", "skillLevel", "basicAttackTargetCount", "buffDuration"]
+  },
+  "attackSpeedOverflow": {
+    "carryToNextUse": true,
+    "onlyWhenCompletedNormally": true,
+    "carryWhenCanceled": false
+  },
+  "battlePower": {
+    "notEquivalentToDps": true,
+    "base": "attack*3 + maxHp*0.05 + defense*0.2",
+    "weightedFactors": {
+      "maxHp": 1,
+      "defense": 20,
+      "maxMpMinus500": 10,
+      "damage": 700,
+      "attackSpeed": 700,
+      "criticalRate": 350,
+      "criticalDamageMinus300": 550,
+      "maxDamageMultiplierMinus1000": 350,
+      "minDamageMultiplierMinus650": 350,
+      "accuracy": 4500,
+      "evasion": 1000,
+      "normalMonsterDamage": 350,
+      "bossMonsterDamage": 350,
+      "statusDamage": 350,
+      "skillDamage": 200,
+      "basicAttackDamage": 500,
+      "defensePenetration": 1000,
+      "buffDuration": 250,
+      "companionSummonDuration": 250,
+      "fixedCooldownReductionSeconds": 25,
+      "cooldownReductionPercent": 250,
+      "basicAttackTargetCountIncrease": 30000,
+      "receivedDamageReduction": 200,
+      "statBasedDamage": 700,
+      "finalDamage": 700,
+      "damageAmplification": 700
+    },
+    "masteryGroups": {
+      "main80k": [12, 15, 19, 22, 26, 32, 37, 42, 47, 52, 56, 62, 66, 71, 76, 80, 84, 88, 92, 96, 102, 106, 111, 116, 120, 124, 128, 132, 136],
+      "sub25k": [21, 24, 39, 44, 49, 54, 68, 73, 78, 82, 90, 94, 98, 104, 108, 113, 118, 122, 126, 130, 134, 138]
+    }
+  },
+  "implementationNote": "이 파일은 공식 규칙의 코드용 요약이다. 실제 계산은 AI 프롬프트가 아니라 브라우저의 수식 엔진에서 수행한다."
+}
