@@ -10,6 +10,15 @@
 - 현재 유지·왼쪽·오른쪽 후보의 방향성 비교
 - 브라우저 localStorage 저장
 - AI 분석용 Markdown 요약 복사
+- 동료 보유 현황 OCR 보조 입력 페이지
+
+## 동료 보유 현황 OCR
+
+보유 현황 스크린샷에서 동료 레벨·보유 수량·보유 여부를 읽고, 이름 매핑을 확인한 뒤 브라우저에 저장합니다.
+
+- 도구: https://zlsomeonelz.github.io/Maplestory_Idle_Growth_Lab/companion-ocr.html
+- 초상화에는 이름 텍스트가 없으므로 이름은 첫 사용 시 위치별로 확인해야 합니다.
+- OCR 결과는 게임 화면과 대조한 뒤 사용하세요.
 
 ## GitHub Pages
 
