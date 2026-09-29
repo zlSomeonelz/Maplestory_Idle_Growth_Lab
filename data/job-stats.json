@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "0.1",
+  "status": "provisional",
+  "source": {
+    "reference": "https://blog.naver.com/PostView.naver?blogId=inno_vation_&logNo=221841068137",
+    "type": "MapleStory PC community reference",
+    "warning": "메이플 키우기 공식 직업별 능력치 표와 대조 전에는 확정값으로 사용하지 않음"
+  },
+  "rule": "main stat contributes 100%, sub stat contributes 25% to attack; stat-based damage uses main 1% per 100 and sub 1% per 400",
+  "jobs": {
+    "hero": {"main": ["STR"], "sub": ["DEX"]},
+    "paladin": {"main": ["STR"], "sub": ["DEX"]},
+    "darkKnight": {"main": ["STR"], "sub": ["DEX"]},
+    "archMageIceLightning": {"main": ["INT"], "sub": ["LUK"]},
+    "archMageFirePoison": {"main": ["INT"], "sub": ["LUK"]},
+    "bishop": {"main": ["INT"], "sub": ["LUK"]},
+    "bowmaster": {"main": ["DEX"], "sub": ["STR"]},
+    "sniper": {"main": ["DEX"], "sub": ["STR"]},
+    "nightLord": {"main": ["LUK"], "sub": ["DEX"]},
+    "shadower": {"main": ["LUK"], "sub": ["DEX"], "legacyReferenceAlsoLists": ["STR"]},
+    "viper": {"main": ["STR"], "sub": ["DEX"]},
+    "captain": {"main": ["DEX"], "sub": ["STR"]},
+    "nightWalker": {"main": ["LUK"], "sub": ["DEX"]},
+    "windBreaker": {"main": ["DEX"], "sub": ["STR"]}
+  },
+  "excludedUntilVerified": [
+    "Demon Avenger: HP/STR special scaling",
+    "Xenon: STR/DEX/LUK hybrid scaling",
+    "classes not present in the current official companion list"
+  ],
+  "implementationNote": "직업 매핑은 옵션 평가 엔진에서 교체 가능한 데이터로 두며, 공식 메이플 키우기 자료가 확인되면 이 파일만 갱신한다."
+}
