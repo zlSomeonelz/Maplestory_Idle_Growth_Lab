@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "name": "메이플 키우기 공식 전투 시스템 안내 · 동료 능력치",
+    "url": "https://maplestoryidle.nexon.com/ko/guide",
+    "updatedAt": "2026-09-22",
+    "verification": "official-summary"
+  },
+  "companionRules": {
+    "attackInheritance": {
+      "cap": 0.9,
+      "snapshot": "소환 시점 플레이어 전투 능력치 기준",
+      "levelDependent": true,
+      "promotionThresholds": [
+        30,
+        60,
+        100
+      ],
+      "status": "official"
+    },
+    "otherAttackStats": "동료의 그 외 공격 관련 능력치는 플레이어 값을 기준으로 사용",
+    "status": "official",
+    "usuallyNotApplied": [
+      "skillCooldownReduction",
+      "skillLevel",
+      "basicAttackTargetCount",
+      "buffDuration"
+    ],
+    "dpsComparisonStatus": "provisional"
+  },
+  "statImpact": {
+    "attack": "기본 공격량에 반영. 동료 공격력 계승은 별도 규칙으로 처리.",
+    "damage": "일반 데미지 계열에서 합산.",
+    "finalDamage": "최종 데미지 계열과 곱연산.",
+    "bossMonsterDamage": "보스 대상에만 적용.",
+    "normalMonsterDamage": "일반 몬스터 대상에만 적용.",
+    "criticalRate": "실제 치명타 확률 = 공격자 확률 - 대상 치명타 저항.",
+    "criticalDamage": "치명타가 발생한 공격에만 적용.",
+    "attackSpeed": "시간당 공격 횟수와 일부 연계 지연에 영향.",
+    "accuracy": "적 회피와의 차이로 MISS 확률에 영향.",
+    "defensePenetration": "대상 방어력에 반영. PvP에서도 공격 계열.",
+    "maxHpDefenseReceivedReduction": "DPS가 아니라 생존·통과 조건에 우선 반영."
+  },
+  "contentGuides": {
+    "bossRaid": {
+      "priority": [
+        "accuracy",
+        "bossMonsterDamage",
+        "attackDamageFinalDamage",
+        "critical",
+        "attackSpeed"
+      ],
+      "adjustment": "squareRoot"
+    },
+    "normalFarm": {
+      "priority": [
+        "normalMonsterDamage",
+        "attackSpeed",
+        "basicAttackTargetCountOrArea",
+        "accuracy",
+        "attackDamage"
+      ],
+      "adjustment": "content-dependent"
+    },
+    "chapter": {
+      "priority": [
+        "bottleneckSplitBossOrNormal",
+        "survivalGate",
+        "accuracy",
+        "balancedDamage"
+      ],
+      "adjustment": "content-dependent"
+    },
+    "pvp": {
+      "priority": [
+        "attackDefensePenetrationDamage",
+        "finalDamageCritical",
+        "maxHpDefenseReceivedDamageReduction"
+      ],
+      "excluded": [
+        "bossMonsterDamage",
+        "normalMonsterDamage"
+      ],
+      "adjustment": [
+        "squareRoot",
+        "level",
+        "pvpDefense"
+      ]
+    },
+    "survivalUnlock": {
+      "priority": [
+        "maxHp",
+        "defense",
+        "receivedDamageReduction",
+        "accuracy",
+        "utility"
+      ],
+      "dps": "not-primary"
+    }
+  },
+  "notes": [
+    "공식 규칙과 동료별 실제 스킬 수치는 별도 데이터다. 동료별 스킬 수치가 확인되기 전에는 입력한 추가 기여도 기반 상대 비교로만 표시한다.",
+    "정확한 절대 DPS에는 캐릭터 기본 스탯, 적 방어력·회피, 스킬 계수, 소환 시점 스냅샷, 콘텐츠 조정이 필요하다."
+  ]
+}
