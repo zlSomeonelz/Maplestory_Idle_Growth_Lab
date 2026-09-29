@@ -3763,51 +3763,500 @@
     }
   },
   "starforce": {
-    "failureRule": "0-20 stars: no downgrade or destruction according to supplied guide",
-    "steps": [
-      {
-        "from": 0,
-        "to": 1,
-        "successPercent": 100,
-        "meso": 20000,
-        "scrolls": 1
+    "sourceNote": "9/3 스타포스 개편 업데이트 이후 집계된 공식 설정 확률",
+    "probabilityColumn": "settingPercent",
+    "levels": {
+      "0": {
+        "fromStar": 0,
+        "outcomes": [
+          {
+            "result": "success",
+            "settingPercent": 100.0
+          }
+        ],
+        "sumSettingPercent": 100.0
       },
-      {
-        "from": 4,
-        "to": 5,
-        "successPercent": 80,
-        "meso": 60000,
-        "scrolls": 4
+      "1": {
+        "fromStar": 1,
+        "outcomes": [
+          {
+            "result": "success",
+            "settingPercent": 100.0
+          }
+        ],
+        "sumSettingPercent": 100.0
       },
-      {
-        "from": 9,
-        "to": 10,
-        "successPercent": 50,
-        "meso": 150000,
-        "scrolls": 9
+      "2": {
+        "fromStar": 2,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 10.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 90.0
+          }
+        ],
+        "sumSettingPercent": 100.0
       },
-      {
-        "from": 10,
-        "to": 11,
-        "successPercent": 35,
-        "meso": 170000,
-        "scrolls": 10
+      "3": {
+        "fromStar": 3,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 15.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 85.0
+          }
+        ],
+        "sumSettingPercent": 100.0
       },
-      {
-        "from": 11,
-        "to": 12,
-        "successPercent": 34,
-        "meso": 190000,
-        "scrolls": 11
+      "4": {
+        "fromStar": 4,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 20.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 80.0
+          }
+        ],
+        "sumSettingPercent": 100.0
       },
-      {
-        "from": 19,
-        "to": 20,
-        "successPercent": 21,
-        "meso": 850000,
-        "scrolls": 42
+      "5": {
+        "fromStar": 5,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 30.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 70.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "6": {
+        "fromStar": 6,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 35.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 65.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "7": {
+        "fromStar": 7,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 40.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 60.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "8": {
+        "fromStar": 8,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 45.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 55.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "9": {
+        "fromStar": 9,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 50.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 50.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "10": {
+        "fromStar": 10,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 65.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 35.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "11": {
+        "fromStar": 11,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 66.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 34.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "12": {
+        "fromStar": 12,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 67.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 33.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "13": {
+        "fromStar": 13,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 67.5
+          },
+          {
+            "result": "success",
+            "settingPercent": 32.5
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "14": {
+        "fromStar": 14,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 68.5
+          },
+          {
+            "result": "success",
+            "settingPercent": 31.5
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "15": {
+        "fromStar": 15,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 69.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 31.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "16": {
+        "fromStar": 16,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 71.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 29.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "17": {
+        "fromStar": 17,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 74.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 26.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "18": {
+        "fromStar": 18,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 77.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 23.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "19": {
+        "fromStar": 19,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 79.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 21.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "20": {
+        "fromStar": 20,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 76.2
+          },
+          {
+            "result": "success",
+            "settingPercent": 12.8
+          },
+          {
+            "result": "destroy",
+            "settingPercent": 11.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "21": {
+        "fromStar": 21,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 70.5
+          },
+          {
+            "result": "success",
+            "settingPercent": 11.5
+          },
+          {
+            "result": "downgrade",
+            "settingPercent": 8.0
+          },
+          {
+            "result": "destroy",
+            "settingPercent": 10.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "22": {
+        "fromStar": 22,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 77.7
+          },
+          {
+            "result": "success",
+            "settingPercent": 11.3
+          },
+          {
+            "result": "downgrade",
+            "settingPercent": 4.0
+          },
+          {
+            "result": "destroy",
+            "settingPercent": 7.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "23": {
+        "fromStar": 23,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 82.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 9.0
+          },
+          {
+            "result": "downgrade",
+            "settingPercent": 4.0
+          },
+          {
+            "result": "destroy",
+            "settingPercent": 5.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "24": {
+        "fromStar": 24,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 81.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 7.5
+          },
+          {
+            "result": "downgrade",
+            "settingPercent": 4.0
+          },
+          {
+            "result": "destroy",
+            "settingPercent": 7.5
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "25": {
+        "fromStar": 25,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 81.5
+          },
+          {
+            "result": "success",
+            "settingPercent": 7.0
+          },
+          {
+            "result": "downgrade",
+            "settingPercent": 4.0
+          },
+          {
+            "result": "destroy",
+            "settingPercent": 7.5
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "26": {
+        "fromStar": 26,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 85.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 4.5
+          },
+          {
+            "result": "downgrade",
+            "settingPercent": 3.0
+          },
+          {
+            "result": "destroy",
+            "settingPercent": 7.5
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "27": {
+        "fromStar": 27,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 86.5
+          },
+          {
+            "result": "success",
+            "settingPercent": 4.0
+          },
+          {
+            "result": "downgrade",
+            "settingPercent": 3.0
+          },
+          {
+            "result": "destroy",
+            "settingPercent": 6.5
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "28": {
+        "fromStar": 28,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 92.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 2.0
+          },
+          {
+            "result": "downgrade",
+            "settingPercent": 4.0
+          },
+          {
+            "result": "destroy",
+            "settingPercent": 2.0
+          }
+        ],
+        "sumSettingPercent": 100.0
+      },
+      "29": {
+        "fromStar": 29,
+        "outcomes": [
+          {
+            "result": "stay",
+            "settingPercent": 92.0
+          },
+          {
+            "result": "success",
+            "settingPercent": 2.0
+          },
+          {
+            "result": "downgrade",
+            "settingPercent": 4.0
+          },
+          {
+            "result": "destroy",
+            "settingPercent": 2.0
+          }
+        ],
+        "sumSettingPercent": 100.0
       }
-    ]
+    },
+    "useForExpectedValue": true,
+    "costDataStatus": "cost/scroll amounts are separate from this probability table and must be versioned independently"
   },
   "normalPotentialPartial": {
     "useForExpectedValue": false,
@@ -3978,6 +4427,7 @@
     "설정 확률만 저장·계산하고 실제 결과 표본은 제외한다.",
     "각 소환 레벨의 행 합계는 검증용으로 보관하되 자동 정규화하지 않는다.",
     "부분 표는 partial로 표시하고 기댓값 계산을 잠근다.",
-    "확률 데이터는 업데이트 날짜와 출처를 함께 관리한다."
+    "확률 데이터는 업데이트 날짜와 출처를 함께 관리한다.",
+    "스타포스는 현재 단계별 유지·성공·하락·파괴를 분리해 상태 전이 계산에 사용한다."
   ]
 }
