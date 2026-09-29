@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "0.2",
+  "schemaVersion": "0.3",
   "source": {
     "officialReference": "https://now.nexon.com/service/maplestoryidle?page=bd75db0f-1352-4401-9457-be38041bfeac",
     "providedByUser": true,
@@ -351,6 +351,5345 @@
           ]
         }
       ]
+    },
+    "epic": {
+      "blockCount": 45,
+      "equipment": [
+        "귀고리",
+        "눈 장식",
+        "망토",
+        "모자",
+        "목걸이",
+        "반지",
+        "반지2",
+        "벨트",
+        "상의",
+        "신발",
+        "어깨장식",
+        "얼굴 장식",
+        "장갑",
+        "포켓",
+        "하의"
+      ],
+      "blocks": [
+        {
+          "grade": "에픽",
+          "equipment": "모자",
+          "slot": 1,
+          "options": [
+            {
+              "option": "스킬 재사용 대기시간 감소 0.5초",
+              "settingPercent": 1.0
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.25
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "모자",
+          "slot": 2,
+          "options": [
+            {
+              "option": "스킬 재사용 대기시간 감소 0.5초",
+              "settingPercent": 0.24
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.22
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "모자",
+          "slot": 3,
+          "options": [
+            {
+              "option": "스킬 재사용 대기시간 감소 0.5초",
+              "settingPercent": 0.08
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.74
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "상의",
+          "slot": 1,
+          "options": [
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.5
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.5
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.5
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.5
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "상의",
+          "slot": 2,
+          "options": [
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.28
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.28
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.28
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.28
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "상의",
+          "slot": 3,
+          "options": [
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.76
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.76
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.76
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.76
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "하의",
+          "slot": 1,
+          "options": [
+            {
+              "option": "최종 데미지 3%",
+              "settingPercent": 1.0
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.25
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "하의",
+          "slot": 2,
+          "options": [
+            {
+              "option": "최종 데미지 3%",
+              "settingPercent": 0.24
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.22
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "하의",
+          "slot": 3,
+          "options": [
+            {
+              "option": "최종 데미지 3%",
+              "settingPercent": 0.08
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.74
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "장갑",
+          "slot": 1,
+          "options": [
+            {
+              "option": "크리티컬 데미지 10%",
+              "settingPercent": 1.0
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.25
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "장갑",
+          "slot": 2,
+          "options": [
+            {
+              "option": "크리티컬 데미지 10%",
+              "settingPercent": 0.24
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.22
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "장갑",
+          "slot": 3,
+          "options": [
+            {
+              "option": "크리티컬 데미지 10%",
+              "settingPercent": 0.08
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.74
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "망토",
+          "slot": 1,
+          "options": [
+            {
+              "option": "최종 데미지 3%",
+              "settingPercent": 1.0
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.25
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "망토",
+          "slot": 2,
+          "options": [
+            {
+              "option": "최종 데미지 3%",
+              "settingPercent": 0.24
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.22
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "망토",
+          "slot": 3,
+          "options": [
+            {
+              "option": "최종 데미지 3%",
+              "settingPercent": 0.08
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.74
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "어깨장식",
+          "slot": 1,
+          "options": [
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.5
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.5
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.5
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.5
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "어깨장식",
+          "slot": 2,
+          "options": [
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.28
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.28
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.28
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.28
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "어깨장식",
+          "slot": 3,
+          "options": [
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.76
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.76
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.76
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.76
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "벨트",
+          "slot": 1,
+          "options": [
+            {
+              "option": "버프 지속시간 증가 5%",
+              "settingPercent": 1.0
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.25
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "벨트",
+          "slot": 2,
+          "options": [
+            {
+              "option": "버프 지속시간 증가 5%",
+              "settingPercent": 0.24
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.22
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "벨트",
+          "slot": 3,
+          "options": [
+            {
+              "option": "버프 지속시간 증가 5%",
+              "settingPercent": 0.08
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.74
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "신발",
+          "slot": 1,
+          "options": [
+            {
+              "option": "동료 소환 지속시간 증가 5%",
+              "settingPercent": 1.0
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.25
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "신발",
+          "slot": 2,
+          "options": [
+            {
+              "option": "동료 소환 지속시간 증가 5%",
+              "settingPercent": 0.24
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.22
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "신발",
+          "slot": 3,
+          "options": [
+            {
+              "option": "동료 소환 지속시간 증가 5%",
+              "settingPercent": 0.08
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.74
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "반지",
+          "slot": 1,
+          "options": [
+            {
+              "option": "모든 스킬 레벨 5",
+              "settingPercent": 1.0
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.25
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "반지",
+          "slot": 2,
+          "options": [
+            {
+              "option": "모든 스킬 레벨 5",
+              "settingPercent": 0.24
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.22
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "반지",
+          "slot": 3,
+          "options": [
+            {
+              "option": "모든 스킬 레벨 5",
+              "settingPercent": 0.08
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.74
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "목걸이",
+          "slot": 1,
+          "options": [
+            {
+              "option": "모든 스킬 레벨 5",
+              "settingPercent": 1.0
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.25
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "목걸이",
+          "slot": 2,
+          "options": [
+            {
+              "option": "모든 스킬 레벨 5",
+              "settingPercent": 0.24
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.22
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "목걸이",
+          "slot": 3,
+          "options": [
+            {
+              "option": "모든 스킬 레벨 5",
+              "settingPercent": 0.08
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.74
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "눈 장식",
+          "slot": 1,
+          "options": [
+            {
+              "option": "1레벨당 주 스탯 10",
+              "settingPercent": 1.0
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.25
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "눈 장식",
+          "slot": 2,
+          "options": [
+            {
+              "option": "1레벨당 주 스탯 10",
+              "settingPercent": 0.24
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.22
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "눈 장식",
+          "slot": 3,
+          "options": [
+            {
+              "option": "1레벨당 주 스탯 10",
+              "settingPercent": 0.08
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.74
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "얼굴 장식",
+          "slot": 1,
+          "options": [
+            {
+              "option": "최종 데미지 3%",
+              "settingPercent": 1.0
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.25
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "얼굴 장식",
+          "slot": 2,
+          "options": [
+            {
+              "option": "최종 데미지 3%",
+              "settingPercent": 0.24
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.22
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "얼굴 장식",
+          "slot": 3,
+          "options": [
+            {
+              "option": "최종 데미지 3%",
+              "settingPercent": 0.08
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.74
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "귀고리",
+          "slot": 1,
+          "options": [
+            {
+              "option": "스킬 데미지 8%",
+              "settingPercent": 1.0
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.25
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "귀고리",
+          "slot": 2,
+          "options": [
+            {
+              "option": "스킬 데미지 8%",
+              "settingPercent": 0.24
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.22
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "귀고리",
+          "slot": 3,
+          "options": [
+            {
+              "option": "스킬 데미지 8%",
+              "settingPercent": 0.08
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.74
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "반지2",
+          "slot": 1,
+          "options": [
+            {
+              "option": "기본 공격 데미지 8%",
+              "settingPercent": 1.0
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.25
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "반지2",
+          "slot": 2,
+          "options": [
+            {
+              "option": "기본 공격 데미지 8%",
+              "settingPercent": 0.24
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.22
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "반지2",
+          "slot": 3,
+          "options": [
+            {
+              "option": "기본 공격 데미지 8%",
+              "settingPercent": 0.08
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.74
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "포켓",
+          "slot": 1,
+          "options": [
+            {
+              "option": "4레벨당 주 스탯% 0.4%",
+              "settingPercent": 1.0
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 2.5
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 4.0
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 4.5
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 9.0
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 9.25
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 9.25
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "포켓",
+          "slot": 2,
+          "options": [
+            {
+              "option": "4레벨당 주 스탯% 0.4%",
+              "settingPercent": 0.24
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 1.9
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.6
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.04
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.96
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 3.42
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 1.08
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 6.84
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 2.16
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 2.22
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 7.22
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 2.22
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        {
+          "grade": "에픽",
+          "equipment": "포켓",
+          "slot": 3,
+          "options": [
+            {
+              "option": "4레벨당 주 스탯% 0.4%",
+              "settingPercent": 0.08
+            },
+            {
+              "option": "크리티컬 확률 4.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "크리티컬 확률 6%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "공격 속도 3.5%",
+              "settingPercent": 2.3
+            },
+            {
+              "option": "공격 속도 4%",
+              "settingPercent": 0.2
+            },
+            {
+              "option": "데미지 8%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "데미지 12%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최소 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최소 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "최대 데미지 배율 6%",
+              "settingPercent": 3.68
+            },
+            {
+              "option": "최대 데미지 배율 8%",
+              "settingPercent": 0.32
+            },
+            {
+              "option": "STR 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "STR 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "DEX 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "DEX 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "INT 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "INT 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "LUK 4.5%",
+              "settingPercent": 4.14
+            },
+            {
+              "option": "LUK 6%",
+              "settingPercent": 0.36
+            },
+            {
+              "option": "방어력 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "방어력 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 HP 9%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 HP 12%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "최대 MP 4.5%",
+              "settingPercent": 8.28
+            },
+            {
+              "option": "최대 MP 6%",
+              "settingPercent": 0.72
+            },
+            {
+              "option": "STR 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "STR 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "DEX 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "DEX 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "INT 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "INT 200",
+              "settingPercent": 0.74
+            },
+            {
+              "option": "LUK 100",
+              "settingPercent": 8.74
+            },
+            {
+              "option": "LUK 200",
+              "settingPercent": 0.74
+            }
+          ],
+          "sumSettingPercent": 100.0
+        }
+      ],
+      "useForExpectedValue": true
     },
     "rare": {
       "blockCount": 45,
@@ -19857,10 +25196,7 @@
     }
   },
   "importStatus": {
-    "epic": {
-      "status": "pending",
-      "note": "에픽 표는 현재 대화의 inline 원문 전체를 파일로 분리한 뒤 추가"
-    },
+    "epic": "imported",
     "rare": "imported",
     "unique": "imported",
     "legendary": "imported",
