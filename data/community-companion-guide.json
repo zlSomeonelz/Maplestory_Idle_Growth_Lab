@@ -1,0 +1,363 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "url": "https://dreaminfo.tistory.com/1386",
+    "title": "메이플 키우기 동료 세팅 조합 업데이트 (사냥/보스/아레나 등)",
+    "publishedAt": "2026-06-10",
+    "verification": "community-guide"
+  },
+  "notes": [
+    "커뮤니티 가이드의 직업 배치 참고값이다. 공식 규칙이나 수학적 최적해로 취급하지 않는다.",
+    "본문은 메인 레전드 동료는 레벨이 중요하고, 보공·크뎀·최댐 등 현재 스탯에 따라 유동적으로 바꾸라고 안내한다.",
+    "등급 표시는 원문 색상에 의존하므로 계산기에서는 직업 배치만 불러오고 등급·레벨은 사용자가 선택한다."
+  ],
+  "effects": {
+    "marksman": {
+      "equipped": "statusDamage",
+      "guide": "상태이상 데미지",
+      "skill": "디버프 3개 제거 + 4초 디버프 면역"
+    },
+    "archmage-fp": {
+      "equipped": "critRate",
+      "guide": "크리티컬 확률",
+      "skill": "주변 적 10명 피해 5회 + 10초간 받는 피해 증가"
+    },
+    "archmage-il": {
+      "equipped": "normalDamage",
+      "guide": "일반 몬스터 데미지",
+      "skill": "주변 적 10명 피해 5회 + 3초 빙결"
+    },
+    "hero": {
+      "equipped": "maxDamage",
+      "guide": "최대 데미지 배율",
+      "skill": "10초간 방어력 15% 증가 + 30% 피해 흡수 보호막"
+    },
+    "shadower": {
+      "equipped": "minDamage",
+      "guide": "최소 데미지 배율",
+      "skill": "대상의 버프 2개 제거 + 피해 5회"
+    },
+    "bowmaster": {
+      "equipped": "attackSpeed",
+      "guide": "공격 속도",
+      "skill": "20초간 공격속도 증가"
+    },
+    "night-lord": {
+      "equipped": "bossDamage",
+      "guide": "보스 몬스터 데미지",
+      "skill": "주변 적 8명에게 피해 4회 + 보스 대상 시 피해 3배"
+    },
+    "dark-knight": {
+      "equipped": "hit",
+      "guide": "명중률",
+      "skill": "3.5초 동안 기본 공격 피해 면역"
+    },
+    "bishop": {
+      "equipped": "skillDamage",
+      "guide": "스킬 데미지",
+      "skill": "30초간 지속회복 초당 1%"
+    },
+    "paladin": {
+      "equipped": "basicDamage",
+      "guide": "기본 공격 데미지",
+      "skill": "20초간 플레이어 받는 피해 20% 감소"
+    },
+    "viper": {
+      "equipped": "mainPct",
+      "guide": "주 스탯",
+      "skill": "동료와 자신 포함 공격속도 + 크리티컬 데미지 15%"
+    },
+    "captain": {
+      "equipped": "critDamage",
+      "guide": "크리티컬 데미지",
+      "skill": "주변 적 10명 피해 5회 + 3초 기절"
+    }
+  },
+  "presets": {
+    "weaponDungeon": {
+      "label": "무기·강화던전",
+      "main": [
+        "viper",
+        "bishop"
+      ],
+      "subs": [
+        [
+          "night-lord"
+        ],
+        [
+          "night-lord"
+        ],
+        [
+          "bowmaster"
+        ],
+        [
+          "paladin",
+          "bowmaster"
+        ],
+        [
+          "hero"
+        ],
+        [
+          "captain",
+          "night-lord"
+        ]
+      ]
+    },
+    "expEquipmentDungeon": {
+      "label": "경험치·장비던전",
+      "main": [
+        "bishop"
+      ],
+      "subs": [
+        [
+          "archmage-il"
+        ],
+        [
+          "archmage-il"
+        ],
+        [
+          "bowmaster"
+        ],
+        [
+          "bowmaster",
+          "hero"
+        ],
+        [
+          "paladin",
+          "archmage-il"
+        ],
+        [
+          "captain"
+        ]
+      ]
+    },
+    "training": {
+      "label": "용사의 수련장",
+      "main": [
+        "night-lord"
+      ],
+      "subs": [
+        [
+          "night-lord"
+        ],
+        [
+          "hero"
+        ],
+        [
+          "bowmaster"
+        ],
+        [
+          "bowmaster"
+        ],
+        [
+          "paladin",
+          "archmage-il"
+        ],
+        [
+          "shadower",
+          "captain"
+        ]
+      ]
+    },
+    "chapterFarm": {
+      "label": "챕터 사냥",
+      "main": [
+        "archmage-il"
+      ],
+      "subs": [
+        [
+          "archmage-il"
+        ],
+        [
+          "archmage-il"
+        ],
+        [
+          "bowmaster"
+        ],
+        [
+          "bowmaster"
+        ],
+        [
+          "hero",
+          "captain"
+        ],
+        [
+          "paladin",
+          "viper"
+        ]
+      ]
+    },
+    "chapterChallenge": {
+      "label": "챕터 도전",
+      "main": [
+        "viper",
+        "bishop"
+      ],
+      "subs": [
+        [
+          "archmage-il"
+        ],
+        [
+          "bowmaster"
+        ],
+        [
+          "hero",
+          "archmage-il"
+        ],
+        [
+          "night-lord"
+        ],
+        [
+          "captain",
+          "night-lord"
+        ],
+        [
+          "paladin",
+          "night-lord"
+        ]
+      ]
+    },
+    "chapterBoss": {
+      "label": "챕터 보스",
+      "main": [
+        "viper",
+        "bishop"
+      ],
+      "subs": [
+        [
+          "shadower"
+        ],
+        [
+          "bowmaster"
+        ],
+        [
+          "hero"
+        ],
+        [
+          "night-lord"
+        ],
+        [
+          "night-lord",
+          "captain"
+        ],
+        [
+          "hero",
+          "night-lord"
+        ]
+      ]
+    },
+    "worldBoss": {
+      "label": "월드 보스",
+      "main": [
+        "viper",
+        "bishop"
+      ],
+      "subs": [
+        [
+          "shadower"
+        ],
+        [
+          "bowmaster"
+        ],
+        [
+          "hero"
+        ],
+        [
+          "night-lord"
+        ],
+        [
+          "marksman"
+        ],
+        [
+          "paladin",
+          "marksman"
+        ]
+      ]
+    },
+    "arena": {
+      "label": "아레나",
+      "main": [
+        "dark-knight"
+      ],
+      "subs": [
+        [
+          "bowmaster"
+        ],
+        [
+          "bowmaster"
+        ],
+        [
+          "bowmaster"
+        ],
+        [
+          "hero"
+        ],
+        [
+          "bishop"
+        ],
+        [
+          "paladin",
+          "dark-knight"
+        ]
+      ]
+    },
+    "guildRaid": {
+      "label": "길드 토벌전",
+      "main": [
+        "shadower",
+        "dark-knight"
+      ],
+      "subs": [
+        [
+          "bowmaster"
+        ],
+        [
+          "night-lord"
+        ],
+        [
+          "marksman"
+        ],
+        [
+          "hero"
+        ],
+        [
+          "bishop",
+          "bowmaster"
+        ],
+        [
+          "paladin",
+          "night-lord"
+        ]
+      ]
+    },
+    "guildLeague": {
+      "label": "길드 대항전",
+      "main": [
+        "viper",
+        "bishop"
+      ],
+      "subs": [
+        [
+          "night-lord"
+        ],
+        [
+          "bowmaster"
+        ],
+        [
+          "hero"
+        ],
+        [
+          "marksman"
+        ],
+        [
+          "shadower",
+          "night-lord"
+        ],
+        [
+          "paladin",
+          "marksman"
+        ]
+      ]
+    }
+  }
+}
