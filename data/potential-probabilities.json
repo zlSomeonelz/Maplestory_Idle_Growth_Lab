@@ -1,0 +1,355 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "officialReference": "https://now.nexon.com/service/maplestoryidle?page=bd75db0f-1352-4401-bfeac-4bea1fb",
+    "providedByUser": true,
+    "probabilityColumn": "settingPercent",
+    "excludedColumn": "actualResult",
+    "verificationStatus": "normal-grade table imported from supplied official transcription"
+  },
+  "normalGrade": {
+    "slotsPerEquipment": 3,
+    "options": [
+      {
+        "option": "크리티컬 확률 3%",
+        "settingPercent": 2.5
+      },
+      {
+        "option": "공격 속도 3%",
+        "settingPercent": 2.5
+      },
+      {
+        "option": "데미지 5%",
+        "settingPercent": 4.0
+      },
+      {
+        "option": "최소 데미지 배율 3%",
+        "settingPercent": 4.0
+      },
+      {
+        "option": "최대 데미지 배율 3%",
+        "settingPercent": 4.0
+      },
+      {
+        "option": "STR 3%",
+        "settingPercent": 4.5
+      },
+      {
+        "option": "DEX 3%",
+        "settingPercent": 4.5
+      },
+      {
+        "option": "INT 3%",
+        "settingPercent": 4.5
+      },
+      {
+        "option": "LUK 3%",
+        "settingPercent": 4.5
+      },
+      {
+        "option": "방어력 3%",
+        "settingPercent": 9.0
+      },
+      {
+        "option": "최대 HP 6%",
+        "settingPercent": 9.0
+      },
+      {
+        "option": "최대 MP 3%",
+        "settingPercent": 9.0
+      },
+      {
+        "option": "STR 50",
+        "settingPercent": 9.5
+      },
+      {
+        "option": "DEX 50",
+        "settingPercent": 9.5
+      },
+      {
+        "option": "INT 50",
+        "settingPercent": 9.5
+      },
+      {
+        "option": "LUK 50",
+        "settingPercent": 9.5
+      }
+    ],
+    "sumSettingPercent": 100.0,
+    "sameTableAcrossListedBlocks": true,
+    "availability": [
+      {
+        "equipment": "모자",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "모자",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "모자",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "상의",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "상의",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "상의",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "하의",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "하의",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "하의",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "장갑",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "장갑",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "장갑",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "망토",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "망토",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "망토",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "어깨장식",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "어깨장식",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "어깨장식",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "벨트",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "벨트",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "벨트",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "신발",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "신발",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "신발",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "반지",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "반지",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "반지",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "목걸이",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "목걸이",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "목걸이",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "눈 장식",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "눈 장식",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "눈 장식",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "얼굴 장식",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "얼굴 장식",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "얼굴 장식",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "귀고리",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "귀고리",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "귀고리",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "반지2",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "반지2",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "반지2",
+        "slots": [
+          3
+        ]
+      },
+      {
+        "equipment": "포켓",
+        "slots": [
+          1
+        ]
+      },
+      {
+        "equipment": "포켓",
+        "slots": [
+          2
+        ]
+      },
+      {
+        "equipment": "포켓",
+        "slots": [
+          3
+        ]
+      }
+    ]
+  },
+  "rerollRule": "if all option type, value, and order match existing options, results reset until a different result appears",
+  "useForExpectedValue": true
+}
