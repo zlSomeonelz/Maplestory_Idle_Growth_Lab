@@ -3705,7 +3705,61 @@
       "formula": "gradeProbability * withinGradeJobProbability"
     },
     "eliteMonsterArmor": {
-      "status": "not present in the supplied full table; retain earlier partial draft separately"
+      "status": "partial settings data from supplied guide; exact full level table not supplied",
+      "levels": {
+        "1": [
+          {
+            "name": "normal_low",
+            "settingPercent": 89.85
+          },
+          {
+            "name": "normal_mid",
+            "settingPercent": 8.35
+          },
+          {
+            "name": "normal_high",
+            "settingPercent": 1.0
+          },
+          {
+            "name": "normal_top",
+            "settingPercent": 0.5
+          },
+          {
+            "name": "rare_low",
+            "settingPercent": 0.3
+          }
+        ],
+        "3": [
+          {
+            "name": "normal",
+            "settingPercent": 98.2
+          },
+          {
+            "name": "rare",
+            "settingPercent": 1.8
+          }
+        ],
+        "5_newUnlocks": [
+          {
+            "name": "epic_low",
+            "settingPercent": 0.2
+          }
+        ],
+        "7_newUnlocks": [
+          {
+            "name": "epic_total",
+            "settingPercent": 0.7
+          }
+        ],
+        "10_newUnlocks": [
+          {
+            "name": "epic_total",
+            "settingPercent": 2.6
+          }
+        ],
+        "11plus": "unique and legendary equipment gradually unlock; exact values not supplied"
+      },
+      "useForExpectedValue": false
     }
   },
   "starforce": {
