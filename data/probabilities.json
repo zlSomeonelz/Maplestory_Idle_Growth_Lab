@@ -1,110 +1,3929 @@
 {
-  "schemaVersion": "0.1",
+  "schemaVersion": "0.2",
   "source": {
-    "name": "메이플 키우기 공식 설정 확률 종합 가이드",
     "officialReference": "https://now.nexon.com/service/maplestoryidle?page=bd75db0f-1352-4401-9457-be38041bfeac",
     "guideReference": "https://maplestoryidle.nexon.com/ko/guide#gnbAllLayer",
     "providedByUser": true,
-    "verificationStatus": "summary transcription; cross-check against current official table before production use",
-    "note": "확률은 업데이트와 소환 레벨·슬롯·등급에 따라 달라질 수 있다. 명시되지 않은 확률은 추정하지 않는다."
+    "probabilityColumn": "settingPercent",
+    "excludedColumn": "actualResult",
+    "verificationStatus": "settings-only import from supplied official-table transcription; recheck after updates",
+    "note": "실제 결과 열은 저장하지 않으며, 누락된 공식 표는 추정하지 않는다."
+  },
+  "eventExamples": {
+    "goblinLuckyPouch": [
+      {
+        "name": "산적 10개",
+        "settingPercent": 70.0
+      },
+      {
+        "name": "메밀묵",
+        "settingPercent": 22.0
+      },
+      {
+        "name": "금송편",
+        "settingPercent": 5.0
+      },
+      {
+        "name": "비단 복건(남) / 비단 조바위(여)",
+        "settingPercent": 1.0
+      },
+      {
+        "name": "온화색동(남) / 홍빛색동(여)",
+        "settingPercent": 1.0
+      },
+      {
+        "name": "반짝반짝 복주머니",
+        "settingPercent": 1.0
+      }
+    ]
   },
   "summon": {
     "weapon": {
-      "level1": [
-        ["normal_low", 36.8], ["normal_mid", 27.6], ["normal_high", 18.4], ["normal_top", 9.2], ["rare_low", 5.6], ["rare_mid", 2.4]
-      ],
-      "level2": [["normal", 88.0], ["rare", 12.0]],
-      "level3_newUnlocks": [["epic_low", 0.56], ["epic_mid", 0.24]],
-      "level4_newUnlocks": [["epic_total", 1.8]],
-      "level5_newUnlocks": [["unique_low", 0.14], ["unique_mid", 0.06]],
-      "level6_newUnlocks": [["unique_total", 0.6]],
-      "level7_newUnlocks": [["legendary_low", 0.03]],
-      "level8to10": "legendary and higher ancient weapon probabilities rise by summon level; exact values not supplied"
+      "levels": {
+        "1": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 36.8
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 27.6
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 18.4
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 9.2
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 5.6
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 2.4
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "2": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 35.2
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 26.4
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 17.6
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 8.8
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 6.0
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 3.6
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 1.8
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 0.6
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "3": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 33.68
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 25.26
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 16.84
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 8.42
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 6.0
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 4.5
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 3.0
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 0.56
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 0.24
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "4": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 32.24
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 24.18
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 16.12
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 8.06
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 7.04
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 5.28
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 3.52
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 1.76
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 0.72
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 0.54
+            },
+            {
+              "name": "에픽 상급",
+              "settingPercent": 0.36
+            },
+            {
+              "name": "에픽 최상급",
+              "settingPercent": 0.18
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "5": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 30.94
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 23.205
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 15.47
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 7.735
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 8.06
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 6.045
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 4.03
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 2.015
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 0.92
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 0.69
+            },
+            {
+              "name": "에픽 상급",
+              "settingPercent": 0.46
+            },
+            {
+              "name": "에픽 최상급",
+              "settingPercent": 0.23
+            },
+            {
+              "name": "유니크 하급",
+              "settingPercent": 0.14
+            },
+            {
+              "name": "유니크 중급",
+              "settingPercent": 0.06
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "6": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 29.64
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 22.23
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 14.82
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 7.41
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 9.08
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 6.81
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 4.54
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 2.27
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 1.04
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 0.78
+            },
+            {
+              "name": "에픽 상급",
+              "settingPercent": 0.52
+            },
+            {
+              "name": "에픽 최상급",
+              "settingPercent": 0.26
+            },
+            {
+              "name": "유니크 하급",
+              "settingPercent": 0.3
+            },
+            {
+              "name": "유니크 중급",
+              "settingPercent": 0.18
+            },
+            {
+              "name": "유니크 상급",
+              "settingPercent": 0.09
+            },
+            {
+              "name": "유니크 최상급",
+              "settingPercent": 0.03
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "7": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 28.108
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 21.081
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 14.054
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 7.027
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 10.28
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 7.71
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 5.14
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 2.57
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 1.24
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 0.93
+            },
+            {
+              "name": "에픽 상급",
+              "settingPercent": 0.62
+            },
+            {
+              "name": "에픽 최상급",
+              "settingPercent": 0.31
+            },
+            {
+              "name": "유니크 하급",
+              "settingPercent": 0.36
+            },
+            {
+              "name": "유니크 중급",
+              "settingPercent": 0.27
+            },
+            {
+              "name": "유니크 상급",
+              "settingPercent": 0.18
+            },
+            {
+              "name": "유니크 최상급",
+              "settingPercent": 0.09
+            },
+            {
+              "name": "레전드리 하급",
+              "settingPercent": 0.03
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "8": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 26.568
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 19.926
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 13.284
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 6.642
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 11.48
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 8.61
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 5.74
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 2.87
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 1.44
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 1.08
+            },
+            {
+              "name": "에픽 상급",
+              "settingPercent": 0.72
+            },
+            {
+              "name": "에픽 최상급",
+              "settingPercent": 0.36
+            },
+            {
+              "name": "유니크 하급",
+              "settingPercent": 0.48
+            },
+            {
+              "name": "유니크 중급",
+              "settingPercent": 0.36
+            },
+            {
+              "name": "유니크 상급",
+              "settingPercent": 0.24
+            },
+            {
+              "name": "유니크 최상급",
+              "settingPercent": 0.12
+            },
+            {
+              "name": "레전드리 하급",
+              "settingPercent": 0.056
+            },
+            {
+              "name": "레전드리 중급",
+              "settingPercent": 0.024
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "9": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 25.016
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 18.762
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 12.508
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 6.254
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 12.68
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 9.51
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 6.34
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 3.17
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 1.64
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 1.23
+            },
+            {
+              "name": "에픽 상급",
+              "settingPercent": 0.82
+            },
+            {
+              "name": "에픽 최상급",
+              "settingPercent": 0.41
+            },
+            {
+              "name": "유니크 하급",
+              "settingPercent": 0.6
+            },
+            {
+              "name": "유니크 중급",
+              "settingPercent": 0.45
+            },
+            {
+              "name": "유니크 상급",
+              "settingPercent": 0.3
+            },
+            {
+              "name": "유니크 최상급",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "레전드리 하급",
+              "settingPercent": 0.096
+            },
+            {
+              "name": "레전드리 중급",
+              "settingPercent": 0.048
+            },
+            {
+              "name": "레전드리 상급",
+              "settingPercent": 0.016
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "10": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 23.464
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 17.598
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 11.732
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 5.866
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 13.88
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 10.41
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 6.94
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 3.47
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 1.84
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 1.38
+            },
+            {
+              "name": "에픽 상급",
+              "settingPercent": 0.92
+            },
+            {
+              "name": "에픽 최상급",
+              "settingPercent": 0.46
+            },
+            {
+              "name": "유니크 하급",
+              "settingPercent": 0.72
+            },
+            {
+              "name": "유니크 중급",
+              "settingPercent": 0.54
+            },
+            {
+              "name": "유니크 상급",
+              "settingPercent": 0.36
+            },
+            {
+              "name": "유니크 최상급",
+              "settingPercent": 0.18
+            },
+            {
+              "name": "레전드리 하급",
+              "settingPercent": 0.12
+            },
+            {
+              "name": "레전드리 중급",
+              "settingPercent": 0.072
+            },
+            {
+              "name": "레전드리 상급",
+              "settingPercent": 0.036
+            },
+            {
+              "name": "레전드리 최상급",
+              "settingPercent": 0.012
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "11": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 21.908
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 16.431
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 10.954
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 5.477
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 15.08
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 11.31
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 7.54
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 3.77
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 2.04
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 1.53
+            },
+            {
+              "name": "에픽 상급",
+              "settingPercent": 1.02
+            },
+            {
+              "name": "에픽 최상급",
+              "settingPercent": 0.51
+            },
+            {
+              "name": "유니크 하급",
+              "settingPercent": 0.84
+            },
+            {
+              "name": "유니크 중급",
+              "settingPercent": 0.63
+            },
+            {
+              "name": "유니크 상급",
+              "settingPercent": 0.42
+            },
+            {
+              "name": "유니크 최상급",
+              "settingPercent": 0.21
+            },
+            {
+              "name": "레전드리 하급",
+              "settingPercent": 0.128
+            },
+            {
+              "name": "레전드리 중급",
+              "settingPercent": 0.1056
+            },
+            {
+              "name": "레전드리 상급",
+              "settingPercent": 0.064
+            },
+            {
+              "name": "레전드리 최상급",
+              "settingPercent": 0.0224
+            },
+            {
+              "name": "미스틱 하급",
+              "settingPercent": 0.01
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "12": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 20.368
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 15.276
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 10.184
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 5.092
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 16.28
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 12.21
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 8.14
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 4.07
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 2.24
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 1.68
+            },
+            {
+              "name": "에픽 상급",
+              "settingPercent": 1.12
+            },
+            {
+              "name": "에픽 최상급",
+              "settingPercent": 0.56
+            },
+            {
+              "name": "유니크 하급",
+              "settingPercent": 0.96
+            },
+            {
+              "name": "유니크 중급",
+              "settingPercent": 0.72
+            },
+            {
+              "name": "유니크 상급",
+              "settingPercent": 0.48
+            },
+            {
+              "name": "유니크 최상급",
+              "settingPercent": 0.24
+            },
+            {
+              "name": "레전드리 하급",
+              "settingPercent": 0.144
+            },
+            {
+              "name": "레전드리 중급",
+              "settingPercent": 0.1188
+            },
+            {
+              "name": "레전드리 상급",
+              "settingPercent": 0.072
+            },
+            {
+              "name": "레전드리 최상급",
+              "settingPercent": 0.0252
+            },
+            {
+              "name": "미스틱 하급",
+              "settingPercent": 0.014
+            },
+            {
+              "name": "미스틱 중급",
+              "settingPercent": 0.006
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "13": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 18.82
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 14.115
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 9.41
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 4.705
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 17.48
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 13.11
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 8.74
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 4.37
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 2.44
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 1.83
+            },
+            {
+              "name": "에픽 상급",
+              "settingPercent": 1.22
+            },
+            {
+              "name": "에픽 최상급",
+              "settingPercent": 0.61
+            },
+            {
+              "name": "유니크 하급",
+              "settingPercent": 1.08
+            },
+            {
+              "name": "유니크 중급",
+              "settingPercent": 0.81
+            },
+            {
+              "name": "유니크 상급",
+              "settingPercent": 0.54
+            },
+            {
+              "name": "유니크 최상급",
+              "settingPercent": 0.27
+            },
+            {
+              "name": "레전드리 하급",
+              "settingPercent": 0.16
+            },
+            {
+              "name": "레전드리 중급",
+              "settingPercent": 0.132
+            },
+            {
+              "name": "레전드리 상급",
+              "settingPercent": 0.08
+            },
+            {
+              "name": "레전드리 최상급",
+              "settingPercent": 0.028
+            },
+            {
+              "name": "미스틱 하급",
+              "settingPercent": 0.03
+            },
+            {
+              "name": "미스틱 중급",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "미스틱 상급",
+              "settingPercent": 0.005
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "14": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 17.292
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 12.969
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 8.646
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 4.323
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 18.68
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 14.01
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 9.34
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 4.67
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 2.64
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 1.98
+            },
+            {
+              "name": "에픽 상급",
+              "settingPercent": 1.32
+            },
+            {
+              "name": "에픽 최상급",
+              "settingPercent": 0.66
+            },
+            {
+              "name": "유니크 하급",
+              "settingPercent": 1.2
+            },
+            {
+              "name": "유니크 중급",
+              "settingPercent": 0.9
+            },
+            {
+              "name": "유니크 상급",
+              "settingPercent": 0.6
+            },
+            {
+              "name": "유니크 최상급",
+              "settingPercent": 0.3
+            },
+            {
+              "name": "레전드리 하급",
+              "settingPercent": 0.16
+            },
+            {
+              "name": "레전드리 중급",
+              "settingPercent": 0.132
+            },
+            {
+              "name": "레전드리 상급",
+              "settingPercent": 0.08
+            },
+            {
+              "name": "레전드리 최상급",
+              "settingPercent": 0.028
+            },
+            {
+              "name": "미스틱 하급",
+              "settingPercent": 0.035
+            },
+            {
+              "name": "미스틱 중급",
+              "settingPercent": 0.021
+            },
+            {
+              "name": "미스틱 상급",
+              "settingPercent": 0.0105
+            },
+            {
+              "name": "미스틱 최상급",
+              "settingPercent": 0.0035
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "15": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 15.7548
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 11.8161
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 7.8774
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 3.9387
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 19.88
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 14.91
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 9.94
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 4.97
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 2.84
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 2.13
+            },
+            {
+              "name": "에픽 상급",
+              "settingPercent": 1.42
+            },
+            {
+              "name": "에픽 최상급",
+              "settingPercent": 0.71
+            },
+            {
+              "name": "유니크 하급",
+              "settingPercent": 1.32
+            },
+            {
+              "name": "유니크 중급",
+              "settingPercent": 0.99
+            },
+            {
+              "name": "유니크 상급",
+              "settingPercent": 0.66
+            },
+            {
+              "name": "유니크 최상급",
+              "settingPercent": 0.33
+            },
+            {
+              "name": "레전드리 하급",
+              "settingPercent": 0.16
+            },
+            {
+              "name": "레전드리 중급",
+              "settingPercent": 0.132
+            },
+            {
+              "name": "레전드리 상급",
+              "settingPercent": 0.08
+            },
+            {
+              "name": "레전드리 최상급",
+              "settingPercent": 0.028
+            },
+            {
+              "name": "미스틱 하급",
+              "settingPercent": 0.055
+            },
+            {
+              "name": "미스틱 중급",
+              "settingPercent": 0.033
+            },
+            {
+              "name": "미스틱 상급",
+              "settingPercent": 0.0143
+            },
+            {
+              "name": "미스틱 최상급",
+              "settingPercent": 0.0077
+            },
+            {
+              "name": "에인션트 하급",
+              "settingPercent": 0.003
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "16": {
+          "rows": [
+            {
+              "name": "노말 하급",
+              "settingPercent": 15.7368
+            },
+            {
+              "name": "노말 중급",
+              "settingPercent": 11.8026
+            },
+            {
+              "name": "노말 상급",
+              "settingPercent": 7.8684
+            },
+            {
+              "name": "노말 최상급",
+              "settingPercent": 3.9342
+            },
+            {
+              "name": "레어 하급",
+              "settingPercent": 19.88
+            },
+            {
+              "name": "레어 중급",
+              "settingPercent": 14.91
+            },
+            {
+              "name": "레어 상급",
+              "settingPercent": 9.94
+            },
+            {
+              "name": "레어 최상급",
+              "settingPercent": 4.97
+            },
+            {
+              "name": "에픽 하급",
+              "settingPercent": 2.84
+            },
+            {
+              "name": "에픽 중급",
+              "settingPercent": 2.13
+            },
+            {
+              "name": "에픽 상급",
+              "settingPercent": 1.42
+            },
+            {
+              "name": "에픽 최상급",
+              "settingPercent": 0.71
+            },
+            {
+              "name": "유니크 하급",
+              "settingPercent": 1.32
+            },
+            {
+              "name": "유니크 중급",
+              "settingPercent": 0.99
+            },
+            {
+              "name": "유니크 상급",
+              "settingPercent": 0.66
+            },
+            {
+              "name": "유니크 최상급",
+              "settingPercent": 0.33
+            },
+            {
+              "name": "레전드리 하급",
+              "settingPercent": 0.16
+            },
+            {
+              "name": "레전드리 중급",
+              "settingPercent": 0.12
+            },
+            {
+              "name": "레전드리 상급",
+              "settingPercent": 0.08
+            },
+            {
+              "name": "레전드리 최상급",
+              "settingPercent": 0.04
+            },
+            {
+              "name": "미스틱 하급",
+              "settingPercent": 0.06
+            },
+            {
+              "name": "미스틱 중급",
+              "settingPercent": 0.0495
+            },
+            {
+              "name": "미스틱 상급",
+              "settingPercent": 0.03
+            },
+            {
+              "name": "미스틱 최상급",
+              "settingPercent": 0.0105
+            },
+            {
+              "name": "에인션트 하급",
+              "settingPercent": 0.006
+            },
+            {
+              "name": "에인션트 중급",
+              "settingPercent": 0.002
+            }
+          ],
+          "sumSettingPercent": 100.0
+        }
+      }
     },
-    "companions": {
-      "formula": "gradeProbability * withinGradeJobProbability",
-      "withinGradeJobs": "uniform among available jobs",
-      "note": "available jobs and grade tables must be versioned separately"
+    "companion": {
+      "levels": {
+        "1": {
+          "rows": [
+            {
+              "name": "전사 지망생",
+              "settingPercent": 19.4
+            },
+            {
+              "name": "마법사 지망생",
+              "settingPercent": 19.4
+            },
+            {
+              "name": "궁수 지망생",
+              "settingPercent": 19.4
+            },
+            {
+              "name": "도적 지망생",
+              "settingPercent": 19.4
+            },
+            {
+              "name": "해적 지망생",
+              "settingPercent": 19.4
+            },
+            {
+              "name": "히어로(1차)",
+              "settingPercent": 0.214285714
+            },
+            {
+              "name": "팔라딘(1차)",
+              "settingPercent": 0.214285714
+            },
+            {
+              "name": "다크나이트(1차)",
+              "settingPercent": 0.214285714
+            },
+            {
+              "name": "아크메이지(썬,콜)(1차)",
+              "settingPercent": 0.214285714
+            },
+            {
+              "name": "아크메이지(불,독)(1차)",
+              "settingPercent": 0.214285714
+            },
+            {
+              "name": "비숍(1차)",
+              "settingPercent": 0.214285714
+            },
+            {
+              "name": "보우마스터(1차)",
+              "settingPercent": 0.214285714
+            },
+            {
+              "name": "신궁(1차)",
+              "settingPercent": 0.214285714
+            },
+            {
+              "name": "나이트로드(1차)",
+              "settingPercent": 0.214285714
+            },
+            {
+              "name": "섀도어(1차)",
+              "settingPercent": 0.214285714
+            },
+            {
+              "name": "바이퍼(1차)",
+              "settingPercent": 0.214285714
+            },
+            {
+              "name": "캡틴(1차)",
+              "settingPercent": 0.214285714
+            },
+            {
+              "name": "나이트워커(1차)",
+              "settingPercent": 0.214285714
+            },
+            {
+              "name": "윈드브레이커(1차)",
+              "settingPercent": 0.214285714
+            }
+          ],
+          "sumSettingPercent": 99.999999996
+        },
+        "2": {
+          "rows": [
+            {
+              "name": "전사 지망생",
+              "settingPercent": 19.0
+            },
+            {
+              "name": "마법사 지망생",
+              "settingPercent": 19.0
+            },
+            {
+              "name": "궁수 지망생",
+              "settingPercent": 19.0
+            },
+            {
+              "name": "도적 지망생",
+              "settingPercent": 19.0
+            },
+            {
+              "name": "해적 지망생",
+              "settingPercent": 19.0
+            },
+            {
+              "name": "히어로(1차)",
+              "settingPercent": 0.357142857
+            },
+            {
+              "name": "팔라딘(1차)",
+              "settingPercent": 0.357142857
+            },
+            {
+              "name": "다크나이트(1차)",
+              "settingPercent": 0.357142857
+            },
+            {
+              "name": "아크메이지(썬,콜)(1차)",
+              "settingPercent": 0.357142857
+            },
+            {
+              "name": "아크메이지(불,독)(1차)",
+              "settingPercent": 0.357142857
+            },
+            {
+              "name": "비숍(1차)",
+              "settingPercent": 0.357142857
+            },
+            {
+              "name": "보우마스터(1차)",
+              "settingPercent": 0.357142857
+            },
+            {
+              "name": "신궁(1차)",
+              "settingPercent": 0.357142857
+            },
+            {
+              "name": "나이트로드(1차)",
+              "settingPercent": 0.357142857
+            },
+            {
+              "name": "섀도어(1차)",
+              "settingPercent": 0.357142857
+            },
+            {
+              "name": "바이퍼(1차)",
+              "settingPercent": 0.357142857
+            },
+            {
+              "name": "캡틴(1차)",
+              "settingPercent": 0.357142857
+            },
+            {
+              "name": "나이트워커(1차)",
+              "settingPercent": 0.357142857
+            },
+            {
+              "name": "윈드브레이커(1차)",
+              "settingPercent": 0.357142857
+            }
+          ],
+          "sumSettingPercent": 99.999999998
+        },
+        "3": {
+          "rows": [
+            {
+              "name": "전사 지망생",
+              "settingPercent": 18.4
+            },
+            {
+              "name": "마법사 지망생",
+              "settingPercent": 18.4
+            },
+            {
+              "name": "궁수 지망생",
+              "settingPercent": 18.4
+            },
+            {
+              "name": "도적 지망생",
+              "settingPercent": 18.4
+            },
+            {
+              "name": "해적 지망생",
+              "settingPercent": 18.4
+            },
+            {
+              "name": "히어로(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "팔라딘(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "다크나이트(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "아크메이지(썬,콜)(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "아크메이지(불,독)(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "비숍(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "보우마스터(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "신궁(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "나이트로드(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "섀도어(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "바이퍼(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "캡틴(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "나이트워커(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "윈드브레이커(1차)",
+              "settingPercent": 0.5
+            },
+            {
+              "name": "히어로(2차)",
+              "settingPercent": 0.071428571
+            },
+            {
+              "name": "팔라딘(2차)",
+              "settingPercent": 0.071428571
+            },
+            {
+              "name": "다크나이트(2차)",
+              "settingPercent": 0.071428571
+            },
+            {
+              "name": "아크메이지(썬,콜)(2차)",
+              "settingPercent": 0.071428571
+            },
+            {
+              "name": "아크메이지(불,독)(2차)",
+              "settingPercent": 0.071428571
+            },
+            {
+              "name": "비숍(2차)",
+              "settingPercent": 0.071428571
+            },
+            {
+              "name": "보우마스터(2차)",
+              "settingPercent": 0.071428571
+            },
+            {
+              "name": "신궁(2차)",
+              "settingPercent": 0.071428571
+            },
+            {
+              "name": "나이트로드(2차)",
+              "settingPercent": 0.071428571
+            },
+            {
+              "name": "섀도어(2차)",
+              "settingPercent": 0.071428571
+            },
+            {
+              "name": "바이퍼(2차)",
+              "settingPercent": 0.071428571
+            },
+            {
+              "name": "캡틴(2차)",
+              "settingPercent": 0.071428571
+            },
+            {
+              "name": "나이트워커(2차)",
+              "settingPercent": 0.071428571
+            },
+            {
+              "name": "윈드브레이커(2차)",
+              "settingPercent": 0.071428571
+            }
+          ],
+          "sumSettingPercent": 99.999999994
+        },
+        "4": {
+          "rows": [
+            {
+              "name": "전사 지망생",
+              "settingPercent": 17.6
+            },
+            {
+              "name": "마법사 지망생",
+              "settingPercent": 17.6
+            },
+            {
+              "name": "궁수 지망생",
+              "settingPercent": 17.6
+            },
+            {
+              "name": "도적 지망생",
+              "settingPercent": 17.6
+            },
+            {
+              "name": "해적 지망생",
+              "settingPercent": 17.6
+            },
+            {
+              "name": "히어로(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "팔라딘(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "다크나이트(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "아크메이지(썬,콜)(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "아크메이지(불,독)(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "비숍(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "보우마스터(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "신궁(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "나이트로드(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "섀도어(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "바이퍼(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "캡틴(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "나이트워커(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "윈드브레이커(1차)",
+              "settingPercent": 0.714285714
+            },
+            {
+              "name": "히어로(2차)",
+              "settingPercent": 0.142857143
+            },
+            {
+              "name": "팔라딘(2차)",
+              "settingPercent": 0.142857143
+            },
+            {
+              "name": "다크나이트(2차)",
+              "settingPercent": 0.142857143
+            },
+            {
+              "name": "아크메이지(썬,콜)(2차)",
+              "settingPercent": 0.142857143
+            },
+            {
+              "name": "아크메이지(불,독)(2차)",
+              "settingPercent": 0.142857143
+            },
+            {
+              "name": "비숍(2차)",
+              "settingPercent": 0.142857143
+            },
+            {
+              "name": "보우마스터(2차)",
+              "settingPercent": 0.142857143
+            },
+            {
+              "name": "신궁(2차)",
+              "settingPercent": 0.142857143
+            },
+            {
+              "name": "나이트로드(2차)",
+              "settingPercent": 0.142857143
+            },
+            {
+              "name": "섀도어(2차)",
+              "settingPercent": 0.142857143
+            },
+            {
+              "name": "바이퍼(2차)",
+              "settingPercent": 0.142857143
+            },
+            {
+              "name": "캡틴(2차)",
+              "settingPercent": 0.142857143
+            },
+            {
+              "name": "나이트워커(2차)",
+              "settingPercent": 0.142857143
+            },
+            {
+              "name": "윈드브레이커(2차)",
+              "settingPercent": 0.142857143
+            }
+          ],
+          "sumSettingPercent": 99.999999998
+        },
+        "5": {
+          "rows": [
+            {
+              "name": "전사 지망생",
+              "settingPercent": 16.98
+            },
+            {
+              "name": "마법사 지망생",
+              "settingPercent": 16.98
+            },
+            {
+              "name": "궁수 지망생",
+              "settingPercent": 16.98
+            },
+            {
+              "name": "도적 지망생",
+              "settingPercent": 16.98
+            },
+            {
+              "name": "해적 지망생",
+              "settingPercent": 16.98
+            },
+            {
+              "name": "히어로(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "팔라딘(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "다크나이트(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "아크메이지(썬,콜)(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "아크메이지(불,독)(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "비숍(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "보우마스터(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "신궁(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "나이트로드(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "섀도어(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "바이퍼(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "캡틴(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "나이트워커(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "윈드브레이커(1차)",
+              "settingPercent": 0.928571429
+            },
+            {
+              "name": "히어로(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "팔라딘(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "다크나이트(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "아크메이지(썬,콜)(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "아크메이지(불,독)(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "비숍(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "보우마스터(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "신궁(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "나이트로드(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "섀도어(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "바이퍼(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "캡틴(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "나이트워커(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "윈드브레이커(2차)",
+              "settingPercent": 0.149285714
+            },
+            {
+              "name": "히어로(3차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "팔라딘(3차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "다크나이트(3차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "아크메이지(썬,콜)(3차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "아크메이지(불,독)(3차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "비숍(3차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "보우마스터(3차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "신궁(3차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "나이트로드(3차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "섀도어(3차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "바이퍼(3차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "캡틴(3차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "나이트워커(3차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "윈드브레이커(3차)",
+              "settingPercent": 0.000714286
+            }
+          ],
+          "sumSettingPercent": 100.000000006
+        },
+        "6": {
+          "rows": [
+            {
+              "name": "전사 지망생",
+              "settingPercent": 16.372
+            },
+            {
+              "name": "마법사 지망생",
+              "settingPercent": 16.372
+            },
+            {
+              "name": "궁수 지망생",
+              "settingPercent": 16.372
+            },
+            {
+              "name": "도적 지망생",
+              "settingPercent": 16.372
+            },
+            {
+              "name": "해적 지망생",
+              "settingPercent": 16.372
+            },
+            {
+              "name": "히어로(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "팔라딘(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "다크나이트(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "아크메이지(썬,콜)(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "아크메이지(불,독)(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "비숍(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "보우마스터(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "신궁(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "나이트로드(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "섀도어(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "바이퍼(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "캡틴(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "나이트워커(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "윈드브레이커(1차)",
+              "settingPercent": 1.142857143
+            },
+            {
+              "name": "히어로(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "팔라딘(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "다크나이트(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "아크메이지(썬,콜)(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "아크메이지(불,독)(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "비숍(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "보우마스터(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "신궁(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "나이트로드(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "섀도어(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "바이퍼(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "캡틴(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "나이트워커(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "윈드브레이커(2차)",
+              "settingPercent": 0.15
+            },
+            {
+              "name": "히어로(3차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "팔라딘(3차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "다크나이트(3차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "아크메이지(썬,콜)(3차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "아크메이지(불,독)(3차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "비숍(3차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "보우마스터(3차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "신궁(3차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "나이트로드(3차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "섀도어(3차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "바이퍼(3차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "캡틴(3차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "나이트워커(3차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "윈드브레이커(3차)",
+              "settingPercent": 0.002857143
+            }
+          ],
+          "sumSettingPercent": 100.000000004
+        },
+        "7": {
+          "rows": [
+            {
+              "name": "전사 지망생",
+              "settingPercent": 15.744
+            },
+            {
+              "name": "마법사 지망생",
+              "settingPercent": 15.744
+            },
+            {
+              "name": "궁수 지망생",
+              "settingPercent": 15.744
+            },
+            {
+              "name": "도적 지망생",
+              "settingPercent": 15.744
+            },
+            {
+              "name": "해적 지망생",
+              "settingPercent": 15.744
+            },
+            {
+              "name": "히어로(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "팔라딘(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "다크나이트(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "아크메이지(썬,콜)(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "아크메이지(불,독)(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "비숍(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "보우마스터(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "신궁(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "나이트로드(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "섀도어(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "바이퍼(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "캡틴(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "나이트워커(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "윈드브레이커(1차)",
+              "settingPercent": 1.357142857
+            },
+            {
+              "name": "히어로(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "팔라딘(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "다크나이트(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "아크메이지(썬,콜)(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "아크메이지(불,독)(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "비숍(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "보우마스터(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "신궁(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "나이트로드(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "섀도어(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "바이퍼(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "캡틴(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "나이트워커(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "윈드브레이커(2차)",
+              "settingPercent": 0.157142857
+            },
+            {
+              "name": "히어로(3차)",
+              "settingPercent": 0.005714286
+            },
+            {
+              "name": "팔라딘(3차)",
+              "settingPercent": 0.005714286
+            },
+            {
+              "name": "다크나이트(3차)",
+              "settingPercent": 0.005714286
+            },
+            {
+              "name": "아크메이지(썬,콜)(3차)",
+              "settingPercent": 0.005714286
+            },
+            {
+              "name": "아크메이지(불,독)(3차)",
+              "settingPercent": 0.005714286
+            },
+            {
+              "name": "비숍(3차)",
+              "settingPercent": 0.005714286
+            },
+            {
+              "name": "보우마스터(3차)",
+              "settingPercent": 0.005714286
+            },
+            {
+              "name": "신궁(3차)",
+              "settingPercent": 0.005714286
+            },
+            {
+              "name": "나이트로드(3차)",
+              "settingPercent": 0.005714286
+            },
+            {
+              "name": "섀도어(3차)",
+              "settingPercent": 0.005714286
+            },
+            {
+              "name": "바이퍼(3차)",
+              "settingPercent": 0.005714286
+            },
+            {
+              "name": "캡틴(3차)",
+              "settingPercent": 0.005714286
+            },
+            {
+              "name": "나이트워커(3차)",
+              "settingPercent": 0.005714286
+            },
+            {
+              "name": "윈드브레이커(3차)",
+              "settingPercent": 0.005714286
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "8": {
+          "rows": [
+            {
+              "name": "전사 지망생",
+              "settingPercent": 15.61
+            },
+            {
+              "name": "마법사 지망생",
+              "settingPercent": 15.61
+            },
+            {
+              "name": "궁수 지망생",
+              "settingPercent": 15.61
+            },
+            {
+              "name": "도적 지망생",
+              "settingPercent": 15.61
+            },
+            {
+              "name": "해적 지망생",
+              "settingPercent": 15.61
+            },
+            {
+              "name": "히어로(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "팔라딘(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "다크나이트(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "아크메이지(썬,콜)(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "아크메이지(불,독)(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "비숍(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "보우마스터(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "신궁(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "나이트로드(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "섀도어(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "바이퍼(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "캡틴(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "나이트워커(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "윈드브레이커(1차)",
+              "settingPercent": 1.392857143
+            },
+            {
+              "name": "히어로(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "팔라딘(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "다크나이트(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "아크메이지(썬,콜)(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "아크메이지(불,독)(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "비숍(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "보우마스터(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "신궁(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "나이트로드(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "섀도어(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "바이퍼(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "캡틴(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "나이트워커(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "윈드브레이커(2차)",
+              "settingPercent": 0.164285714
+            },
+            {
+              "name": "히어로(3차)",
+              "settingPercent": 0.010714286
+            },
+            {
+              "name": "팔라딘(3차)",
+              "settingPercent": 0.010714286
+            },
+            {
+              "name": "다크나이트(3차)",
+              "settingPercent": 0.010714286
+            },
+            {
+              "name": "아크메이지(썬,콜)(3차)",
+              "settingPercent": 0.010714286
+            },
+            {
+              "name": "아크메이지(불,독)(3차)",
+              "settingPercent": 0.010714286
+            },
+            {
+              "name": "비숍(3차)",
+              "settingPercent": 0.010714286
+            },
+            {
+              "name": "보우마스터(3차)",
+              "settingPercent": 0.010714286
+            },
+            {
+              "name": "신궁(3차)",
+              "settingPercent": 0.010714286
+            },
+            {
+              "name": "나이트로드(3차)",
+              "settingPercent": 0.010714286
+            },
+            {
+              "name": "섀도어(3차)",
+              "settingPercent": 0.010714286
+            },
+            {
+              "name": "바이퍼(3차)",
+              "settingPercent": 0.010714286
+            },
+            {
+              "name": "캡틴(3차)",
+              "settingPercent": 0.010714286
+            },
+            {
+              "name": "나이트워커(3차)",
+              "settingPercent": 0.010714286
+            },
+            {
+              "name": "윈드브레이커(3차)",
+              "settingPercent": 0.010714286
+            }
+          ],
+          "sumSettingPercent": 100.000000002
+        },
+        "9": {
+          "rows": [
+            {
+              "name": "전사 지망생",
+              "settingPercent": 15.485
+            },
+            {
+              "name": "마법사 지망생",
+              "settingPercent": 15.485
+            },
+            {
+              "name": "궁수 지망생",
+              "settingPercent": 15.485
+            },
+            {
+              "name": "도적 지망생",
+              "settingPercent": 15.485
+            },
+            {
+              "name": "해적 지망생",
+              "settingPercent": 15.485
+            },
+            {
+              "name": "히어로(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "팔라딘(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "다크나이트(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "아크메이지(썬,콜)(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "아크메이지(불,독)(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "비숍(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "보우마스터(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "신궁(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "나이트로드(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "섀도어(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "바이퍼(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "캡틴(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "나이트워커(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "윈드브레이커(1차)",
+              "settingPercent": 1.428571429
+            },
+            {
+              "name": "히어로(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "팔라딘(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "다크나이트(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "아크메이지(썬,콜)(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "아크메이지(불,독)(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "비숍(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "보우마스터(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "신궁(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "나이트로드(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "섀도어(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "바이퍼(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "캡틴(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "나이트워커(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "윈드브레이커(2차)",
+              "settingPercent": 0.171428571
+            },
+            {
+              "name": "히어로(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "팔라딘(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "다크나이트(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "아크메이지(썬,콜)(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "아크메이지(불,독)(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "비숍(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "보우마스터(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "신궁(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "나이트로드(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "섀도어(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "바이퍼(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "캡틴(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "나이트워커(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "윈드브레이커(3차)",
+              "settingPercent": 0.012142857
+            },
+            {
+              "name": "히어로(4차)",
+              "settingPercent": 0.000357143
+            },
+            {
+              "name": "팔라딘(4차)",
+              "settingPercent": 0.000357143
+            },
+            {
+              "name": "다크나이트(4차)",
+              "settingPercent": 0.000357143
+            },
+            {
+              "name": "아크메이지(썬,콜)(4차)",
+              "settingPercent": 0.000357143
+            },
+            {
+              "name": "아크메이지(불,독)(4차)",
+              "settingPercent": 0.000357143
+            },
+            {
+              "name": "비숍(4차)",
+              "settingPercent": 0.000357143
+            },
+            {
+              "name": "보우마스터(4차)",
+              "settingPercent": 0.000357143
+            },
+            {
+              "name": "신궁(4차)",
+              "settingPercent": 0.000357143
+            },
+            {
+              "name": "나이트로드(4차)",
+              "settingPercent": 0.000357143
+            },
+            {
+              "name": "섀도어(4차)",
+              "settingPercent": 0.000357143
+            },
+            {
+              "name": "바이퍼(4차)",
+              "settingPercent": 0.000357143
+            },
+            {
+              "name": "캡틴(4차)",
+              "settingPercent": 0.000357143
+            },
+            {
+              "name": "나이트워커(4차)",
+              "settingPercent": 0.000357143
+            },
+            {
+              "name": "윈드브레이커(4차)",
+              "settingPercent": 0.000357143
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "10": {
+          "rows": [
+            {
+              "name": "전사 지망생",
+              "settingPercent": 15.36
+            },
+            {
+              "name": "마법사 지망생",
+              "settingPercent": 15.36
+            },
+            {
+              "name": "궁수 지망생",
+              "settingPercent": 15.36
+            },
+            {
+              "name": "도적 지망생",
+              "settingPercent": 15.36
+            },
+            {
+              "name": "해적 지망생",
+              "settingPercent": 15.36
+            },
+            {
+              "name": "히어로(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "팔라딘(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "다크나이트(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "아크메이지(썬,콜)(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "아크메이지(불,독)(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "비숍(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "보우마스터(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "신궁(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "나이트로드(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "섀도어(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "바이퍼(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "캡틴(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "나이트워커(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "윈드브레이커(1차)",
+              "settingPercent": 1.464285714
+            },
+            {
+              "name": "히어로(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "팔라딘(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "다크나이트(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "아크메이지(썬,콜)(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "아크메이지(불,독)(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "비숍(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "보우마스터(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "신궁(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "나이트로드(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "섀도어(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "바이퍼(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "캡틴(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "나이트워커(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "윈드브레이커(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "히어로(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "팔라딘(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "다크나이트(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "아크메이지(썬,콜)(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "아크메이지(불,독)(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "비숍(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "보우마스터(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "신궁(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "나이트로드(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "섀도어(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "바이퍼(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "캡틴(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "나이트워커(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "윈드브레이커(3차)",
+              "settingPercent": 0.013571429
+            },
+            {
+              "name": "히어로(4차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "팔라딘(4차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "다크나이트(4차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "아크메이지(썬,콜)(4차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "아크메이지(불,독)(4차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "비숍(4차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "보우마스터(4차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "신궁(4차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "나이트로드(4차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "섀도어(4차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "바이퍼(4차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "캡틴(4차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "나이트워커(4차)",
+              "settingPercent": 0.000714286
+            },
+            {
+              "name": "윈드브레이커(4차)",
+              "settingPercent": 0.000714286
+            }
+          ],
+          "sumSettingPercent": 100.000000012
+        },
+        "11": {
+          "rows": [
+            {
+              "name": "전사 지망생",
+              "settingPercent": 15.254
+            },
+            {
+              "name": "마법사 지망생",
+              "settingPercent": 15.254
+            },
+            {
+              "name": "궁수 지망생",
+              "settingPercent": 15.254
+            },
+            {
+              "name": "도적 지망생",
+              "settingPercent": 15.254
+            },
+            {
+              "name": "해적 지망생",
+              "settingPercent": 15.254
+            },
+            {
+              "name": "히어로(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "팔라딘(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "다크나이트(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "아크메이지(썬,콜)(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "아크메이지(불,독)(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "비숍(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "보우마스터(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "신궁(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "나이트로드(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "섀도어(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "바이퍼(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "캡틴(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "나이트워커(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "윈드브레이커(1차)",
+              "settingPercent": 1.5
+            },
+            {
+              "name": "히어로(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "팔라딘(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "다크나이트(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "아크메이지(썬,콜)(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "아크메이지(불,독)(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "비숍(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "보우마스터(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "신궁(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "나이트로드(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "섀도어(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "바이퍼(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "캡틴(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "나이트워커(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "윈드브레이커(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "히어로(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "팔라딘(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "다크나이트(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "아크메이지(썬,콜)(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "아크메이지(불,독)(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "비숍(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "보우마스터(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "신궁(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "나이트로드(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "섀도어(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "바이퍼(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "캡틴(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "나이트워커(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "윈드브레이커(3차)",
+              "settingPercent": 0.015
+            },
+            {
+              "name": "히어로(4차)",
+              "settingPercent": 0.001428571
+            },
+            {
+              "name": "팔라딘(4차)",
+              "settingPercent": 0.001428571
+            },
+            {
+              "name": "다크나이트(4차)",
+              "settingPercent": 0.001428571
+            },
+            {
+              "name": "아크메이지(썬,콜)(4차)",
+              "settingPercent": 0.001428571
+            },
+            {
+              "name": "아크메이지(불,독)(4차)",
+              "settingPercent": 0.001428571
+            },
+            {
+              "name": "비숍(4차)",
+              "settingPercent": 0.001428571
+            },
+            {
+              "name": "보우마스터(4차)",
+              "settingPercent": 0.001428571
+            },
+            {
+              "name": "신궁(4차)",
+              "settingPercent": 0.001428571
+            },
+            {
+              "name": "나이트로드(4차)",
+              "settingPercent": 0.001428571
+            },
+            {
+              "name": "섀도어(4차)",
+              "settingPercent": 0.001428571
+            },
+            {
+              "name": "바이퍼(4차)",
+              "settingPercent": 0.001428571
+            },
+            {
+              "name": "캡틴(4차)",
+              "settingPercent": 0.001428571
+            },
+            {
+              "name": "나이트워커(4차)",
+              "settingPercent": 0.001428571
+            },
+            {
+              "name": "윈드브레이커(4차)",
+              "settingPercent": 0.001428571
+            }
+          ],
+          "sumSettingPercent": 100.0
+        },
+        "12": {
+          "rows": [
+            {
+              "name": "전사 지망생",
+              "settingPercent": 15.148
+            },
+            {
+              "name": "마법사 지망생",
+              "settingPercent": 15.148
+            },
+            {
+              "name": "궁수 지망생",
+              "settingPercent": 15.148
+            },
+            {
+              "name": "도적 지망생",
+              "settingPercent": 15.148
+            },
+            {
+              "name": "해적 지망생",
+              "settingPercent": 15.148
+            },
+            {
+              "name": "히어로(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "팔라딘(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "다크나이트(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "아크메이지(썬,콜)(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "아크메이지(불,독)(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "비숍(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "보우마스터(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "신궁(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "나이트로드(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "섀도어(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "바이퍼(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "캡틴(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "나이트워커(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "윈드브레이커(1차)",
+              "settingPercent": 1.535714286
+            },
+            {
+              "name": "히어로(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "팔라딘(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "다크나이트(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "아크메이지(썬,콜)(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "아크메이지(불,독)(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "비숍(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "보우마스터(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "신궁(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "나이트로드(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "섀도어(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "바이퍼(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "캡틴(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "나이트워커(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "윈드브레이커(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "히어로(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "팔라딘(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "다크나이트(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "아크메이지(썬,콜)(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "아크메이지(불,독)(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "비숍(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "보우마스터(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "신궁(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "나이트로드(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "섀도어(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "바이퍼(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "캡틴(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "나이트워커(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "윈드브레이커(3차)",
+              "settingPercent": 0.016428571
+            },
+            {
+              "name": "히어로(4차)",
+              "settingPercent": 0.002142857
+            },
+            {
+              "name": "팔라딘(4차)",
+              "settingPercent": 0.002142857
+            },
+            {
+              "name": "다크나이트(4차)",
+              "settingPercent": 0.002142857
+            },
+            {
+              "name": "아크메이지(썬,콜)(4차)",
+              "settingPercent": 0.002142857
+            },
+            {
+              "name": "아크메이지(불,독)(4차)",
+              "settingPercent": 0.002142857
+            },
+            {
+              "name": "비숍(4차)",
+              "settingPercent": 0.002142857
+            },
+            {
+              "name": "보우마스터(4차)",
+              "settingPercent": 0.002142857
+            },
+            {
+              "name": "신궁(4차)",
+              "settingPercent": 0.002142857
+            },
+            {
+              "name": "나이트로드(4차)",
+              "settingPercent": 0.002142857
+            },
+            {
+              "name": "섀도어(4차)",
+              "settingPercent": 0.002142857
+            },
+            {
+              "name": "바이퍼(4차)",
+              "settingPercent": 0.002142857
+            },
+            {
+              "name": "캡틴(4차)",
+              "settingPercent": 0.002142857
+            },
+            {
+              "name": "나이트워커(4차)",
+              "settingPercent": 0.002142857
+            },
+            {
+              "name": "윈드브레이커(4차)",
+              "settingPercent": 0.002142857
+            }
+          ],
+          "sumSettingPercent": 100.000000002
+        },
+        "13": {
+          "rows": [
+            {
+              "name": "전사 지망생",
+              "settingPercent": 15.042
+            },
+            {
+              "name": "마법사 지망생",
+              "settingPercent": 15.042
+            },
+            {
+              "name": "궁수 지망생",
+              "settingPercent": 15.042
+            },
+            {
+              "name": "도적 지망생",
+              "settingPercent": 15.042
+            },
+            {
+              "name": "해적 지망생",
+              "settingPercent": 15.042
+            },
+            {
+              "name": "히어로(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "팔라딘(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "다크나이트(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "아크메이지(썬,콜)(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "아크메이지(불,독)(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "비숍(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "보우마스터(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "신궁(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "나이트로드(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "섀도어(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "바이퍼(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "캡틴(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "나이트워커(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "윈드브레이커(1차)",
+              "settingPercent": 1.571428571
+            },
+            {
+              "name": "히어로(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "팔라딘(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "다크나이트(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "아크메이지(썬,콜)(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "아크메이지(불,독)(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "비숍(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "보우마스터(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "신궁(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "나이트로드(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "섀도어(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "바이퍼(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "캡틴(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "나이트워커(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "윈드브레이커(2차)",
+              "settingPercent": 0.178571429
+            },
+            {
+              "name": "히어로(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "팔라딘(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "다크나이트(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "아크메이지(썬,콜)(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "아크메이지(불,독)(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "비숍(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "보우마스터(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "신궁(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "나이트로드(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "섀도어(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "바이퍼(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "캡틴(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "나이트워커(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "윈드브레이커(3차)",
+              "settingPercent": 0.017857143
+            },
+            {
+              "name": "히어로(4차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "팔라딘(4차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "다크나이트(4차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "아크메이지(썬,콜)(4차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "아크메이지(불,독)(4차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "비숍(4차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "보우마스터(4차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "신궁(4차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "나이트로드(4차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "섀도어(4차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "바이퍼(4차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "캡틴(4차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "나이트워커(4차)",
+              "settingPercent": 0.002857143
+            },
+            {
+              "name": "윈드브레이커(4차)",
+              "settingPercent": 0.002857143
+            }
+          ],
+          "sumSettingPercent": 100.000000004
+        }
+      },
+      "formula": "gradeProbability * withinGradeJobProbability"
     },
     "eliteMonsterArmor": {
-      "grade1": [["normal_low", 89.85], ["normal_mid", 8.35], ["normal_high", 1.0], ["normal_top", 0.5], ["rare_low", 0.3]],
-      "grade3": [["normal", 98.2], ["rare", 1.8]],
-      "grade5_newUnlocks": [["epic_low", 0.2]],
-      "grade7_newUnlocks": [["epic_total", 0.7]],
-      "grade10_newUnlocks": [["epic_total", 2.6]],
-      "grade11plus": "unique and legendary equipment gradually unlock; exact values not supplied"
+      "status": "not present in the supplied full table; retain earlier partial draft separately"
     }
   },
   "starforce": {
-    "notes": ["0-20 stars: failure does not downgrade or destroy according to supplied guide"],
+    "failureRule": "0-20 stars: no downgrade or destruction according to supplied guide",
     "steps": [
-      {"from": 0, "to": 1, "successPercent": 100, "meso": 20000, "scrolls": 1},
-      {"from": 4, "to": 5, "successPercent": 80, "meso": 60000, "scrolls": 4},
-      {"from": 9, "to": 10, "successPercent": 50, "meso": 150000, "scrolls": 9, "label": "popular stopping point"},
-      {"from": 10, "to": 11, "successPercent": 35, "meso": 170000, "scrolls": 10},
-      {"from": 11, "to": 12, "successPercent": 34, "meso": 190000, "scrolls": 11, "label": "additional potential unlock"},
-      {"from": 19, "to": 20, "successPercent": 21, "meso": 850000, "scrolls": 42}
+      {
+        "from": 0,
+        "to": 1,
+        "successPercent": 100,
+        "meso": 20000,
+        "scrolls": 1
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "successPercent": 80,
+        "meso": 60000,
+        "scrolls": 4
+      },
+      {
+        "from": 9,
+        "to": 10,
+        "successPercent": 50,
+        "meso": 150000,
+        "scrolls": 9
+      },
+      {
+        "from": 10,
+        "to": 11,
+        "successPercent": 35,
+        "meso": 170000,
+        "scrolls": 10
+      },
+      {
+        "from": 11,
+        "to": 12,
+        "successPercent": 34,
+        "meso": 190000,
+        "scrolls": 11
+      },
+      {
+        "from": 19,
+        "to": 20,
+        "successPercent": 21,
+        "meso": 850000,
+        "scrolls": 42
+      }
     ]
   },
-  "potential": {
-    "normal": {
-      "scope": "per line; supplied table is partial",
-      "options": [
-        {"type": "flatStat50", "values": ["STR", "DEX", "INT", "LUK"], "eachPercent": 9.5},
-        {"type": "defense3_or_maxHp6_or_maxMp3", "values": ["defense_3_percent", "max_hp_6_percent", "max_mp_3_percent"], "eachPercent": 9.0},
-        {"type": "mainStat3Percent", "values": ["STR", "DEX", "INT", "LUK"], "eachPercent": 4.5},
-        {"type": "damage5_or_minMax3", "values": ["damage_5_percent", "min_damage_multiplier_3_percent", "max_damage_multiplier_3_percent"], "eachPercent": 4.0},
-        {"type": "criticalRate3_or_attackSpeed3", "values": ["critical_rate_3_percent", "attack_speed_3_percent"], "eachPercent": 2.5}
-      ],
-      "missingProbabilityPercent": 4.0,
-      "useForExpectedValue": false
+  "normalPotentialPartial": {
+    "useForExpectedValue": false,
+    "missingProbabilityPercent": 4.0,
+    "options": [
+      {
+        "type": "flatStat50",
+        "values": [
+          "STR",
+          "DEX",
+          "INT",
+          "LUK"
+        ],
+        "eachPercent": 9.5
+      },
+      {
+        "type": "defense3_or_maxHp6_or_maxMp3",
+        "values": [
+          "defense_3_percent",
+          "max_hp_6_percent",
+          "max_mp_3_percent"
+        ],
+        "eachPercent": 9.0
+      },
+      {
+        "type": "mainStat3Percent",
+        "values": [
+          "STR",
+          "DEX",
+          "INT",
+          "LUK"
+        ],
+        "eachPercent": 4.5
+      },
+      {
+        "type": "damage5_or_minMax3",
+        "values": [
+          "damage_5_percent",
+          "min_damage_multiplier_3_percent",
+          "max_damage_multiplier_3_percent"
+        ],
+        "eachPercent": 4.0
+      },
+      {
+        "type": "criticalRate3_or_attackSpeed3",
+        "values": [
+          "critical_rate_3_percent",
+          "attack_speed_3_percent"
+        ],
+        "eachPercent": 2.5
+      }
+    ]
+  },
+  "abilityPartial": {
+    "useForExpectedValue": false,
+    "options": [
+      {
+        "type": "accuracy",
+        "values": [
+          2,
+          3
+        ],
+        "eachPercent": 5.0
+      },
+      {
+        "type": "evasion",
+        "values": [
+          2,
+          3
+        ],
+        "eachPercent": 5.0
+      },
+      {
+        "type": "mpRecoveryPerSecond",
+        "values": [
+          3,
+          4,
+          5
+        ],
+        "eachPercent": 3.33
+      },
+      {
+        "type": "debuffResistance",
+        "values": [
+          4,
+          5
+        ],
+        "eachPercent": 2.19
+      },
+      {
+        "type": "mainStat",
+        "range": [
+          40,
+          60
+        ],
+        "valueCount": 11,
+        "eachPercentApprox": 0.91
+      },
+      {
+        "type": "maxHp",
+        "range": [
+          1200,
+          1500
+        ],
+        "valueCount": 4,
+        "eachPercentApprox": 0.91
+      },
+      {
+        "type": "maxMp",
+        "range": [
+          30,
+          40
+        ],
+        "valueCount": 11,
+        "eachPercentApprox": 0.91
+      },
+      {
+        "type": "damage",
+        "range": [
+          3.0,
+          5.0
+        ],
+        "step": 0.4,
+        "eachPercentApprox": 0.4
+      },
+      {
+        "type": "minDamageMultiplier",
+        "value": 7,
+        "eachPercentApprox": 0.036
+      }
+    ]
+  },
+  "relicPotentialPartial": {
+    "useForExpectedValue": false,
+    "generalStatOptions": {
+      "eachPercent": 4.58,
+      "values": [
+        "main_stat_2_percent",
+        "defense_2_percent",
+        "accuracy_2",
+        "critical_rate_2_percent",
+        "min_damage_multiplier_2_percent",
+        "max_damage_multiplier_2_percent",
+        "received_damage_reduction_1_percent"
+      ]
     },
-    "additional": {
-      "unlockAtStars": 12,
-      "independentPerSlot": true,
-      "duplicateRule": "if type, value, and order fully match existing options, reroll correction applies",
-      "exactDuplicateRuleDetails": "not supplied"
-    }
-  },
-  "herosPowerAbility": {
-    "level1": {
-      "scope": "supplied entries are partial distribution",
-      "options": [
-        {"type": "accuracy", "values": [2, 3], "eachPercent": 5.0},
-        {"type": "evasion", "values": [2, 3], "eachPercent": 5.0},
-        {"type": "mpRecoveryPerSecond", "values": [3, 4, 5], "eachPercent": 3.33},
-        {"type": "debuffResistance", "values": [4, 5], "eachPercent": 2.19},
-        {"type": "mainStat", "range": [40, 60], "valueCount": 11, "eachPercentApprox": 0.91},
-        {"type": "maxHp", "range": [1200, 1500], "valueCount": 4, "eachPercentApprox": 0.91},
-        {"type": "maxMp", "range": [30, 40], "valueCount": 11, "eachPercentApprox": 0.91},
-        {"type": "damage", "range": [3.0, 5.0], "step": 0.4, "eachPercentApprox": 0.4},
-        {"type": "minDamageMultiplier", "value": 7, "eachPercentApprox": 0.036}
-      ],
-      "useForExpectedValue": false
-    }
-  },
-  "relicPotential": {
-    "oneSlot": {
-      "scope": "supplied entries are partial distribution",
-      "generalStatOptions": {
-        "eachPercent": 4.58,
-        "values": ["main_stat_2_percent", "defense_2_percent", "accuracy_2", "critical_rate_2_percent", "min_damage_multiplier_2_percent", "max_damage_multiplier_2_percent", "received_damage_reduction_1_percent"]
-      },
-      "specialDamageOptions": {
-        "eachPercent": 2.29,
-        "values": ["damage_4_percent", "boss_monster_damage_4_percent", "normal_monster_damage_4_percent", "status_damage_4_percent", "defense_penetration_2_percent"]
-      },
-      "higherTier": {
-        "valueRange": "3%-7% class values",
-        "tierProbabilitiesPercent": [3.05, 2.03, 0.75, 0.076]
-      },
-      "useForExpectedValue": false
+    "specialDamageOptions": {
+      "eachPercent": 2.29,
+      "values": [
+        "damage_4_percent",
+        "boss_monster_damage_4_percent",
+        "normal_monster_damage_4_percent",
+        "status_damage_4_percent",
+        "defense_penetration_2_percent"
+      ]
+    },
+    "higherTier": {
+      "valueRange": "3%-7% class values",
+      "tierProbabilitiesPercent": [
+        3.05,
+        2.03,
+        0.75,
+        0.076
+      ]
     }
   },
   "implementationRules": [
-    "등장 확률과 옵션 수치 확률을 분리한다.",
-    "부분 표는 전체 분포로 정규화하지 않고 누락 확률을 표시한다.",
-    "기댓값 계산은 공식 원문과 슬롯·등급·중복 보정 조건을 확인한 뒤 활성화한다.",
-    "큐브/변환 비교에서는 비용, 성공 목표, 중복 보정, 옵션 가치와 함께 계산한다."
+    "설정 확률만 저장·계산하고 실제 결과 표본은 제외한다.",
+    "각 소환 레벨의 행 합계는 검증용으로 보관하되 자동 정규화하지 않는다.",
+    "부분 표는 partial로 표시하고 기댓값 계산을 잠근다.",
+    "확률 데이터는 업데이트 날짜와 출처를 함께 관리한다."
   ]
 }
