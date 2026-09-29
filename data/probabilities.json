@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "name": "메이플 키우기 공식 설정 확률 종합 가이드",
+    "officialReference": "https://now.nexon.com/service/maplestoryidle?page=bd75db0f-1352-4401-9457-be38041bfeac",
+    "guideReference": "https://maplestoryidle.nexon.com/ko/guide#gnbAllLayer",
+    "providedByUser": true,
+    "verificationStatus": "summary transcription; cross-check against current official table before production use",
+    "note": "확률은 업데이트와 소환 레벨·슬롯·등급에 따라 달라질 수 있다. 명시되지 않은 확률은 추정하지 않는다."
+  },
+  "summon": {
+    "weapon": {
+      "level1": [
+        ["normal_low", 36.8], ["normal_mid", 27.6], ["normal_high", 18.4], ["normal_top", 9.2], ["rare_low", 5.6], ["rare_mid", 2.4]
+      ],
+      "level2": [["normal", 88.0], ["rare", 12.0]],
+      "level3_newUnlocks": [["epic_low", 0.56], ["epic_mid", 0.24]],
+      "level4_newUnlocks": [["epic_total", 1.8]],
+      "level5_newUnlocks": [["unique_low", 0.14], ["unique_mid", 0.06]],
+      "level6_newUnlocks": [["unique_total", 0.6]],
+      "level7_newUnlocks": [["legendary_low", 0.03]],
+      "level8to10": "legendary and higher ancient weapon probabilities rise by summon level; exact values not supplied"
+    },
+    "companions": {
+      "formula": "gradeProbability * withinGradeJobProbability",
+      "withinGradeJobs": "uniform among available jobs",
+      "note": "available jobs and grade tables must be versioned separately"
+    },
+    "eliteMonsterArmor": {
+      "grade1": [["normal_low", 89.85], ["normal_mid", 8.35], ["normal_high", 1.0], ["normal_top", 0.5], ["rare_low", 0.3]],
+      "grade3": [["normal", 98.2], ["rare", 1.8]],
+      "grade5_newUnlocks": [["epic_low", 0.2]],
+      "grade7_newUnlocks": [["epic_total", 0.7]],
+      "grade10_newUnlocks": [["epic_total", 2.6]],
+      "grade11plus": "unique and legendary equipment gradually unlock; exact values not supplied"
+    }
+  },
+  "starforce": {
+    "notes": ["0-20 stars: failure does not downgrade or destroy according to supplied guide"],
+    "steps": [
+      {"from": 0, "to": 1, "successPercent": 100, "meso": 20000, "scrolls": 1},
+      {"from": 4, "to": 5, "successPercent": 80, "meso": 60000, "scrolls": 4},
+      {"from": 9, "to": 10, "successPercent": 50, "meso": 150000, "scrolls": 9, "label": "popular stopping point"},
+      {"from": 10, "to": 11, "successPercent": 35, "meso": 170000, "scrolls": 10},
+      {"from": 11, "to": 12, "successPercent": 34, "meso": 190000, "scrolls": 11, "label": "additional potential unlock"},
+      {"from": 19, "to": 20, "successPercent": 21, "meso": 850000, "scrolls": 42}
+    ]
+  },
+  "potential": {
+    "normal": {
+      "scope": "per line; supplied table is partial",
+      "options": [
+        {"type": "flatStat50", "values": ["STR", "DEX", "INT", "LUK"], "eachPercent": 9.5},
+        {"type": "defense3_or_maxHp6_or_maxMp3", "values": ["defense_3_percent", "max_hp_6_percent", "max_mp_3_percent"], "eachPercent": 9.0},
+        {"type": "mainStat3Percent", "values": ["STR", "DEX", "INT", "LUK"], "eachPercent": 4.5},
+        {"type": "damage5_or_minMax3", "values": ["damage_5_percent", "min_damage_multiplier_3_percent", "max_damage_multiplier_3_percent"], "eachPercent": 4.0},
+        {"type": "criticalRate3_or_attackSpeed3", "values": ["critical_rate_3_percent", "attack_speed_3_percent"], "eachPercent": 2.5}
+      ],
+      "missingProbabilityPercent": 4.0,
+      "useForExpectedValue": false
+    },
+    "additional": {
+      "unlockAtStars": 12,
+      "independentPerSlot": true,
+      "duplicateRule": "if type, value, and order fully match existing options, reroll correction applies",
+      "exactDuplicateRuleDetails": "not supplied"
+    }
+  },
+  "herosPowerAbility": {
+    "level1": {
+      "scope": "supplied entries are partial distribution",
+      "options": [
+        {"type": "accuracy", "values": [2, 3], "eachPercent": 5.0},
+        {"type": "evasion", "values": [2, 3], "eachPercent": 5.0},
+        {"type": "mpRecoveryPerSecond", "values": [3, 4, 5], "eachPercent": 3.33},
+        {"type": "debuffResistance", "values": [4, 5], "eachPercent": 2.19},
+        {"type": "mainStat", "range": [40, 60], "valueCount": 11, "eachPercentApprox": 0.91},
+        {"type": "maxHp", "range": [1200, 1500], "valueCount": 4, "eachPercentApprox": 0.91},
+        {"type": "maxMp", "range": [30, 40], "valueCount": 11, "eachPercentApprox": 0.91},
+        {"type": "damage", "range": [3.0, 5.0], "step": 0.4, "eachPercentApprox": 0.4},
+        {"type": "minDamageMultiplier", "value": 7, "eachPercentApprox": 0.036}
+      ],
+      "useForExpectedValue": false
+    }
+  },
+  "relicPotential": {
+    "oneSlot": {
+      "scope": "supplied entries are partial distribution",
+      "generalStatOptions": {
+        "eachPercent": 4.58,
+        "values": ["main_stat_2_percent", "defense_2_percent", "accuracy_2", "critical_rate_2_percent", "min_damage_multiplier_2_percent", "max_damage_multiplier_2_percent", "received_damage_reduction_1_percent"]
+      },
+      "specialDamageOptions": {
+        "eachPercent": 2.29,
+        "values": ["damage_4_percent", "boss_monster_damage_4_percent", "normal_monster_damage_4_percent", "status_damage_4_percent", "defense_penetration_2_percent"]
+      },
+      "higherTier": {
+        "valueRange": "3%-7% class values",
+        "tierProbabilitiesPercent": [3.05, 2.03, 0.75, 0.076]
+      },
+      "useForExpectedValue": false
+    }
+  },
+  "implementationRules": [
+    "등장 확률과 옵션 수치 확률을 분리한다.",
+    "부분 표는 전체 분포로 정규화하지 않고 누락 확률을 표시한다.",
+    "기댓값 계산은 공식 원문과 슬롯·등급·중복 보정 조건을 확인한 뒤 활성화한다.",
+    "큐브/변환 비교에서는 비용, 성공 목표, 중복 보정, 옵션 가치와 함께 계산한다."
+  ]
+}
