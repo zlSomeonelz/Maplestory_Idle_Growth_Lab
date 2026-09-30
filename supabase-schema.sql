@@ -6,10 +6,12 @@ create table if not exists public.maple_growth_user_data (
   companion_inventory jsonb not null default '{}'::jsonb,
   detailed_stats jsonb not null default '{}'::jsonb,
   build_presets jsonb not null default '{}'::jsonb,
+  preset_ocr jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default timezone('utc', now())
 );
 
 alter table public.maple_growth_user_data enable row level security;
+alter table public.maple_growth_user_data add column if not exists preset_ocr jsonb not null default '{}'::jsonb;
 
 drop policy if exists "Users can read their own Maple Growth data" on public.maple_growth_user_data;
 create policy "Users can read their own Maple Growth data"
