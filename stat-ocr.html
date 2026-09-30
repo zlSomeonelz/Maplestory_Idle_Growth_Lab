@@ -129,11 +129,13 @@ function inferRole(text,role='stats',visualPanel=false){
  return 'stats';
 }
 const ROLE_KEYS={attack:new Set(['ATK_FLAT','ATK_PCT']),main:new Set(['MAIN_STAT_FLAT','MAIN_STAT_PCT','SUB_STAT_FLAT','FINAL_MAIN_STAT','STR_STAT','DEX_STAT','INT_STAT','LUK_STAT']),top:new Set(['LEVEL','POWER','ATK_FLAT','ATK_PCT','DEFENSE','MAX_HP','MAX_MP','CRIT_RATE','CRIT_DMG','ATK_SPEED']),middle:new Set(['DMG','DMG_AMP','BASIC_ATK_DMG','SKILL_DMG','DEF_PEN','BOSS_DMG','NORMAL_DMG','ABNORMAL_DMG','CRIT_RESIST']),bottom:new Set(['ACCURACY','EVASION','MIN_DMG_MULT','MAX_DMG_MULT','EXP_GAIN','MESO_GAIN','FINAL_DMG'])};
+function parseFlexibleLabeledStats(text,role='stats'){const lines=String(text||'').split(/\r?\n/).map(normalizeOcrText).filter(Boolean);const found={};const allowed=ROLE_KEYS[role];if(!allowed)return found;const labelDefs=STAT_DEFS.filter(def=>allowed.has(def.key)&&!['STR_STAT','DEX_STAT','INT_STAT','LUK_STAT'].includes(def.key));const labelKeys=new Set(labelDefs.flatMap(def=>def.aliases));for(const def of labelDefs){const candidates=[];for(let i=0;i<lines.length;i++){const hit=findAlias(lines[i],def);if(!hit)continue;for(const dir of [1,-1]){for(let step=1;step<=8;step++){const j=i+dir*step;if(j<0||j>=lines.length)break;const candidate=lines[j];if(labelDefs.some(other=>other!==def&&findAlias(candidate,other)))break;if(!looksLikeValueLine(candidate))continue;const value=parseCandidateNumber(def,candidate);if(value!==null&&candidateTailAllowed(def,candidate))candidates.push({value,score:100-step*8-(dir<0?12:0)});break}}}if(candidates.length){candidates.sort((a,b)=>a.score-b.score);found[def.key]=candidates[candidates.length-1].value}}return found}
 function parseText(text,role='stats'){
  const lines=String(text||'').split(/\r?\n/).map(normalizeOcrText).filter(Boolean);
  const found={};
  const aggregateValues=lines.map(line=>aggregateValue(line)).filter(value=>value!==null);
  STAT_DEFS.forEach(def=>{
+  if(role==='main'&&['STR_STAT','DEX_STAT','INT_STAT','LUK_STAT'].includes(def.key))return;
   const candidates=[];
   const attackBlock=lines.join(' '),attackPercentages=[...attackBlock.matchAll(/(-?[\d,]+(?:\.\d+)?)\s*%/g)];
   if(def.key==='ATK_FLAT'&&aggregateValues.length&&/공격력|공격려|공격 속도/.test(attackBlock))aggregateValues.forEach(value=>candidates.push({value,score:180,line:'합산'}));
@@ -161,6 +163,7 @@ function parseText(text,role='stats'){
   }
   if(candidates.length){candidates.sort((a,b)=>a.score-b.score);found[def.key]=candidates[candidates.length-1].value}
  });
+ Object.assign(found,parseFlexibleLabeledStats(text,role));
  Object.assign(found,parseDetailBreakdown(text,role));
  const allowed=ROLE_KEYS[role];if(allowed)Object.keys(found).forEach(key=>{if(!allowed.has(key))delete found[key]});
  return found
