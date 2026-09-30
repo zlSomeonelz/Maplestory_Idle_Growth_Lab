@@ -119,7 +119,9 @@ function inferRole(text,role='stats',visualPanel=false){
  if(hasPopupTotal&&(hasMainDescription||mainStatHeading)&&/(STR|DEX|INT|LUK)/i.test(compact))return 'main';
  if(hasPopupTotal&&/(공격력|공격려)/.test(compact))return 'attack';
  if(!visualPanel&&role==='ignore'&&statSignalCount(compact)<3)return 'ignore';
- if(!visualPanel&&presetChrome&&statSignalCount(compact)<3)return 'ignore';
+ // A pasted/raw block explicitly tagged as stats must not be discarded merely
+ // because the preset background reduced OCR signal count.
+ if(!visualPanel&&presetChrome&&role!=='stats'&&statSignalCount(compact)<3)return 'ignore';
  const topSignals=['전투력','방어력','최대HP','최대MP','크리티컬확률','크리티컬데미지','공격속도','STR','DEX','INT','LUK'].filter(token=>compact.includes(token)).length;
  const middleSignals=['데미지','데미지증폭','기본공격데미지','스킬데미지','방어관통력','보스몬스터','일반몬스터','명중','회피'].filter(token=>compact.includes(token)).length;
  const bottomSignals=['최소데미지배율','최대데미지배율','경험치획득량','메소획득량','최종데미지','디버프내성','기본공격대상수','스킬재사용','1레벨당주스탯','스킬레벨'].filter(token=>compact.includes(token)).length;
