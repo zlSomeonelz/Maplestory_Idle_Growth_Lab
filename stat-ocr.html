@@ -23,31 +23,56 @@
 <script>
 const $=id=>document.getElementById(id);
 const STAT_DEFS=[
- {key:'ATK_FLAT',label:'공격력 합계',target:'contentAttack',aliases:['공격력 합계','공격력']},
- {key:'MAIN_STAT_PCT',label:'주 스탯(%)',target:'contentMainPct',aliases:['주 스탯','주스탯','주 능력치']},
- {key:'DMG',label:'데미지(%)',target:'contentDamage',aliases:['데미지']},
- {key:'DMG_AMP',label:'데미지 증폭(%)',target:'contentAmp',aliases:['데미지 증폭','피해 증폭']},
- {key:'BOSS_DMG',label:'보스 데미지(%)',target:'contentBossDamage',aliases:['보스 몬스터 데미지','보스 데미지']},
- {key:'NORMAL_DMG',label:'일반 몬스터 데미지(%)',target:'contentNormalDamage',aliases:['일반 몬스터 데미지','일반 몬스터 피해']},
- {key:'BASIC_ATK_DMG',label:'기본 공격 데미지(%)',target:'contentBasicDamage',aliases:['기본 공격 데미지','기본 공격 피해']},
- {key:'SKILL_DMG',label:'스킬 데미지(%)',target:'contentSkillDamage',aliases:['스킬 데미지','스킬 피해']},
+ {key:'LEVEL',label:'캐릭터 레벨',target:null,aliases:['캐릭터 레벨']},
+ {key:'POWER',label:'전투력',target:null,aliases:['전투력']},
+ {key:'ATK_FLAT',label:'공격력(+)',target:'contentAttack',aliases:['공격력 합계','공격력']},
+ {key:'ATK_PCT',label:'공격력(%)',target:'contentAttackPct',aliases:['공격력%','공격력 %']},
+ {key:'DEFENSE',label:'방어력',target:'contentDefense',aliases:['방어력']},
+ {key:'MAX_HP',label:'최대 HP',target:'contentHp',aliases:['최대 HP','최대 체력']},
+ {key:'MAX_MP',label:'최대 MP',target:'contentMaxMp',aliases:['최대 MP','최대 마나']},
  {key:'CRIT_RATE',label:'크리티컬 확률(%)',target:'contentCritRate',aliases:['크리티컬 확률','치명타 확률']},
  {key:'CRIT_DMG',label:'크리티컬 데미지(%)',target:'contentCritDamage',aliases:['크리티컬 데미지','치명타 데미지']},
+ {key:'ATK_SPEED',label:'공격 속도(%)',target:'contentAttackSpeed',aliases:['공격 속도']},
+ {key:'MAIN_STAT_FLAT',label:'주스탯(+)',target:'contentMainFlat',aliases:['주 스탯 수치','주스탯 수치','주 스탯(+)','주스탯(+)']},
+ {key:'MAIN_STAT_PCT',label:'주스탯(%)',target:'contentMainPct',aliases:['주 스탯%','주스탯%','주 스탯 %','주스탯 %']},
+ {key:'SUB_STAT_FLAT',label:'부스탯(+)',target:'contentSubFlat',aliases:['부 스탯 수치','부스탯 수치','부 스탯(+)','부스탯(+)']},
+ {key:'FINAL_MAIN_STAT',label:'최종 주스탯',target:'contentFinalMainStat',aliases:['최종 주 스탯','최종 주스탯']},
+ {key:'STAT_SCALING_DMG',label:'스탯 비례 데미지(%)',target:'contentStatScalingDamage',aliases:['스탯 비례 데미지','스탯 비례 피해']},
+ {key:'MP_REGEN',label:'초당 MP 회복',target:'contentMpRegen',aliases:['초당 MP 회복','초당 MP 회복량']},
+ {key:'DMG_REDUCTION',label:'받는 피해 감소(%)',target:'contentDamageReduction',aliases:['받는 피해 감소','피해 감소']},
+ {key:'DMG',label:'데미지(%)',target:'contentDamage',aliases:['데미지']},
+ {key:'DMG_AMP',label:'데미지 증폭(%)',target:'contentAmp',aliases:['데미지 증폭','피해 증폭']},
+ {key:'BASIC_ATK_DMG',label:'기본 공격 데미지(%)',target:'contentBasicDamage',aliases:['기본 공격 데미지','기본 공격 피해']},
+ {key:'SKILL_DMG',label:'스킬 데미지(%)',target:'contentSkillDamage',aliases:['스킬 데미지','스킬 피해']},
+ {key:'DEF_PEN',label:'방어 관통력(%)',target:'contentDefensePen',aliases:['방어 관통력','방어력 관통','방어력 무시']},
+ {key:'BOSS_DMG',label:'보스 몬스터 데미지(%)',target:'contentBossDamage',aliases:['보스 몬스터 데미지','보스 몬스터 피해','보스 데미지']},
+ {key:'NORMAL_DMG',label:'일반 몬스터 데미지(%)',target:'contentNormalDamage',aliases:['일반 몬스터 데미지','일반 몬스터 피해']},
+ {key:'ABNORMAL_DMG',label:'상태이상 데미지(%)',target:'contentAbnormalDamage',aliases:['상태이상 데미지','상태 이상 데미지']},
+ {key:'CRIT_RESIST',label:'크리티컬 저항(%)',target:'contentCritResist',aliases:['크리티컬 저항','치명타 저항']},
+ {key:'ACCURACY',label:'명중',target:'contentAccuracy',aliases:['명중']},
+ {key:'EVASION',label:'회피',target:'contentEvasion',aliases:['회피']},
  {key:'MIN_DMG_MULT',label:'최소 데미지 배율(%)',target:'contentMinDamage',aliases:['최소 데미지 배율','최소 피해 배율']},
  {key:'MAX_DMG_MULT',label:'최대 데미지 배율(%)',target:'contentMaxDamage',aliases:['최대 데미지 배율','최대 피해 배율']},
+ {key:'EXP_GAIN',label:'경험치 획득량(%)',target:'contentExpGain',aliases:['경험치 획득량','경험치 획득']},
+ {key:'MESO_GAIN',label:'메소 획득량(%)',target:'contentMesoGain',aliases:['메소 획득량','메소 획득']},
  {key:'FINAL_DMG',label:'최종 데미지(%)',target:'contentFinalDamage',aliases:['최종 데미지','최종 피해']},
- {key:'ATK_SPEED',label:'공격 속도(%)',target:'contentAttackSpeed',aliases:['공격 속도']},
- {key:'ACCURACY',label:'명중',target:'contentAccuracy',aliases:['명중']},
- {key:'MAX_HP',label:'최대 HP',target:'contentHp',aliases:['최대 HP','최대 체력']},
- {key:'DEFENSE',label:'방어력',target:'contentDefense',aliases:['방어력','방어']},
- {key:'LEVEL',label:'캐릭터 레벨',target:null,aliases:['캐릭터 레벨','레벨']},
- {key:'MAIN_STAT_FLAT',label:'주 스탯(수치)',target:null,aliases:['주 스탯 수치','주스탯 수치']},
- {key:'SUB_STAT_FLAT',label:'부 스탯(수치)',target:null,aliases:['부 스탯','부스탯']},
- {key:'DEF_PEN',label:'방어력 무시',target:null,aliases:['방어력 무시','방어력 관통']},
- {key:'EVASION',label:'회피',target:null,aliases:['회피']},
- {key:'MP_REGEN',label:'MP 회복',target:null,aliases:['MP 회복','MP 재생']},
- {key:'CRIT_RESIST',label:'크리티컬 저항',target:null,aliases:['크리티컬 저항']},
- {key:'DMG_REDUCTION',label:'피해 감소',target:null,aliases:['피해 감소','데미지 감소']}
+ {key:'COMPANION_DURATION',label:'동료 소환 지속시간 증가(%)',target:'contentCompanionDuration',aliases:['동료 소환 지속시간 증가']},
+ {key:'BUFF_DURATION',label:'버프 지속시간 증가(%)',target:'contentBuffDuration',aliases:['버프 지속시간 증가']},
+ {key:'DEBUFF_RESIST',label:'디버프 내성(%)',target:'contentDebuffResist',aliases:['디버프 내성']},
+ {key:'BASIC_TARGET_COUNT',label:'기본 공격 대상 수 증가',target:'contentBasicTargetCount',aliases:['기본 공격 대상 수 증가']},
+ {key:'SKILL_CDR_PCT',label:'스킬 재사용 대기시간 감소(%)',target:'contentSkillCdrPct',aliases:['스킬 재사용 대기시간 감소%','스킬 재사용 대기시간 감소 %']},
+ {key:'SKILL_CDR_SEC',label:'스킬 재사용 대기시간 감소(+초)',target:'contentSkillCdrSec',aliases:['스킬 재사용 대기시간 감소(+초)','스킬 재사용 대기시간 감소 (+초)']},
+ {key:'MAIN_STAT_PER_LEVEL1',label:'1레벨당 주 스탯',target:'contentMainStatPerLevel1',aliases:['1레벨당 주 스탯','1레벨당 주스탯']},
+ {key:'MAIN_STAT_PER_LEVEL4',label:'4레벨당 주 스탯(%)',target:'contentMainStatPerLevel4',aliases:['4레벨당 주 스탯','4레벨당 주스탯']},
+ {key:'FIRST_SKILL_LEVEL',label:'1차 스킬 레벨(+)',target:'contentFirstSkillLevel',aliases:['1차 스킬 레벨']},
+ {key:'SECOND_SKILL_LEVEL',label:'2차 스킬 레벨(+)',target:'contentSecondSkillLevel',aliases:['2차 스킬 레벨']},
+ {key:'THIRD_SKILL_LEVEL',label:'3차 스킬 레벨(+)',target:'contentThirdSkillLevel',aliases:['3차 스킬 레벨']},
+ {key:'FOURTH_SKILL_LEVEL',label:'4차 스킬 레벨(+)',target:'contentFourthSkillLevel',aliases:['4차 스킬 레벨']},
+ {key:'ALL_SKILL_LEVEL',label:'모든 스킬 레벨(+)',target:'contentAllSkillLevel',aliases:['모든 스킬 레벨']},
+ {key:'STR_STAT',label:'STR 주스탯 수치',target:null,aliases:['STR']},
+ {key:'DEX_STAT',label:'DEX 주스탯 수치',target:null,aliases:['DEX']},
+ {key:'INT_STAT',label:'INT 주스탯 수치',target:null,aliases:['INT']},
+ {key:'LUK_STAT',label:'LUK 주스탯 수치',target:null,aliases:['LUK']}
 ];
 let files=[],ocrStats={},rawTexts=[];
 function setStatus(text,kind=''){const e=$('status');e.textContent=text;e.className='status '+kind}
@@ -55,8 +80,9 @@ function setProgress(n){$('progress').style.width=Math.max(0,Math.min(100,n))+'%
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function renderFiles(){const box=$('files');box.innerHTML='';files.forEach((f,i)=>{const row=document.createElement('div');row.className='file-row';row.innerHTML=`<span>${esc(f.file.name)} <span class="small">${Math.round(f.file.size/1024)} KB</span></span><select data-i="${i}" class="role"><option value="stats">예상 능력치</option><option value="top">상단</option><option value="middle">중단</option><option value="bottom">하단</option><option value="attack">공격력 상세</option><option value="main">주 스탯 상세</option></select><button type="button" data-i="${i}" class="remove">삭제</button>`;box.appendChild(row);row.querySelector('.role').value=f.role;row.querySelector('.role').addEventListener('change',e=>f.role=e.target.value);row.querySelector('.remove').addEventListener('click',()=>{files.splice(i,1);renderFiles()})});$('scanBtn').disabled=!files.length}
 $('file').addEventListener('change',e=>{files.push(...[...e.target.files].map(file=>({file,role:'stats'})));renderFiles();setStatus(`${files.length}장 준비됨. 영역을 지정한 뒤 OCR을 실행하세요.`,'good')});$('clearFilesBtn').addEventListener('click',()=>{files=[];renderFiles();setStatus('이미지 목록을 비웠습니다.');setProgress(0)});
-function numbersAfter(text,alias){const raw=String(text||''),at=raw.toLowerCase().indexOf(String(alias).toLowerCase());if(at<0)return null;const part=raw.slice(at+String(alias).length);const m=part.match(/-?\d[\d,]*(?:\.\d+)?/);return m?Number(m[0].replace(/,/g,'')):null}
-const ALIAS_MATCHES=STAT_DEFS.flatMap(def=>def.aliases.map(alias=>({key:def.key,alias}))).sort((a,b)=>b.alias.length-a.alias.length);function ownedAlias(line,def){const lower=String(line).toLowerCase();const hits=ALIAS_MATCHES.filter(x=>lower.includes(x.alias.toLowerCase()));return hits.find(x=>x.key===def.key)||null}function parseText(text){const lines=String(text||'').split(/\r?\n/).map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean);const found={};STAT_DEFS.forEach(def=>{let candidates=[];for(let i=0;i<lines.length;i++){const hit=ownedAlias(lines[i],def);if(!hit)continue;const alias=hit.alias;const same=numbersAfter(lines[i],alias);if(same!==null)candidates.push({value:same,line:lines[i]});const next=numbersAfter(lines[i+1]||'',alias);if(next!==null)candidates.push({value:next,line:(lines[i]+' '+(lines[i+1]||''))});const window=numbersAfter(lines.slice(i,i+2).join(' '),alias);if(window!==null)candidates.push({value:window,line:lines.slice(i,i+2).join(' ')})}if(candidates.length)found[def.key]=candidates[candidates.length-1].value});return found}
+function parseLocalizedNumber(text){const raw=String(text||'').replace(/\s+/g,' ').trim();const unitMatch=raw.match(/(-?[\d,]+(?:\.\d+)?)\s*억/);const manMatch=raw.match(/(-?[\d,]+(?:\.\d+)?)\s*만/);if(unitMatch||manMatch){let total=0;if(unitMatch){total+=Number(unitMatch[1].replace(/,/g,''))*100000000}if(manMatch){total+=Number(manMatch[1].replace(/,/g,''))*10000}let rest=raw;if(unitMatch)rest=rest.slice((unitMatch.index||0)+unitMatch[0].length);if(manMatch){const idx=rest.indexOf(manMatch[0]);if(idx>=0)rest=rest.slice(idx+manMatch[0].length)}const tail=rest.match(/-?[\d,]+(?:\.\d+)?/);if(tail)total+=Number(tail[0].replace(/,/g,''));return total}const m=raw.match(/-?[\d,]+(?:\.\d+)?/);return m?Number(m[0].replace(/,/g,'')):null}
+function numbersAfter(text,alias){const raw=String(text||''),at=raw.toLowerCase().indexOf(String(alias).toLowerCase());if(at<0)return null;return parseLocalizedNumber(raw.slice(at+String(alias).length))}
+const ALIAS_MATCHES=STAT_DEFS.flatMap(def=>def.aliases.map(alias=>({key:def.key,alias}))).sort((a,b)=>b.alias.length-a.alias.length);function ownedAlias(line,def){const lower=String(line).toLowerCase();const hits=ALIAS_MATCHES.filter(x=>lower.includes(x.alias.toLowerCase()));return hits.find(x=>x.key===def.key)||null}function parseText(text){const lines=String(text||'').split(/\r?\n/).map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean);const found={};STAT_DEFS.forEach(def=>{let candidates=[];for(let i=0;i<lines.length;i++){const hit=ownedAlias(lines[i],def);if(!hit)continue;const alias=hit.alias;const same=numbersAfter(lines[i],alias);if(same!==null)candidates.push({value:same,line:lines[i]});const next=numbersAfter(lines[i+1]||'',alias);if(next!==null)candidates.push({value:next,line:(lines[i]+' '+(lines[i+1]||''))});const lookahead=lines.slice(i,i+5).join(' ');const detailValue=(def.key==='ATK_FLAT'||def.key==='MAIN_STAT_FLAT')&&lookahead.includes('합산')?numbersAfter(lookahead,'합산'):null;if(detailValue!==null)candidates.push({value:detailValue,line:lookahead});const window=numbersAfter(lines.slice(i,i+2).join(' '),alias);if(window!==null)candidates.push({value:window,line:lines.slice(i,i+2).join(' ')})}if(candidates.length)found[def.key]=candidates[candidates.length-1].value});return found}
 function mergeStats(found){Object.entries(found).forEach(([k,v])=>{if(v!==null&&Number.isFinite(v))ocrStats[k]=v});renderStats()}
 function renderStats(){const box=$('stats');box.innerHTML=STAT_DEFS.map(def=>`<div class="stat-row"><label for="stat-${def.key}">${def.label}</label><input id="stat-${def.key}" type="number" step="any" data-key="${def.key}" value="${ocrStats[def.key]??''}" placeholder="미검출"><span class="confidence">${ocrStats[def.key]!==undefined?'후보':''}</span></div>`).join('');box.querySelectorAll('input').forEach(el=>el.addEventListener('input',()=>{const n=Number(el.value);if(el.value==='')delete ocrStats[el.dataset.key];else if(Number.isFinite(n))ocrStats[el.dataset.key]=n}))}
 async function scan(){if(!files.length){setStatus('이미지를 먼저 선택하세요.','warn');return}if(!window.Tesseract){setStatus('OCR 엔진을 불러오지 못했습니다. 인터넷 연결을 확인하세요.','bad');return}$('scanBtn').disabled=true;rawTexts=[];setProgress(2);try{for(let i=0;i<files.length;i++){const f=files[i];setStatus(`${i+1}/${files.length}장 OCR 중 · ${f.file.name}`);const result=await Tesseract.recognize(f.file,'kor+eng',{logger:m=>{if(m.status==='recognizing text')setProgress(Math.round(((i+(m.progress||0))/files.length)*94)+3)}});const text=result.data?.text||'';rawTexts.push(`[${f.role}] ${f.file.name}\n${text}`);mergeStats(parseText(text))}$('rawInput').value=rawTexts.join('\n\n');$('rawOutput').hidden=false;$('rawOutput').textContent=$('rawInput').value;setProgress(100);setStatus(`${files.length}장 OCR 완료. 검출값을 확인·수정한 뒤 계산기에 반영하세요.`,'good')}catch(err){console.error(err);setStatus('OCR 중 오류가 발생했습니다. 이미지 크기를 줄이거나 한 장씩 다시 시도하세요.','bad')}finally{$('scanBtn').disabled=false}}
