@@ -23,7 +23,7 @@
 <script>
 const $=id=>document.getElementById(id);
 const STAT_DEFS=[
- {key:'LEVEL',label:'캐릭터 레벨',target:null,aliases:['캐릭터 레벨']},
+ {key:'LEVEL',label:'캐릭터 레벨',target:null,aliases:['캐릭터 레벨','레벨','LV','Lv']},
  {key:'POWER',label:'전투력',target:null,aliases:['전투력']},
  {key:'ATK_FLAT',label:'공격력(+)',target:'contentAttack',aliases:['공격력 합계','공격력']},
  {key:'ATK_PCT',label:'공격력(%)',target:'contentAttackPct',aliases:['공격력%','공격력 %']},
@@ -89,17 +89,24 @@ function numbersAfter(text,alias){const raw=normalizeOcrText(text),match=raw.mat
 const ALIAS_MATCHES=STAT_DEFS.flatMap(def=>def.aliases.map(alias=>({key:def.key,alias}))).sort((a,b)=>b.alias.length-a.alias.length);
 function ownedAlias(line,def){return findAlias(line,def)}
 function looksLikeValueLine(line){const value=normalizeOcrText(line).replace(/[\s+:%.,/|()\[\]{}<>="'`~^*·]/g,'');if(!value)return false;return !/[가-힣A-Za-z]/.test(value.replace(/[억만초합산]/g,''))}
+const PERCENT_STAT_KEYS=new Set(['ATK_PCT','CRIT_RATE','CRIT_DMG','ATK_SPEED','MAIN_STAT_PCT','STAT_SCALING_DMG','DMG_REDUCTION','DMG','DMG_AMP','BASIC_ATK_DMG','SKILL_DMG','DEF_PEN','BOSS_DMG','NORMAL_DMG','ABNORMAL_DMG','CRIT_RESIST','MIN_DMG_MULT','MAX_DMG_MULT','EXP_GAIN','MESO_GAIN','FINAL_DMG','COMPANION_DURATION','BUFF_DURATION','DEBUFF_RESIST','SKILL_CDR_PCT','MAIN_STAT_PER_LEVEL4']);
+function candidateTailAllowed(def,text){const raw=normalizeOcrText(text);if(!raw)return false;if(PERCENT_STAT_KEYS.has(def.key)&&!/%/.test(raw))return false;if(def.key==='ATK_SPEED'&&/[+]/.test(raw)&&/%/.test(raw))return false;if(def.key==='ATK_SPEED'&&/[+]\s*[:：]?\s*[\d,]+/.test(raw)&&/합산/.test(raw))return false;if(['MAX_HP','MAX_MP','DEFENSE','ACCURACY','EVASION'].includes(def.key)&&!looksLikeValueLine(raw))return false;if(def.key==='ATK_FLAT'&&/(당|증가|효과|기본|피해|스킬|설명|포함|자신|적에게|나이트|LUK|DEX)/i.test(raw))return false;return true}
+function parseCandidateNumber(def,text){const raw=normalizeOcrText(text);if(PERCENT_STAT_KEYS.has(def.key)){const percentages=[...raw.matchAll(/(-?[\d,]+(?:\.\d+)?)\s*%/g)];const percent=percentages[percentages.length-1];return percent?Number(percent[1].replace(/,/g,'')):null}return parseLocalizedNumber(raw)}
 function aggregateValue(text){const match=normalizeOcrText(text).match(/합산\s*[:：]?\s*((?:-?[\d,]+(?:\.\d+)?\s*억\s*)?(?:-?[\d,]+(?:\.\d+)?\s*만\s*)?-?[\d,]+(?:\.\d+)?)/);return match?parseLocalizedNumber(match[1]):null}
 function parseText(text){
  const lines=String(text||'').split(/\r?\n/).map(normalizeOcrText).filter(Boolean);
  const found={};
+ const aggregateValues=lines.map(line=>aggregateValue(line)).filter(value=>value!==null);
  STAT_DEFS.forEach(def=>{
   const candidates=[];
+  const attackBlock=lines.join(' '),attackPercentages=[...attackBlock.matchAll(/(-?[\d,]+(?:\.\d+)?)\s*%/g)];
+  if(def.key==='ATK_FLAT'&&aggregateValues.length&&/공격력|공격려|공격 속도/.test(attackBlock))aggregateValues.forEach(value=>candidates.push({value,score:180,line:'합산'}));
+  if(def.key==='ATK_PCT'&&/공격력|공격려|공격 속도/.test(attackBlock)&&/합산/.test(attackBlock)&&/\+/.test(attackBlock)&&attackPercentages.length){const percent=attackPercentages[attackPercentages.length-1];candidates.push({value:Number(percent[1].replace(/,/g,'')),score:175,line:'공격력 합산 블록'})};
   for(let i=0;i<lines.length;i++){
    const hit=findAlias(lines[i],def);if(!hit)continue;
    const same=lines[i].slice(hit.index+hit.length);
-   const sameValue=parseLocalizedNumber(same);
-   if(sameValue!==null)candidates.push({value:sameValue,score:100,line:lines[i]});
+   const sameValue=parseCandidateNumber(def,same);
+   if(sameValue!==null&&candidateTailAllowed(def,same))candidates.push({value:sameValue,score:100,line:lines[i]});
    // Detail popups expose the useful total as "합산" after the flat and percent rows.
    if(def.key==='ATK_FLAT'||def.key==='MAIN_STAT_FLAT'){
     for(let span=2;span<=5;span++){const joined=lines.slice(i,Math.min(lines.length,i+span)).join(' ');const total=aggregateValue(joined);if(total!==null)candidates.push({value:total,score:130-(span-1)*5,line:joined})}
@@ -110,11 +117,11 @@ function parseText(text){
     const following=lines.slice(i+1,Math.min(lines.length,i+span));
     if(!following.length||!following.every(looksLikeValueLine))break;
     const joined=[lines[i],...following].join(' '),joinedHit=findAlias(joined,def);if(!joinedHit)continue;
-    const value=parseLocalizedNumber(joined.slice(joinedHit.index+joinedHit.length));
-    if(value!==null)candidates.push({value,score:100-(span-1)*12,line:joined});
+    const value=parseCandidateNumber(def,joined.slice(joinedHit.index+joinedHit.length));
+    if(value!==null&&candidateTailAllowed(def,joined.slice(joinedHit.index+joinedHit.length)))candidates.push({value,score:100-(span-1)*12,line:joined});
    }
-   const before=parseLocalizedNumber(lines[i].slice(0,hit.index));
-   if(before!==null)candidates.push({value:before,score:70,line:lines[i]});
+   const before=parseCandidateNumber(def,lines[i].slice(0,hit.index));
+   if(before!==null&&candidateTailAllowed(def,lines[i].slice(0,hit.index)))candidates.push({value:before,score:70,line:lines[i]});
   }
   if(candidates.length){candidates.sort((a,b)=>a.score-b.score);found[def.key]=candidates[candidates.length-1].value}
  });
