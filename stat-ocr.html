@@ -105,11 +105,24 @@ const PERCENT_STAT_KEYS=new Set(['ATK_PCT','CRIT_RATE','CRIT_DMG','ATK_SPEED','M
 function candidateTailAllowed(def,text){const raw=normalizeOcrText(text);if(!raw)return false;if(PERCENT_STAT_KEYS.has(def.key)&&!/%/.test(raw))return false;if(def.key==='ATK_SPEED'&&/[+]/.test(raw)&&/%/.test(raw))return false;if(def.key==='ATK_SPEED'&&/[+]\s*[:：]?\s*[\d,]+/.test(raw)&&/합산/.test(raw))return false;if(['MAX_HP','MAX_MP','DEFENSE','ACCURACY','EVASION','STR_STAT','DEX_STAT','INT_STAT','LUK_STAT'].includes(def.key)&&!looksLikeValueLine(raw))return false;if(def.key==='ATK_FLAT'&&/(당|증가|효과|기본|피해|스킬|설명|포함|자신|적에게|나이트|LUK|DEX)/i.test(raw))return false;return true}
 function parseCandidateNumber(def,text){const raw=normalizeOcrText(text);if(PERCENT_STAT_KEYS.has(def.key)){const percentages=[...raw.matchAll(/(-?[\d,]+(?:\.\d+)?)\s*%/g)];const percent=percentages[percentages.length-1];return percent?Number(percent[1].replace(/,/g,'')):null}return parseLocalizedNumber(raw)}
 function aggregateValue(text){const match=normalizeOcrText(text).match(/합산\s*[:：]?\s*((?:-?[\d,]+(?:\.\d+)?\s*억\s*)?(?:-?[\d,]+(?:\.\d+)?\s*만\s*)?-?[\d,]+(?:\.\d+)?)/);return match?parseLocalizedNumber(match[1]):null}
+function statSignalCount(compact){return ['스탯정보','전투력','공격력','방어력','최대HP','최대MP','크리티컬','공격속도','STR','DEX','INT','LUK','데미지','방어관통력','보스몬스터','일반몬스터','명중','회피','최종데미지','디버프내성','스킬재사용'].filter(token=>compact.includes(token)).length}
 function inferRole(text,role='stats'){
  const compact=normalizeOcrText(text).replace(/\s+/g,'');
- if(role==='ignore'||/(프리셋설정|어빌리티프리셋|프리셋편집|장비프리셋|스킬프리셋|동료프리셋|유물프리셋)/.test(compact))return 'ignore';
- if(/(STR|DEX|INT|LUK)/i.test(compact)&&/(공격력|공격려|합산|주스탯|부스탯)/.test(compact))return 'main';
- if(/(공격력|공격려)/.test(compact)&&/(합산|공격력\+|공격력%|기본이되는)/.test(compact))return 'attack';
+ const presetChrome=/(프리셋설정|어빌리티프리셋|프리셋편집|장비프리셋|스킬프리셋|동료프리셋|유물프리셋)/.test(compact);
+ const hasPopupTotal=/합산/.test(compact)&&/[+％%]/.test(compact);
+ const hasMainDescription=/(주스탯|주스탯|부스탯|주스탯으로|부스탯은)/.test(compact);
+ // A stat-information popup can sit on top of the preset screen. Identify the
+ // popup first; only a preset-only page should be excluded.
+ if(hasPopupTotal&&hasMainDescription&&/(STR|DEX|INT|LUK)/i.test(compact))return 'main';
+ if(hasPopupTotal&&/(공격력|공격려)/.test(compact))return 'attack';
+ if(role==='ignore'&&statSignalCount(compact)<3)return 'ignore';
+ if(presetChrome&&statSignalCount(compact)<3)return 'ignore';
+ const topSignals=['전투력','방어력','최대HP','최대MP','크리티컬확률','크리티컬데미지','공격속도','STR','DEX','INT','LUK'].filter(token=>compact.includes(token)).length;
+ const middleSignals=['데미지','데미지증폭','기본공격데미지','스킬데미지','방어관통력','보스몬스터','일반몬스터','명중','회피'].filter(token=>compact.includes(token)).length;
+ const bottomSignals=['최소데미지배율','최대데미지배율','경험치획득량','메소획득량','최종데미지','디버프내성','기본공격대상수','스킬재사용','1레벨당주스탯','스킬레벨'].filter(token=>compact.includes(token)).length;
+ if(topSignals>=3)return 'top';
+ if(middleSignals>=3)return 'middle';
+ if(bottomSignals>=2)return 'bottom';
  return 'stats';
 }
 const ROLE_KEYS={attack:new Set(['ATK_FLAT','ATK_PCT']),main:new Set(['MAIN_STAT_FLAT','MAIN_STAT_PCT','SUB_STAT_FLAT','FINAL_MAIN_STAT','STR_STAT','DEX_STAT','INT_STAT','LUK_STAT']),top:new Set(['LEVEL','POWER','ATK_FLAT','ATK_PCT','DEFENSE','MAX_HP','MAX_MP','CRIT_RATE','CRIT_DMG','ATK_SPEED']),middle:new Set(['DMG','DMG_AMP','BASIC_ATK_DMG','SKILL_DMG','DEF_PEN','BOSS_DMG','NORMAL_DMG','ABNORMAL_DMG','CRIT_RESIST']),bottom:new Set(['ACCURACY','EVASION','MIN_DMG_MULT','MAX_DMG_MULT','EXP_GAIN','MESO_GAIN','FINAL_DMG'])};
