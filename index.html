@@ -36,7 +36,6 @@
 
     <nav class="tabs" aria-label="기능 선택">
       <button class="tab active" data-tab="combat">⚔️ 전투 계산</button>
-      <button class="tab" data-tab="growth">📈 성장 계획</button>
       <button class="tab" data-tab="cube">🧊 큐브 비교</button>
       <button class="tab" data-tab="probability">🎲 확률·기댓값</button>
     </nav>
@@ -81,8 +80,13 @@
             <div class="section-heading"><div><span class="step">02</span><h2>목표 콘텐츠</h2></div><span class="badge official">공식 규칙 기반</span></div>
             <p class="hint">보스/일반 데미지는 대상에 따라 하나만 적용됩니다.</p>
             <div class="fields compact">
+              <label>계산 대상<select id="stageMode"><option value="hunt">챕터 사냥</option><option value="trial">챕터 도전</option><option value="manual">직접 입력</option></select></label>
+              <label>챕터<select id="stageChapter"><option value="">스테이지 선택</option></select></label>
+              <label>스테이지<select id="stageSelect"><option value="">스테이지 선택</option></select></label>
               <label>대상 유형<select id="targetType"><option value="normal">일반 몬스터</option><option value="boss">보스</option><option value="pvp">PvP (미지원)</option></select></label>
               <label>적 방어력<input id="targetDefense" type="number" min="0" step="0.01" value="0"></label>
+              <label>적 최대 HP<input id="targetHp" type="number" min="0" step="0.01" value="0"></label>
+              <label>목표 제한 시간(초)<input id="stageTimeLimit" type="number" min="1" step="1" value="60"></label>
               <label>방어 관통력%<input id="defPen" type="number" min="0" max="100" step="0.01" value="0"></label>
               <label>보스 데미지%<input id="bossDamage" type="number" step="0.01" value="0"></label>
               <label>일반 몬스터 데미지%<input id="normalDamage" type="number" step="0.01" value="0"></label>
@@ -105,32 +109,8 @@
             <div class="metric"><span>스탯 비례 데미지</span><strong id="statDamage">—</strong><small>주스탯 100당 1%, 부스탯 400당 1%</small></div>
           </div>
           <div class="breakdown" id="combatBreakdown">입력을 바꾸면 계산 결과가 여기에 표시됩니다.</div>
+          <div class="stage-verdict" id="stageVerdict">목표 스테이지를 선택하면 클리어 가능성과 병목을 진단합니다.</div>
           <div class="disclaimer"><span class="badge provisional">provisional</span> 표시값은 공식 규칙을 코드화한 상대 비교용 MVP입니다. 공식 원문에 없는 직업·스킬 계수는 확정하지 않습니다.</div>
-        </section>
-      </section>
-
-      <section class="tab-panel" data-panel="growth">
-        <div class="card">
-          <div class="section-heading"><div><span class="step">01</span><h2>성장 목표와 예산</h2></div><span class="badge official">공통 전투 엔진</span></div>
-          <p class="hint">현재 프리셋을 기준으로 성장 방법을 가정하고, 딜 증가량·기대 비용·목표 달성 여부를 비교합니다.</p>
-          <div class="fields compact growth-meta">
-            <label>목표 DPS<input id="growthGoalDps" type="number" min="0" step="0.01" value="0"></label>
-            <label>사용 가능 예산(메소)<input id="growthBudget" type="number" min="0" step="1" value="0"></label>
-          </div>
-        </div>
-        <div class="card">
-          <div class="section-heading"><div><span class="step">02</span><h2>성장 시나리오</h2></div><span class="source-link">현재 입력에 변화량만 적용</span></div>
-          <div class="scenario-table" id="growthScenarios"></div>
-          <button class="button primary" type="button" id="calculateGrowth">성장 경로 비교</button>
-        </div>
-        <section class="card result-card">
-          <div class="section-heading"><div><span class="step">03</span><h2>추천 결과</h2></div><span class="badge provisional">조건부 추천</span></div>
-          <div class="result-grid three">
-            <div class="metric"><span>현재 예상 DPS</span><strong id="growthBaseDps">—</strong></div>
-            <div class="metric primary-metric"><span>가장 효율적인 성장 후 DPS</span><strong id="growthBestDps">—</strong></div>
-            <div class="metric"><span>추천 경로</span><strong id="growthBestName">—</strong></div>
-          </div>
-          <div class="growth-results" id="growthResults">시나리오를 입력하고 비교를 눌러주세요.</div>
         </section>
       </section>
 
