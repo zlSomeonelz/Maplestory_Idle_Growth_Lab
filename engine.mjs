@@ -6,10 +6,11 @@
 export const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 0));
 export const pct = value => 1 + (Number(value) || 0) / 100;
 
-export function calculateDamage(s) {
+export function calculateDamage(s, rules = {}) {
   const attack = (Number(s.attackFlat) || 0) * pct(s.attackPct);
   const targetDefense = Math.max(0, Number(s.targetDefense) || 0);
-  const defPen = clamp(s.defPen, 0, 100);
+  const defPenCap = Number(rules?.caps?.defensePenetration || 1000) / 10;
+  const defPen = clamp(s.defPen, 0, defPenCap);
   const afterDef = targetDefense * (1 - defPen / 100);
   // Official guide: attack * 5000 / (defenseAfterPenetration + 6000).
   const defenseFactor = targetDefense > 0 ? 5000 / (afterDef + 6000) : 1;
@@ -23,7 +24,8 @@ export function calculateDamage(s) {
   const base = attack * defenseFactor * pct(s.targetTaken) * pct(s.damage) * pct(s.damageAmp) * pct(targetBonus) * pct((Number(s.basicDamage) || 0) + (Number(s.skillDamage) || 0)) * pct((Number(s.statBased) || 0) * 100) * pct(s.mastery) * critFactor * rangeFactor * pct(s.finalDamage) * ((Number(s.skillCoefficient) || 0) / 100) * accuracyFactor;
   // Attack-speed conversion is intentionally labeled provisional until the
   // official action-interval table is encoded; keep it isolated and visible.
-  const speedFactor = 1 + (Number(s.attackSpeed) || 0) / 100;
+  const attackSpeedCap = Number(rules?.caps?.attackSpeed || 1500) / 10;
+  const speedFactor = 1 + clamp(s.attackSpeed, 0, attackSpeedCap) / 100;
   const interval = Number(s.attackInterval) || 0;
   const dps = interval > 0 ? base * speedFactor / interval : 0;
   return {
@@ -38,6 +40,7 @@ export function calculateDamage(s) {
     critChance,
     targetBonus,
     speedFactor,
+    capsApplied: { defPen: defPenCap, attackSpeed: attackSpeedCap },
   };
 }
 
