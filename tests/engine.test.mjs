@@ -31,4 +31,10 @@ r = calculateDamage({ ...base, attackSpeed: 300 }, rules);
 assert.equal(r.capsApplied.attackSpeed, 150);
 assert.equal(r.speedFactor, 2.5);
 
+r = calculateDamage({ ...base, defPen: 50, defPenAdditions: [20] }, rules);
+assert.equal(Number(r.effectiveDefPen.toFixed(6)), 60, 'defense penetration additions use remaining-gap diminishing');
+
+r = calculateDamage({ ...base, attackSpeed: 100, attackSpeedAdditions: [20] }, rules);
+assert.equal(Number(r.effectiveAttackSpeed.toFixed(6)), 106.666667, 'attack speed additions use remaining-gap diminishing');
+
 console.log('engine tests passed');

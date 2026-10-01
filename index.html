@@ -90,7 +90,7 @@
               <label>스킬 데미지%<input id="skillDamage" type="number" step="0.01" value="0"></label>
               <label>명중률 보정%<input id="accuracy" type="number" step="0.01" value="100"></label>
             </div>
-            <div class="formula-note"><strong>계산 순서</strong><br>공격력 → 방어력 → 대상 보정 → 일반 데미지 → 치명타·최소/최대 → 최종 데미지 → 스킬 계수</div>
+            <div class="formula-note"><strong>계산 순서</strong><br>공격력 → 점감(방어 관통·공격 속도) → 방어력 → 대상 보정 → 일반 데미지 → 치명타·최소/최대 → 최종 데미지 → 스킬 계수</div>
             <button class="button primary full" type="button" id="calculateCombat">전투 계산</button>
           </form>
         </div>
