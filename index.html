@@ -66,6 +66,14 @@
               <label>기본 공격 간격(초)<input id="attackInterval" type="number" min="0.01" step="0.01" value="1"></label>
               <label>공격 속도%<input id="attackSpeed" type="number" min="0" step="0.01" value="0"></label>
             </div>
+            <div class="companion-box">
+              <div class="companion-heading"><strong>메인 동료 장착 효과</strong><span class="badge provisional">외부 클라이언트 데이터</span></div>
+              <div class="fields compact">
+                <label>등급<select id="companionGrade"><option value="">사용 안 함</option><option value="normal">노말</option><option value="rare">레어</option><option value="epic">에픽</option><option value="unique">유니크</option><option value="legendary">레전더리</option></select></label>
+                <label>레벨<input id="companionLevel" type="number" min="1" value="1"></label>
+              </div>
+              <div class="companion-effect" id="companionEffect">직업과 등급을 선택하면 장착 효과를 표시합니다.</div>
+            </div>
           </form>
 
           <form class="card" id="targetForm">
