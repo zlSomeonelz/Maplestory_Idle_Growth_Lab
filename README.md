@@ -15,14 +15,16 @@
 ## 구조
 
 - `index.html`: 앱 셸과 3개 핵심 탭
-- `app.js`: 입력 상태, 프리셋, 전투·큐브·확률 계산 엔진
+- `app.js`: 입력 상태, 프리셋, 화면 렌더링
+- `engine.mjs`: UI와 분리된 순수 전투·확률 계산 엔진
+- `tests/engine.test.mjs`: 기준 사례 회귀 테스트
 - `styles.css`: 반응형 iPad·모바일 UI
 - `data/combat-rules.json`: 공식 전투 규칙 요약
 - `data/stat-rules.json`: 능력치 합산·곱연산·상한 규칙
 - `data/job-stats.json`: 공식 대조 전 임시 직업 주·부 스탯 매핑
 - `data/probabilities.json`: 넥슨 나우 설정 확률 데이터
 
-계산은 AI 호출이 아니라 브라우저 수식 엔진에서 수행합니다. 저장소에 없는 공식 수치나 스킬 계수는 임의로 확정하지 않습니다.
+계산은 AI 호출이 아니라 브라우저 수식 엔진에서 수행합니다. `node tests/engine.test.mjs`로 핵심 공식의 기준 사례를 검증할 수 있습니다. 저장소에 없는 공식 수치나 스킬 계수는 임의로 확정하지 않습니다.
 
 ## 공식 기준
 
