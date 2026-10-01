@@ -36,6 +36,7 @@
 
     <nav class="tabs" aria-label="기능 선택">
       <button class="tab active" data-tab="combat">⚔️ 전투 계산</button>
+      <button class="tab" data-tab="growth">📈 성장 계획</button>
       <button class="tab" data-tab="cube">🧊 큐브 비교</button>
       <button class="tab" data-tab="probability">🎲 확률·기댓값</button>
     </nav>
@@ -105,6 +106,31 @@
           </div>
           <div class="breakdown" id="combatBreakdown">입력을 바꾸면 계산 결과가 여기에 표시됩니다.</div>
           <div class="disclaimer"><span class="badge provisional">provisional</span> 표시값은 공식 규칙을 코드화한 상대 비교용 MVP입니다. 공식 원문에 없는 직업·스킬 계수는 확정하지 않습니다.</div>
+        </section>
+      </section>
+
+      <section class="tab-panel" data-panel="growth">
+        <div class="card">
+          <div class="section-heading"><div><span class="step">01</span><h2>성장 목표와 예산</h2></div><span class="badge official">공통 전투 엔진</span></div>
+          <p class="hint">현재 프리셋을 기준으로 성장 방법을 가정하고, 딜 증가량·기대 비용·목표 달성 여부를 비교합니다.</p>
+          <div class="fields compact growth-meta">
+            <label>목표 DPS<input id="growthGoalDps" type="number" min="0" step="0.01" value="0"></label>
+            <label>사용 가능 예산(메소)<input id="growthBudget" type="number" min="0" step="1" value="0"></label>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-heading"><div><span class="step">02</span><h2>성장 시나리오</h2></div><span class="source-link">현재 입력에 변화량만 적용</span></div>
+          <div class="scenario-table" id="growthScenarios"></div>
+          <button class="button primary" type="button" id="calculateGrowth">성장 경로 비교</button>
+        </div>
+        <section class="card result-card">
+          <div class="section-heading"><div><span class="step">03</span><h2>추천 결과</h2></div><span class="badge provisional">조건부 추천</span></div>
+          <div class="result-grid three">
+            <div class="metric"><span>현재 예상 DPS</span><strong id="growthBaseDps">—</strong></div>
+            <div class="metric primary-metric"><span>가장 효율적인 성장 후 DPS</span><strong id="growthBestDps">—</strong></div>
+            <div class="metric"><span>추천 경로</span><strong id="growthBestName">—</strong></div>
+          </div>
+          <div class="growth-results" id="growthResults">시나리오를 입력하고 비교를 눌러주세요.</div>
         </section>
       </section>
 
