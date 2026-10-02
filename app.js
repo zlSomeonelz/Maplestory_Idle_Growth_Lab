@@ -377,6 +377,40 @@ function initOcrModal(){
   });
 }
 
-function bind(){initOcrModal();window.addEventListener('maple:presets-changed',()=>{renderCompanionEffect();renderAll()});document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('.tab-panel').forEach(x=>x.classList.toggle('active',x.dataset.panel===btn.dataset.tab))}));document.querySelectorAll('#characterForm input,#characterForm select,#targetForm input,#targetForm select').forEach(el=>el.addEventListener('input',()=>{renderCompanionEffect();if(['stageMode','stageChapter'].includes(el.id)){if(el.id==='stageMode')fillStageChapters();else fillStages()}else if(el.id==='stageSelect')applyStageTarget();renderCombat()}));$('calculateCombat').addEventListener('click',renderCombat);$('calculateCube').addEventListener('click',renderCube);$('cubeGrade').addEventListener('change',fillCubeSources);$('cubeEquipment').addEventListener('change',fillCubeSources);$('cubeSlot').addEventListener('change',fillCubeSources);$('cubeOptionSelect').addEventListener('change',()=>{setCubeProbability();renderCubeTargetSummary();});$('cubeGoalMode').addEventListener('change',renderCubeTargetSummary);['cubeGoal1','cubeGoal2','cubeGoal3'].forEach(id=>$(id).addEventListener('change',renderCubeTargetSummary));$('applyCubeOption').addEventListener('click',applySelectedCubeOption);$('calculateProbability').addEventListener('click',renderProbability);document.querySelectorAll('#currentOptions,#candidateOptions').forEach(el=>el.addEventListener('input',renderCube));$('saveQuick').addEventListener('click',()=>{saveLocal();$('activePresetLabel').textContent='현재 입력 저장됨';});$('resetAll').addEventListener('click',()=>{if(confirm('현재 입력을 초기화할까요?')){localStorage.removeItem(STORE);location.reload()}});$('savePreset').addEventListener('click',()=>{const name=$('presetName').value.trim();if(!name){alert('프리셋 이름을 입력하세요.');return}const p=profiles();p[name]=snapshot();saveProfiles(p);$('presetSelect').value=name;$('activePresetLabel').textContent=name;saveLocal()});$('loadPreset').addEventListener('click',()=>{const name=$('presetSelect').value,p=profiles();if(name&&p[name]){$('activePresetLabel').textContent=name;applySnapshot(p[name]);saveLocal()}});$('deletePreset').addEventListener('click',()=>{const name=$('presetSelect').value;if(!name)return;const p=profiles();delete p[name];saveProfiles(p);$('activePresetLabel').textContent='현재 입력'});}
+function getContentIdFromStageTarget() {
+  const mode = $('stageMode')?.value || 'hunt';
+  const chapter = $('stageChapter')?.value || '';
+  if (mode === 'hunt') return 'chapter-hunt';
+  if (mode === 'trial') return 'chapter-trial';
+  if (mode === 'boss_raid') return 'boss-raid';
+  if (mode === 'world_boss') return 'world-boss';
+  if (mode === 'growth_dungeon') {
+    if (chapter.includes('무기')) return 'weapon-dungeon';
+    if (chapter.includes('경험치')) return 'exp-dungeon';
+    if (chapter.includes('장비')) return 'equipment-dungeon';
+    if (chapter.includes('수련장')) return 'training-ground';
+    if (chapter.includes('강화')) return 'enhancement-dungeon';
+    return 'weapon-dungeon';
+  }
+  if (mode === 'guild_content') {
+    if (chapter.includes('토벌')) return 'guild-battle';
+    if (chapter.includes('대항전')) return 'guild-war';
+    if (chapter.includes('자쿰')) return 'guild-raid-zakum';
+    return 'guild-battle';
+  }
+  return 'chapter-hunt';
+}
+
+function syncContentPresetFromTarget() {
+  const id = getContentIdFromStageTarget();
+  if (window.MapleGrowthPresets?.activateContent) {
+    window.MapleGrowthPresets.activateContent(id, { syncTarget: false });
+  }
+}
+
+window.fillStageChapters = fillStageChapters;
+window.fillStages = fillStages;
+
+function bind(){initOcrModal();window.addEventListener('maple:presets-changed',()=>{renderCompanionEffect();renderAll()});document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('.tab-panel').forEach(x=>x.classList.toggle('active',x.dataset.panel===btn.dataset.tab))}));document.querySelectorAll('#characterForm input,#characterForm select,#targetForm input,#targetForm select').forEach(el=>el.addEventListener('input',()=>{renderCompanionEffect();if(['stageMode','stageChapter'].includes(el.id)){if(el.id==='stageMode')fillStageChapters();else fillStages();syncContentPresetFromTarget();}else if(el.id==='stageSelect')applyStageTarget();renderCombat()}));$('calculateCombat').addEventListener('click',renderCombat);$('calculateCube').addEventListener('click',renderCube);$('cubeGrade').addEventListener('change',fillCubeSources);$('cubeEquipment').addEventListener('change',fillCubeSources);$('cubeSlot').addEventListener('change',fillCubeSources);$('cubeOptionSelect').addEventListener('change',()=>{setCubeProbability();renderCubeTargetSummary();});$('cubeGoalMode').addEventListener('change',renderCubeTargetSummary);['cubeGoal1','cubeGoal2','cubeGoal3'].forEach(id=>$(id).addEventListener('change',renderCubeTargetSummary));$('applyCubeOption').addEventListener('click',applySelectedCubeOption);$('calculateProbability').addEventListener('click',renderProbability);document.querySelectorAll('#currentOptions,#candidateOptions').forEach(el=>el.addEventListener('input',renderCube));$('saveQuick').addEventListener('click',()=>{saveLocal();$('activePresetLabel').textContent='현재 입력 저장됨';});$('resetAll').addEventListener('click',()=>{if(confirm('현재 입력을 초기화할까요?')){localStorage.removeItem(STORE);location.reload()}});$('savePreset').addEventListener('click',()=>{const name=$('presetName').value.trim();if(!name){alert('프리셋 이름을 입력하세요.');return}const p=profiles();p[name]=snapshot();saveProfiles(p);$('presetSelect').value=name;$('activePresetLabel').textContent=name;saveLocal()});$('loadPreset').addEventListener('click',()=>{const name=$('presetSelect').value,p=profiles();if(name&&p[name]){$('activePresetLabel').textContent=name;applySnapshot(p[name]);saveLocal()}});$('deletePreset').addEventListener('click',()=>{const name=$('presetSelect').value;if(!name)return;const p=profiles();delete p[name];saveProfiles(p);$('activePresetLabel').textContent='현재 입력'});}
 renderOptionRows();renderProfileSelect();bind();loadData();renderAll();
 

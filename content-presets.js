@@ -222,20 +222,58 @@ function companionEffect() {
   });
   return members.length ? { level: '', grade: slot.name, record: null, values, members } : null;
 }
+function setTargetModeFromContent(id) {
+  const content = contentById(id);
+  if (!content) return;
+  const stageModeEl = $('stageMode');
+  const stageChapterEl = $('stageChapter');
+  if (!stageModeEl) return;
+  let targetMode = 'hunt';
+  let targetChapter = '';
+
+  if (id === 'chapter-hunt') { targetMode = 'hunt'; }
+  else if (id === 'chapter-trial') { targetMode = 'trial'; }
+  else if (id === 'chapter-boss') { targetMode = 'hunt'; if ($('targetType')) $('targetType').value = 'boss'; }
+  else if (id === 'weapon-dungeon') { targetMode = 'growth_dungeon'; targetChapter = '무기 던전'; }
+  else if (id === 'exp-dungeon') { targetMode = 'growth_dungeon'; targetChapter = '경험치 던전'; }
+  else if (id === 'equipment-dungeon') { targetMode = 'growth_dungeon'; targetChapter = '장비 던전'; }
+  else if (id === 'training-ground') { targetMode = 'growth_dungeon'; targetChapter = '용사의 수련장'; }
+  else if (id === 'enhancement-dungeon') { targetMode = 'growth_dungeon'; targetChapter = '강화 던전'; }
+  else if (id === 'world-boss') { targetMode = 'world_boss'; targetChapter = '월드 보스'; }
+  else if (id === 'guild-battle') { targetMode = 'guild_content'; targetChapter = '길드 토벌전'; }
+  else if (id === 'guild-war') { targetMode = 'guild_content'; targetChapter = '길드 대항전'; }
+  else if (id === 'guild-raid-zakum') { targetMode = 'guild_content'; targetChapter = '길드 토벌전'; }
+  else if (id === 'boss-raid') { targetMode = 'boss_raid'; }
+
+  if (stageModeEl.value !== targetMode) {
+    stageModeEl.value = targetMode;
+    if (typeof window.fillStageChapters === 'function') window.fillStageChapters();
+  }
+  if (targetChapter && stageChapterEl) {
+    stageChapterEl.value = targetChapter;
+    if (typeof window.fillStages === 'function') window.fillStages();
+  }
+}
+
 function exposeCompanionBridge() {
   window.MapleGrowthCompanion = { getEffect: companionEffect };
+  window.MapleGrowthPresets = {
+    activateContent,
+    getCurrentContent: () => selectedId,
+    getAssignedPresets: (id = selectedId) => {
+      const assignments = assignmentsFor(id);
+      return {
+        stats: slotFor('stats', assignments.stats, id),
+        skill: slotFor('skill', assignments.skill, id),
+        companion: slotFor('companion', assignments.companion, id),
+        relic: slotFor('relic', assignments.relic, id),
+      };
+    }
+  };
   window.dispatchEvent(new Event('maple:presets-changed'));
 }
-function renderCompanionEditor(slot) {
-  if (!slot) return '';
-  if (!companionRuntime) return `<div class="companion-slot-editor"><strong>동료 데이터 불러오는 중…</strong></div>`;
-  const candidates = companionCandidates();
-  const options = `<option value="">미지정</option>${candidates.map(item => `<option value="${item.supporterIndex}">${companionLabel(item)}</option>`).join('')}`;
-  const members = Array.from({ length: COMPANION_MEMBER_COUNT }, (_, index) => slot.members?.[index] || {});
-  const unlocked = Math.max(1, Math.min(6, Number(state.companionSlotCount) || 6));
-  return `<div class="companion-slot-editor"><div class="companion-slot-editor-heading"><div><strong>${slot.name} 구성</strong><p>현재 직업에 맞는 동료를 선택하거나 최고 등급 6마리로 자동 배치하세요.</p></div><button type="button" class="button secondary" data-auto-optimize-companion="${slot.id}">🚀 1-Click 최적 동료 조합 세팅</button></div><label class="companion-unlocked-label">현재 열린 동료 슬롯 수<select id="companionUnlockedCount">${Array.from({ length: 6 }, (_, index) => `<option value="${index + 1}"${unlocked === index + 1 ? ' selected' : ''}>${index + 1}개</option>`).join('')}</select></label><div class="companion-member-grid">${members.map((member, index) => { const chosen = candidates.find(item => item.supporterIndex === Number(member.supporterIndex)); const max = chosen?.maxLevel || 1; const locked = index >= unlocked; return `<div class="companion-member-row${locked ? ' locked' : ''}"><span>${index + 1}</span><select data-companion-supporter="${index}"${locked ? ' disabled' : ''}>${options.replace(`value="${member.supporterIndex}"`, `value="${member.supporterIndex}" selected`)}</select><input data-companion-level="${index}" type="number" min="1" max="${max}" value="${member.level || 1}" aria-label="동료 ${index + 1} 레벨"${locked ? ' disabled' : ''}></div>`; }).join('')}</div><p class="hint">열린 슬롯 수만 효과 계산과 동료 최적화에 사용합니다. 잠긴 슬롯은 미리 저장해 둘 수 있지만 계산에서 제외됩니다.</p></div>`;
-}
-function activateContent(id, { load = true } = {}) {
+
+function activateContent(id, { load = true, syncTarget = true } = {}) {
   selectedId = id;
   const content = contentById(id);
   const settings = settingsFor(id);
@@ -243,13 +281,12 @@ function activateContent(id, { load = true } = {}) {
   if (load && state.contentSnapshots[effectiveId]) applySnapshot(state.contentSnapshots[effectiveId]);
   const equippedStats = slotFor('stats', assignmentsFor(id).stats);
   if (load && equippedStats.snapshot) applySnapshot(equippedStats.snapshot);
-  if (content?.stageMode && $('stageMode')) {
-    $('stageMode').value = content.stageMode;
-    $('stageMode').dispatchEvent(new Event('input', { bubbles: true }));
+
+  if (syncTarget) {
+    setTargetModeFromContent(id);
   }
   if (content?.targetType && $('targetType')) {
     $('targetType').value = content.targetType;
-    $('targetType').dispatchEvent(new Event('input', { bubbles: true }));
   }
   persist();
   render();
