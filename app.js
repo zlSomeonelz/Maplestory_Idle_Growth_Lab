@@ -229,24 +229,139 @@ function initOcrModal(){
     if(typeof modal.close==='function')modal.close();else modal.removeAttribute('open');
   });
 
-  const STAT_FIELD_MAP=[
-    {label:'공격력 합계',target:'attackFlat',keywords:['공격력 합계','공격력']},
-    {label:'공격력%',target:'attackPct',keywords:['공격력%']},
-    {label:'주스탯(+)',target:'mainStat',keywords:['주 스탯 수치','주스탯 수치','주스탯(+)']},
-    {label:'주스탯%',target:'mainStatPct',keywords:['주 스탯%','주스탯%']},
-    {label:'부스탯(+)',target:'subStat',keywords:['부 스탯 수치','부스탯 수치','부스탯(+)']},
-    {label:'데미지%',target:'damage',keywords:['데미지']},
-    {label:'데미지 증폭%',target:'damageAmp',keywords:['데미지 증폭']},
-    {label:'최종 데미지%',target:'finalDamage',keywords:['최종 데미지']},
-    {label:'보스 데미지%',target:'bossDamage',keywords:['보스 몬스터 데미지','보스 데미지']},
-    {label:'일반 몬스터 데미지%',target:'normalDamage',keywords:['일반 몬스터 데미지']},
-    {label:'크리티컬 확률%',target:'critRate',keywords:['크리티컬 확률','치명타 확률']},
-    {label:'크리티컬 데미지%',target:'critDamage',keywords:['크리티컬 데미지','치명타 데미지']},
-    {label:'방어 관통력%',target:'defPen',keywords:['방어 관통력','방어력 관통']},
-    {label:'공격 속도%',target:'attackSpeed',keywords:['공격 속도']},
-    {label:'최소 데미지 배율%',target:'minDamage',keywords:['최소 데미지 배율']},
-    {label:'최대 데미지 배율%',target:'maxDamage',keywords:['최대 데미지 배율']}
-  ];
+  function parseKoreanNumber(str) {
+    if (!str) return null;
+    let text = String(str).replace(/\s+/g, '').replace(/,/g, '').replace(/%/g, '');
+    if (!text) return null;
+    let total = 0;
+    let matched = false;
+    if (text.includes('조')) {
+      const parts = text.split('조');
+      const val = parseFloat(parts[0]);
+      if (Number.isFinite(val)) { total += val * 1e12; matched = true; }
+      text = parts[1] || '';
+    }
+    if (text.includes('억')) {
+      const parts = text.split('억');
+      const val = parseFloat(parts[0]);
+      if (Number.isFinite(val)) { total += val * 1e8; matched = true; }
+      text = parts[1] || '';
+    }
+    if (text.includes('만')) {
+      const parts = text.split('만');
+      const val = parseFloat(parts[0]);
+      if (Number.isFinite(val)) { total += val * 1e4; matched = true; }
+      text = parts[1] || '';
+    }
+    if (text) {
+      const val = parseFloat(text);
+      if (Number.isFinite(val)) { total += val; matched = true; }
+    }
+    return matched ? total : null;
+  }
+
+  const STAT_LABELS = {
+    attackFlat: '공격력 (+)',
+    attackPct: '공격력%',
+    mainStat: '주스탯 (+)',
+    mainStatPct: '주스탯%',
+    subStat: '부스탯 (+)',
+    playerDefense: '캐릭터 방어력',
+    maxHp: '최대 HP',
+    damage: '데미지%',
+    damageAmp: '데미지 증폭%',
+    finalDamage: '최종 데미지%',
+    bossDamage: '보스 몬스터 데미지%',
+    normalDamage: '일반 몬스터 데미지%',
+    critRate: '크리티컬 확률%',
+    critDamage: '크리티컬 데미지%',
+    defPen: '방어 관통력%',
+    attackSpeed: '공격 속도%',
+    minDamage: '최소 데미지 배율%',
+    maxDamage: '최대 데미지 배율%',
+    basicDamage: '기본 공격 데미지%',
+    skillDamage: '스킬 데미지%'
+  };
+
+  function parseSingleOcrText(text) {
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const detected = {};
+    let currentHeader = null;
+    const HEADER_MAP = [
+      { target: 'bossDamage', keywords: ['보스 몬스터 데미지', '보스 데미지', '보뎀'] },
+      { target: 'normalDamage', keywords: ['일반 몬스터 데미지', '일반 데미지', '일공'] },
+      { target: 'damageAmp', keywords: ['데미지 증폭'] },
+      { target: 'finalDamage', keywords: ['최종 데미지'] },
+      { target: 'damage', keywords: ['데미지'] },
+      { target: 'attack', keywords: ['공격력'] },
+      { target: 'playerDefense', keywords: ['방어력'] },
+      { target: 'maxHp', keywords: ['최대 HP', '최대HP', 'HP'] },
+      { target: 'attackSpeed', keywords: ['공격 속도', '공격속도'] },
+      { target: 'mainStat', keywords: ['주 스탯', '주스탯', 'LUK', 'STR', 'DEX', 'INT'] },
+      { target: 'subStat', keywords: ['부 스탯', '부스탯'] },
+      { target: 'critRate', keywords: ['크리티컬 확률', '치명타 확률', '크확'] },
+      { target: 'critDamage', keywords: ['크리티컬 데미지', '치명타 데미지', '크뎀'] },
+      { target: 'defPen', keywords: ['방어 관통력', '방어력 관통', '방관'] },
+      { target: 'minDamage', keywords: ['최소 데미지 배율', '최소 데미지'] },
+      { target: 'maxDamage', keywords: ['최대 데미지 배율', '최대 데미지'] },
+      { target: 'basicDamage', keywords: ['기본 공격 데미지'] },
+      { target: 'skillDamage', keywords: ['스킬 데미지'] }
+    ];
+
+    for (const line of lines) {
+      for (const h of HEADER_MAP) {
+        if (h.keywords.some(kw => line === kw || line.startsWith(kw))) {
+          currentHeader = h.target;
+          break;
+        }
+      }
+      if (currentHeader) break;
+    }
+
+    for (const line of lines) {
+      const plusMatch = line.match(/\+\s*[:;\-]?\s*([0-9만억조,\.]+)/);
+      if (plusMatch && currentHeader) {
+        const val = parseKoreanNumber(plusMatch[1]);
+        if (val !== null && val > 0) {
+          if (currentHeader === 'attack') detected['attackFlat'] = val;
+          else if (currentHeader === 'mainStat') detected['mainStat'] = val;
+          else if (currentHeader === 'subStat') detected['subStat'] = val;
+          else if (currentHeader === 'playerDefense') detected['playerDefense'] = val;
+          else if (currentHeader === 'maxHp') detected['maxHp'] = val;
+        }
+      }
+
+      const pctMatch = line.match(/%\s*[:;\-]?\s*([0-9만억조,\.]+)/);
+      if (pctMatch && currentHeader) {
+        const val = parseKoreanNumber(pctMatch[1]);
+        if (val !== null && val > 0) {
+          if (currentHeader === 'attack') detected['attackPct'] = val;
+          else if (currentHeader === 'mainStat') detected['mainStatPct'] = val;
+          else if (currentHeader === 'subStat') detected['subStatPct'] = val;
+          else detected[currentHeader] = val;
+        }
+      }
+
+      for (const h of HEADER_MAP) {
+        if (h.keywords.some(kw => line.includes(kw))) {
+          const numMatches = line.match(/([0-9만억조,\.]+%?)/g);
+          if (numMatches) {
+            for (const m of numMatches) {
+              const val = parseKoreanNumber(m);
+              if (val !== null && val > 0) {
+                if (h.target === 'attack' && line.includes('%')) detected['attackPct'] = val;
+                else if (h.target === 'attack' && !line.includes('%')) detected['attackFlat'] = val;
+                else if (h.target === 'mainStat' && line.includes('%')) detected['mainStatPct'] = val;
+                else if (h.target === 'mainStat') detected['mainStat'] = val;
+                else if (!detected[h.target]) detected[h.target] = val;
+              }
+            }
+          }
+        }
+      }
+    }
+    return detected;
+  }
 
   async function processFiles(files){
     if(!files||!files.length)return;
@@ -254,41 +369,44 @@ function initOcrModal(){
       statusEl.textContent='Tesseract OCR 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도하세요.';
       return;
     }
-    statusEl.textContent='OCR 분석 진행 중… 잠시만 기다려주세요.';
-    pendingOcrStats={};
-    resultsEl.innerHTML='';
-    try{
-      const worker=await window.Tesseract.createWorker('kor+eng');
-      for(const file of files){
-        const {data:{text}}=await worker.recognize(file);
-        const lines=text.split('\n');
-        for(const line of lines){
-          for(const def of STAT_FIELD_MAP){
-            for(const kw of def.keywords){
-              if(line.includes(kw)){
-                const match=line.match(/([0-9,]+(?:\.[0-9]+)?)/);
-                if(match){
-                  const val=Number(match[1].replace(/,/g,''));
-                  if(Number.isFinite(val))pendingOcrStats[def.target]=val;
-                }
-              }
-            }
-          }
-        }
+    const fileArray = Array.from(files).filter(f => f.type.startsWith('image/') || f instanceof Blob);
+    if (!fileArray.length) {
+      statusEl.textContent = '이미지 파일이 선택되지 않았습니다.';
+      return;
+    }
+
+    statusEl.textContent = `총 ${fileArray.length}개 이미지 분석 진행 중… 잠시만 기다려주세요.`;
+    pendingOcrStats = {};
+    resultsEl.innerHTML = '';
+
+    try {
+      const worker = await window.Tesseract.createWorker('kor+eng');
+      let processedCount = 0;
+
+      for (const file of fileArray) {
+        processedCount++;
+        statusEl.textContent = `OCR 분석 중… (${processedCount}/${fileArray.length} 이미지 처리 완료)`;
+        const { data: { text } } = await worker.recognize(file);
+        const parsed = parseSingleOcrText(text);
+        Object.assign(pendingOcrStats, parsed);
       }
       await worker.terminate();
-      const foundCount=Object.keys(pendingOcrStats).length;
-      if(foundCount===0){
-        statusEl.textContent='이미지에서 스탯 수치를 찾지 못했습니다. 글자가 선명한 스탯 팝업 스크린샷을 사용하세요.';
-      }else{
-        statusEl.textContent=`${foundCount}개의 스탯 항목을 감지했습니다. 수치 확인 후 적용을 누르세요.`;
-        resultsEl.innerHTML=Object.entries(pendingOcrStats).map(([field,val])=>{
-          const def=STAT_FIELD_MAP.find(d=>d.target===field);
-          return `<div class="stat-row" style="border:1px solid var(--line);border-radius:8px;padding:6px;background:#fff;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;">${def?.label||field}</span><input data-ocr-field="${field}" type="number" step="0.01" value="${val}" style="width:100px;padding:4px;border:1px solid var(--line);border-radius:6px;"></div>`;
+
+      const foundCount = Object.keys(pendingOcrStats).length;
+      if (foundCount === 0) {
+        statusEl.textContent = `총 ${fileArray.length}개 이미지에서 스탯 수치를 감지하지 못했습니다. 글자가 선명한 스탯 팝업 스크린샷을 사용하세요.`;
+      } else {
+        statusEl.textContent = `총 ${fileArray.length}개 이미지 분석 완료! ${foundCount}개 스탯 항목을 수집했습니다. 확인 후 적용을 누르세요.`;
+        resultsEl.innerHTML = Object.entries(pendingOcrStats).map(([field, val]) => {
+          const label = STAT_LABELS[field] || field;
+          return `<div class="stat-row" style="border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fff;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:12px;font-weight:700;color:var(--ink);">${label}</span>
+            <input data-ocr-field="${field}" type="number" step="0.01" value="${val}" style="width:110px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;text-align:right;font-weight:800;">
+          </div>`;
         }).join('');
       }
-    }catch(err){
-      statusEl.textContent='OCR 처리 중 오류가 발생했습니다: '+err.message;
+    } catch (err) {
+      statusEl.textContent = 'OCR 분석 중 오류가 발생했습니다: ' + err.message;
     }
   }
 
