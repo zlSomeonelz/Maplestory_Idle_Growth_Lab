@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { calculateCombatPower, calculateDamage, calculateDps, calculatePvpDamage, probabilitySummary } from '../engine.mjs';
+import { calculateCombatPower, calculateDamage, calculateDps, calculatePvpDamage, cubeTargetSummary, probabilitySummary } from '../engine.mjs';
 
 const base = { attackFlat: 1000, attackPct: 0, targetDefense: 0, defPen: 0, target: 'normal', targetTaken: 0, damage: 0, damageAmp: 0, normalDamage: 0, bossDamage: 0, basicDamage: 0, skillDamage: 0, statBased: 0, mastery: 0, critRate: 0, critDamage: 0, minDamage: 100, maxDamage: 100, finalDamage: 0, skillCoefficient: 100, accuracy: 100, attackInterval: 1, attackSpeed: 0 };
 const rules = { caps: { defensePenetration: 1000, attackSpeed: 1500 }, battlePower: { base: 'attack*3 + maxHp*0.05 + defense*0.2' } };
@@ -54,5 +54,10 @@ const pvpHigherDefense = calculatePvpDamage({ ...pvpBase, targetDefense: 10000 }
 assert.ok(pvpHigherDefense.average < pvp.average, 'higher target defense should reduce PvP damage');
 const colosseum = calculatePvpDamage({ ...pvpBase, pvpContent: 'colosseum', level: 120 }, { ...rules, pvp: { constants: { colosseum: 4323600000 } } });
 assert.ok(colosseum.average < pvp.average, 'Colosseum constant and level penalty should reduce damage');
+
+const cube = cubeTargetSummary([2.5, 2.5, 2.5], 1000);
+assert.equal(Number((cube.probability * 100).toFixed(4)), 7.3141, 'three-slot target probability should combine independent slot chances');
+assert.equal(Number(cube.expectedAttempts.toFixed(4)), 13.6723, 'expected cube count should use the one-or-more target probability');
+assert.equal(Number(cube.expectedCost.toFixed(2)), 13672.29, 'expected cube cost should use cube cost');
 
 console.log('engine tests passed');

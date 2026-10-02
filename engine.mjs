@@ -233,6 +233,19 @@ export function calculateCombatPower(s = {}, rules = {}) {
   };
 }
 
+export function cubeTargetSummary(slotProbabilities = [], cost = 0) {
+  const probabilities = (slotProbabilities || []).map(value => clamp((Number(value) || 0) / 100, 0, 1));
+  const missProbability = probabilities.reduce((miss, probability) => miss * (1 - probability), 1);
+  const probability = 1 - missProbability;
+  const expectedAttempts = probability > 0 ? 1 / probability : Infinity;
+  return {
+    slotProbabilities: probabilities,
+    probability,
+    expectedAttempts,
+    expectedCost: cost ? expectedAttempts * Number(cost) : null,
+  };
+}
+
 export function probabilitySummary(ratePercent, attempts, cost = 0) {
   const p = clamp((Number(ratePercent) || 0) / 100, 0, 1);
   const tries = Math.max(0, Math.floor(Number(attempts) || 0));
