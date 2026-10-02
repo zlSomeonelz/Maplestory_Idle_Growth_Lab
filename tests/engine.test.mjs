@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { calculateCombatPower, calculateDamage, calculateDps, calculateEffectiveCooldown, calculateMultiTargetDps, calculatePvpDamage, cubeTargetSummary, probabilitySummary } from '../engine.mjs';
+import { calculateCombatPower, calculateDamage, calculateDps, calculateEffectiveCooldown, calculateMultiTargetDps, calculatePvpDamage, calculateStatEfficiencies, cubeTargetSummary, probabilitySummary } from '../engine.mjs';
 
 const base = { attackFlat: 1000, attackPct: 0, targetDefense: 0, defPen: 0, target: 'normal', targetTaken: 0, damage: 0, damageAmp: 0, normalDamage: 0, bossDamage: 0, basicDamage: 0, skillDamage: 0, statBased: 0, mastery: 0, critRate: 0, critDamage: 0, minDamage: 100, maxDamage: 100, finalDamage: 0, skillCoefficient: 100, accuracy: 100, attackInterval: 1, attackSpeed: 0 };
 const rules = { caps: { defensePenetration: 1000, attackSpeed: 1500 }, battlePower: { base: 'attack*3 + maxHp*0.05 + defense*0.2' } };
@@ -74,11 +74,6 @@ const rerollHit = cubeTargetSummary([slotA, slotA, slotA], ['A'], 'any', 100, ['
 assert.equal(rerollHit.rerollExclusion.currentIsGoal, true);
 assert.equal(Number((rerollHit.probability * 100).toFixed(4)), 20.6746, 'reroll probability when current state is a goal state should exclude exact current state');
 
-// Combat power for defensive/utility options
-const basePowerInput = { attackFlat: 1000, maxHp: 10000, playerDefense: 1000, maxMp: 500 };
-const basePower = calculateCombatPower(basePowerInput, rules);
-const hpPower = calculateCombatPower({ ...basePowerInput, maxHp: 20000 }, rules);
-const defPower = calculateCombatPower({ ...basePowerInput, playerDefense: 3000 }, rules);
 // Cooldown reduction and multi-target DPS tests
 assert.equal(calculateEffectiveCooldown(10, 20, 1), 7, '10s - 20% = 8s (>7s), minus 1s = 7s');
 assert.equal(calculateEffectiveCooldown(6, 0, 2), 5, '6s (<7s) reduces fixed CDR rate to 0.5x, so 6 - 1 = 5s');
@@ -90,4 +85,10 @@ assert.equal(multiDps.multiTargetDps, 3000, '3 total targets (1 base + 2 bonus) 
 const pvpCritResist = calculatePvpDamage({ ...pvpBase, critRate: 60, targetCritResist: 20 }, { ...rules, pvp: { constants: { arena: 7206000000 } } });
 assert.equal(pvpCritResist.effectiveCritRate, 40, 'PvP target crit resistance should subtract from attacker crit rate');
 
+// Marginal Stat Efficiency tests
+const effs = calculateStatEfficiencies(base, rules);
+assert.ok(Array.isArray(effs) && effs.length === 12, 'calculateStatEfficiencies should return array of 12 ranked stat gains');
+assert.equal(effs[0].key, 'ATK_FLAT', '+1,000 attack flat on 1,000 base should give top percentage DPS increase (+100%)');
+
 console.log('engine tests passed');
+

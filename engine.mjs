@@ -383,3 +383,50 @@ export function probabilitySummary(ratePercent, attempts, cost = 0) {
   const expectedAttempts = 1 / p;
   return { probability: achieved, expectedAttempts, expectedCost: cost ? expectedAttempts * Number(cost) : null, need90: needed(.9), need95: needed(.95), attempts: tries };
 }
+
+/**
+ * Marginal Stat Efficiency Breakdown (MekiCalc style).
+ * Calculates DPS increase and percentage gain for +1% or +1,000 increments of key stats.
+ */
+export function calculateStatEfficiencies(s, rules = {}) {
+  const baseRes = calculateDamage(s, rules);
+  const baseDps = baseRes.dps;
+  if (!baseDps) return [];
+
+  const candidateStats = [
+    { label: '공격력 (+1,000)', key: 'ATK_FLAT', amount: 1000, fn: input => ({ ...input, attackFlat: (input.attackFlat || 0) + 1000 }) },
+    { label: '공격력 (+1%)', key: 'ATK_PCT', amount: 1, fn: input => ({ ...input, attackPct: (input.attackPct || 0) + 1 }) },
+    { label: '주스탯 (+1,000)', key: 'MAIN_STAT_FLAT', amount: 1000, fn: input => ({ ...input, mainStat: (input.mainStat || 0) + 1000, statBased: ((input.mainStat || 0) + 1000) / 100 + (input.subStat || 0) / 400 }) },
+    { label: '주스탯 (+1%)', key: 'MAIN_STAT_PCT', amount: 1, fn: input => ({ ...input, mainStat: (input.mainStat || 0) * 1.01, statBased: ((input.mainStat || 0) * 1.01) / 100 + (input.subStat || 0) / 400 }) },
+    { label: '데미지 (+1%)', key: 'DMG', amount: 1, fn: input => ({ ...input, damage: (input.damage || 0) + 1 }) },
+    { label: '데미지 증폭 (+1%)', key: 'DMG_AMP', amount: 1, fn: input => ({ ...input, damageAmp: (input.damageAmp || 0) + 1 }) },
+    { label: '최종 데미지 (+1%)', key: 'FINAL_DMG', amount: 1, fn: input => ({ ...input, finalDamage: (input.finalDamage || 0) + 1 }) },
+    { label: '보스 몬스터 데미지 (+1%)', key: 'BOSS_DMG', amount: 1, fn: input => ({ ...input, bossDamage: (input.bossDamage || 0) + 1 }) },
+    { label: '크리티컬 확률 (+1%)', key: 'CRIT_RATE', amount: 1, fn: input => ({ ...input, critRate: (input.critRate || 0) + 1 }) },
+    { label: '크리티컬 데미지 (+1%)', key: 'CRIT_DMG', amount: 1, fn: input => ({ ...input, critDamage: (input.critDamage || 0) + 1 }) },
+    { label: '방어 관통력 (+1%)', key: 'DEF_PEN', amount: 1, fn: input => {
+      const defPenAdditions = [...(input.defPenAdditions || []), 1];
+      return { ...input, defPenAdditions, defPen: (input.defPen || 0) + 1 };
+    }},
+    { label: '공격 속도 (+1%)', key: 'ATK_SPEED', amount: 1, fn: input => {
+      const attackSpeedAdditions = [...(input.attackSpeedAdditions || []), 1];
+      return { ...input, attackSpeedAdditions, attackSpeed: (input.attackSpeed || 0) + 1 };
+    }},
+  ];
+
+  return candidateStats.map(cand => {
+    const newInputs = cand.fn(s);
+    const newRes = calculateDamage(newInputs, rules);
+    const deltaDps = newRes.dps - baseDps;
+    const ratioPct = (deltaDps / baseDps) * 100;
+    return {
+      label: cand.label,
+      key: cand.key,
+      amount: cand.amount,
+      deltaDps,
+      ratioPct,
+      newDps: newRes.dps,
+    };
+  }).sort((a, b) => b.ratioPct - a.ratioPct);
+}
+
