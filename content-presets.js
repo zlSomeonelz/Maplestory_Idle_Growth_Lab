@@ -31,10 +31,9 @@ const CONTENTS = [
   { group: '월드 아레나', items: [{ id: 'world-arena', label: '월드 아레나', targetType: 'pvp' }] },
 ];
 const COMPONENTS = [
-  ['equipment', '장비'],
+  ['stats', '스탯'],
   ['skill', '스킬'],
   ['companion', '동료'],
-  ['ability', '어빌리티'],
   ['relic', '유물'],
 ];
 const $ = id => document.getElementById(id);
@@ -57,18 +56,33 @@ function defaultAssignments() {
   return Object.fromEntries(COMPONENTS.map(([type]) => [type, `${type}-1`]));
 }
 function defaultState() {
-  return { activeContent: 'chapter-hunt', activeLibraryType: 'equipment', library: createLibrary(), assignments: {}, contentSnapshots: {}, contentSettings: {} };
+  return { activeContent: 'chapter-hunt', activeLibraryType: 'stats', library: createLibrary(), assignments: {}, contentSnapshots: {}, contentSettings: {} };
 }
 function migrateState(saved) {
   const next = defaultState();
   if (!saved || typeof saved !== 'object') return next;
   if (saved.library && saved.assignments) {
-    next.library = { ...next.library, ...saved.library };
-    next.assignments = saved.assignments;
+    const oldTypeFor = type => type === 'stats' ? (saved.library.stats || saved.library.ability || saved.library.equipment) : saved.library[type];
+    const normalizeSlots = (type, oldSlots) => {
+      const source = Array.isArray(oldSlots) ? oldSlots : [];
+      const slots = source.map((slot, index) => ({ ...createSlot(type, index), ...slot, id: `${type}-${index + 1}` }));
+      while (slots.length < SLOT_COUNT) slots.push(createSlot(type, slots.length));
+      return slots;
+    };
+    next.library = Object.fromEntries(COMPONENTS.map(([type]) => [type, normalizeSlots(type, oldTypeFor(type))]));
+    next.assignments = Object.fromEntries(Object.entries(saved.assignments).map(([contentId, assignment]) => {
+      const nextAssignment = {};
+      COMPONENTS.forEach(([type]) => {
+        const oldId = type === 'stats' ? (assignment.stats || assignment.ability || assignment.equipment) : assignment[type];
+        const index = String(oldId || '').match(/-(\d+)$/)?.[1] || '1';
+        nextAssignment[type] = `${type}-${index}`;
+      });
+      return [contentId, nextAssignment];
+    }));
     next.contentSnapshots = saved.contentSnapshots || {};
     next.contentSettings = saved.contentSettings || {};
     next.activeContent = saved.activeContent || next.activeContent;
-    next.activeLibraryType = saved.activeLibraryType || next.activeLibraryType;
+    next.activeLibraryType = COMPONENTS.some(([type]) => type === saved.activeLibraryType) ? saved.activeLibraryType : 'stats';
     return next;
   }
   // Preserve the previous 1차 content settings where possible.
@@ -165,7 +179,7 @@ function render() {
   const settings = settingsFor(content.id);
   const snapshots = state.contentSnapshots[content.id];
   root.innerHTML = `
-    <div class="content-preset-heading"><div><span class="step">02</span><div><h2 id="contentPresetHeading">콘텐츠 프리셋</h2><p>콘텐츠마다 여러 슬롯 중 원하는 장비·스킬·동료·어빌리티·유물 프리셋을 장착합니다.</p></div></div><span class="badge official">브라우저에 자동 저장</span></div>
+    <div class="content-preset-heading"><div><span class="step">02</span><div><h2 id="contentPresetHeading">콘텐츠 프리셋</h2><p>콘텐츠마다 여러 슬롯 중 원하는 스탯·스킬·동료·유물 프리셋을 장착합니다.</p></div></div><span class="badge official">브라우저에 자동 저장</span></div>
     <div class="content-preset-layout"><aside class="content-tree" aria-label="콘텐츠 선택">${renderTree()}</aside><div class="content-preset-editor">
       <div class="content-preset-title"><div><span class="content-parent">${CONTENTS.find(group => group.items.some(item => item.id === content.id))?.group || ''}</span><h3>${content.label}</h3></div><label class="content-toggle"><input id="contentPresetEnabled" type="checkbox"${settings.enabled ? ' checked' : ''}> 사용</label></div>
       <p class="hint">콘텐츠에 장착할 슬롯을 선택하세요. 별도 계산 입력을 저장하면 이 콘텐츠를 열 때 함께 불러옵니다.</p>
