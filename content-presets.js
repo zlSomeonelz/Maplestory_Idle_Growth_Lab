@@ -34,6 +34,7 @@ const COMPANION_MEMBER_COUNT = 6;
 const RUNTIME_JOB = { hero:'hero', paladin:'paladin', darkKnight:'dark-knight', archMageIceLightning:'archmage-il', archMageFirePoison:'archmage-fp', bishop:'bishop', bowmaster:'bowmaster', sniper:'marksman', nightLord:'night-lord', shadower:'shadower', viper:'viper', captain:'captain', nightWalker:'night-walker', windBreaker:'wind-breaker' };
 let companionRuntime = null;
 let activeCompanionSlotId = null;
+let activeStatSlotId = null;
 const STAT_FIELD_IDS = ['job', 'level', 'attackFlat', 'attackPct', 'mainStat', 'mainStatPct', 'subStat', 'damage', 'damageAmp', 'finalDamage', 'critRate', 'critDamage', 'minDamage', 'maxDamage', 'mastery', 'skillCoefficient', 'attackInterval', 'attackSpeed', 'targetDefense', 'targetHp', 'defPen', 'bossDamage', 'normalDamage', 'targetTaken', 'basicDamage', 'skillDamage', 'accuracy'];
 const COMPONENTS = [
   ['stats', '스탯'],
@@ -152,6 +153,55 @@ function applySnapshot(snapshot) {
     el.dispatchEvent(new Event('input', { bubbles: true }));
   });
 }
+function statSummaryTag(slot) {
+  const snap = slot?.snapshot;
+  if (!snap) return '<span class="stat-summary-tag empty">미입력 (스탯 편집으로 입력)</span>';
+  const parts = [];
+  if (snap.attackFlat) parts.push(`공격력 ${Number(snap.attackFlat).toLocaleString()}`);
+  if (snap.mainStat) parts.push(`주스탯 ${Number(snap.mainStat).toLocaleString()}`);
+  if (snap.damage) parts.push(`데미지 ${snap.damage}%`);
+  if (snap.bossDamage) parts.push(`보뎀 ${snap.bossDamage}%`);
+  if (snap.critRate) parts.push(`크확 ${snap.critRate}%`);
+  if (snap.defPen) parts.push(`관통 ${snap.defPen}%`);
+  return parts.length ? `<span class="stat-summary-tag">${parts.join(' · ')}</span>` : '<span class="stat-summary-tag">내용 저장됨</span>';
+}
+function renderStatEditor(slot) {
+  if (!slot) return '';
+  const snap = slot.snapshot || {};
+  return `
+    <div class="stat-slot-editor">
+      <div class="stat-slot-editor-heading">
+        <div>
+          <strong>${escapeHtml(slot.name)} 상세 스탯 편집 (Mekicalc 방식)</strong>
+          <p>이 슬롯의 스탯 수치를 직접 수정하거나 현재 폼에서 불러올 수 있습니다.</p>
+        </div>
+        <div class="stat-preset-quick-actions">
+          <button type="button" class="button ghost" data-load-form-to-slot="${slot.id}">현재 폼 스탯 가져오기</button>
+          <button type="button" class="button secondary" data-apply-slot="${slot.id}">이 스탯 적용 & 장착</button>
+          <button type="button" class="button danger ghost" data-clear-slot="${slot.id}">초기화</button>
+        </div>
+      </div>
+      <div class="stat-editor-grid">
+        <label>공격력(+)<input data-stat-field="attackFlat" data-slot-id="${slot.id}" type="number" min="0" value="${snap.attackFlat ?? 0}"></label>
+        <label>공격력%<input data-stat-field="attackPct" data-slot-id="${slot.id}" type="number" step="0.1" value="${snap.attackPct ?? 0}"></label>
+        <label>주스탯(+)<input data-stat-field="mainStat" data-slot-id="${slot.id}" type="number" min="0" value="${snap.mainStat ?? 0}"></label>
+        <label>주스탯%<input data-stat-field="mainStatPct" data-slot-id="${slot.id}" type="number" step="0.1" value="${snap.mainStatPct ?? 0}"></label>
+        <label>부스탯(+)<input data-stat-field="subStat" data-slot-id="${slot.id}" type="number" min="0" value="${snap.subStat ?? 0}"></label>
+        <label>데미지%<input data-stat-field="damage" data-slot-id="${slot.id}" type="number" step="0.1" value="${snap.damage ?? 0}"></label>
+        <label>데미지 증폭%<input data-stat-field="damageAmp" data-slot-id="${slot.id}" type="number" step="0.1" value="${snap.damageAmp ?? 0}"></label>
+        <label>최종 데미지%<input data-stat-field="finalDamage" data-slot-id="${slot.id}" type="number" step="0.1" value="${snap.finalDamage ?? 0}"></label>
+        <label>보스 데미지%<input data-stat-field="bossDamage" data-slot-id="${slot.id}" type="number" step="0.1" value="${snap.bossDamage ?? 0}"></label>
+        <label>일반 몬스터 데미지%<input data-stat-field="normalDamage" data-slot-id="${slot.id}" type="number" step="0.1" value="${snap.normalDamage ?? 0}"></label>
+        <label>크리티컬 확률%<input data-stat-field="critRate" data-slot-id="${slot.id}" type="number" step="0.1" value="${snap.critRate ?? 0}"></label>
+        <label>크리티컬 데미지%<input data-stat-field="critDamage" data-slot-id="${slot.id}" type="number" step="0.1" value="${snap.critDamage ?? 0}"></label>
+        <label>방어 관통력%<input data-stat-field="defPen" data-slot-id="${slot.id}" type="number" step="0.1" value="${snap.defPen ?? 0}"></label>
+        <label>공격 속도%<input data-stat-field="attackSpeed" data-slot-id="${slot.id}" type="number" step="0.1" value="${snap.attackSpeed ?? 0}"></label>
+        <label>기본 공격 데미지%<input data-stat-field="basicDamage" data-slot-id="${slot.id}" type="number" step="0.1" value="${snap.basicDamage ?? 0}"></label>
+        <label>스킬 데미지%<input data-stat-field="skillDamage" data-slot-id="${slot.id}" type="number" step="0.1" value="${snap.skillDamage ?? 0}"></label>
+      </div>
+    </div>
+  `;
+}
 function runtimeJob() { return RUNTIME_JOB[$('job')?.value] || ''; }
 function companionCandidates() { return companionRuntime?.supporters?.filter(item => !runtimeJob() || item.typeId === runtimeJob()) || []; }
 function companionLabel(item) { return `${item.typeId || '동료'} · ${item.grade || '등급 미상'} · #${item.creatureIndex || item.supporterIndex}`; }
@@ -222,7 +272,8 @@ function renderLibrary() {
   const type = state.activeLibraryType;
   const assignments = assignmentsFor(selectedId);
   const slots = slotsFor(type);
-  return `<div class="preset-library"><div class="preset-library-heading"><div><h3>${componentLabel(type)} 프리셋 슬롯</h3><p>${type === 'stats' ? '이 콘텐츠에만 적용되는 스탯 슬롯입니다. 다른 콘텐츠와 자동으로 공유되지 않습니다.' : '슬롯 이름은 자유롭게 바꿀 수 있습니다. 현재 콘텐츠에 장착된 슬롯은 표시됩니다.'}</p></div><button type="button" class="button secondary" id="addPresetSlot">슬롯 추가</button></div><div class="preset-type-tabs">${COMPONENTS.map(([id, label]) => `<button type="button" class="tab${id === type ? ' active' : ''}" data-library-type="${id}">${label}</button>`).join('')}</div><div class="preset-slot-list">${slots.map((slot, index) => { const equipped = assignments[type] === slot.id; const statActions = type === 'stats' ? `<button type="button" class="button ghost" data-save-slot="${slot.id}">현재값 저장</button>${slot.snapshot ? `<button type="button" class="button secondary" data-apply-slot="${slot.id}">적용</button>` : ''}` : ''; const companionAction = type === 'companion' ? `<button type="button" class="button ghost" data-edit-companion="${slot.id}">편집</button>` : ''; return `<div class="preset-slot-row${equipped ? ' equipped' : ''}"><span class="preset-slot-number">${index + 1}</span><input data-slot-name="${slot.id}" value="${slot.name}" aria-label="${slot.name} 이름"><span class="preset-slot-state">${equipped ? '현재 장착' : slot.snapshot ? '내용 저장됨' : '빈 슬롯'}</span>${statActions}${companionAction}<button type="button" class="button ${equipped ? 'secondary' : 'ghost'}" data-equip-slot="${slot.id}">${equipped ? '장착 중' : '장착'}</button></div>`; }).join('')}</div>${type === 'companion' ? renderCompanionEditor(slotFor('companion', activeCompanionSlotId || assignments.companion)) : ''}</div>`;
+  const activeStatSlot = slotFor('stats', activeStatSlotId || assignments.stats);
+  return `<div class="preset-library"><div class="preset-library-heading"><div><h3>${componentLabel(type)} 프리셋 슬롯</h3><p>${type === 'stats' ? '이 콘텐츠에만 적용되는 스탯 슬롯입니다. 다른 콘텐츠와 자동으로 공유되지 않습니다.' : '슬롯 이름은 자유롭게 바꿀 수 있습니다. 현재 콘텐츠에 장착된 슬롯은 표시됩니다.'}</p></div><button type="button" class="button secondary" id="addPresetSlot">슬롯 추가</button></div><div class="preset-type-tabs">${COMPONENTS.map(([id, label]) => `<button type="button" class="tab${id === type ? ' active' : ''}" data-library-type="${id}">${label}</button>`).join('')}</div><div class="preset-slot-list">${slots.map((slot, index) => { const equipped = assignments[type] === slot.id; const statActions = type === 'stats' ? `<button type="button" class="button secondary" data-edit-stat="${slot.id}">스탯 편집</button>` : ''; const companionAction = type === 'companion' ? `<button type="button" class="button ghost" data-edit-companion="${slot.id}">편집</button>` : ''; return `<div class="preset-slot-row${equipped ? ' equipped' : ''}"><span class="preset-slot-number">${index + 1}</span><div class="slot-info-col"><input data-slot-name="${slot.id}" value="${slot.name}" aria-label="${slot.name} 이름">${type === 'stats' ? statSummaryTag(slot) : ''}</div><span class="preset-slot-state">${equipped ? '현재 장착' : slot.snapshot ? '내용 저장됨' : '빈 슬롯'}</span>${statActions}${companionAction}<button type="button" class="button ${equipped ? 'secondary' : 'ghost'}" data-equip-slot="${slot.id}">${equipped ? '장착 중' : '장착'}</button></div>`; }).join('')}</div>${type === 'companion' ? renderCompanionEditor(slotFor('companion', activeCompanionSlotId || assignments.companion)) : type === 'stats' ? renderStatEditor(activeStatSlot) : ''}</div>`;
 }
 function render() {
   const root = $('contentPresetRoot');
@@ -242,17 +293,21 @@ function render() {
       ${renderLibrary()}
     </div></div>`;
   root.querySelectorAll('[data-content-id]').forEach(button => button.addEventListener('click', () => activateContent(button.dataset.contentId)));
-  root.querySelectorAll('[data-assignment-type]').forEach(select => select.addEventListener('change', event => { const type = event.target.dataset.assignmentType; assignmentsFor(selectedId)[type] = event.target.value; if (type === 'companion') activeCompanionSlotId = event.target.value; persist(); render(); exposeCompanionBridge(); }));
-  root.querySelectorAll('[data-manage-type]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = button.dataset.manageType; if (state.activeLibraryType === 'companion') activeCompanionSlotId = assignmentsFor(selectedId).companion; persist(); render(); }));
-  root.querySelectorAll('[data-library-type]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = button.dataset.libraryType; if (state.activeLibraryType === 'companion') activeCompanionSlotId = assignmentsFor(selectedId).companion; persist(); render(); }));
+  root.querySelectorAll('[data-assignment-type]').forEach(select => select.addEventListener('change', event => { const type = event.target.dataset.assignmentType; assignmentsFor(selectedId)[type] = event.target.value; if (type === 'companion') activeCompanionSlotId = event.target.value; else if (type === 'stats') activeStatSlotId = event.target.value; persist(); render(); exposeCompanionBridge(); }));
+  root.querySelectorAll('[data-manage-type]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = button.dataset.manageType; if (state.activeLibraryType === 'companion') activeCompanionSlotId = assignmentsFor(selectedId).companion; else if (state.activeLibraryType === 'stats') activeStatSlotId = assignmentsFor(selectedId).stats; persist(); render(); }));
+  root.querySelectorAll('[data-library-type]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = button.dataset.libraryType; if (state.activeLibraryType === 'companion') activeCompanionSlotId = assignmentsFor(selectedId).companion; else if (state.activeLibraryType === 'stats') activeStatSlotId = assignmentsFor(selectedId).stats; persist(); render(); }));
   root.querySelectorAll('[data-slot-name]').forEach(input => input.addEventListener('change', event => { const slot = slotsFor(state.activeLibraryType).find(item => item.id === event.target.dataset.slotName); if (slot && event.target.value.trim()) { slot.name = event.target.value.trim(); persist(); render(); } }));
   root.querySelectorAll('[data-edit-companion]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = 'companion'; activeCompanionSlotId = button.dataset.editCompanion; persist(); render(); }));
+  root.querySelectorAll('[data-edit-stat]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = 'stats'; activeStatSlotId = button.dataset.editStat; persist(); render(); }));
+  root.querySelectorAll('[data-load-form-to-slot]').forEach(button => button.addEventListener('click', () => { const slot = slotFor('stats', button.dataset.loadFormToSlot); slot.snapshot = formSnapshot(STAT_FIELD_IDS); assignmentsFor(selectedId).stats = slot.id; activeStatSlotId = slot.id; persist(); render(); exposeCompanionBridge(); }));
+  root.querySelectorAll('[data-clear-slot]').forEach(button => button.addEventListener('click', () => { const slot = slotFor('stats', button.dataset.clearSlot); slot.snapshot = null; persist(); render(); }));
+  root.querySelectorAll('[data-stat-field]').forEach(input => input.addEventListener('input', event => { const slotId = event.target.dataset.slotId; const slot = slotFor('stats', slotId); if (!slot.snapshot) slot.snapshot = formSnapshot(STAT_FIELD_IDS); slot.snapshot[event.target.dataset.statField] = event.target.value; const equipped = assignmentsFor(selectedId).stats === slot.id; if (equipped) applySnapshot(slot.snapshot); persist(); }));
   root.querySelectorAll('[data-companion-supporter]').forEach(select => select.addEventListener('change', event => { const slot = slotFor('companion', activeCompanionSlotId || assignmentsFor(selectedId).companion); const index = Number(event.target.dataset.companionSupporter); slot.members[index] = { supporterIndex: Number(event.target.value) || null, level: 1 }; persist(); render(); exposeCompanionBridge(); }));
   root.querySelectorAll('[data-companion-level]').forEach(input => input.addEventListener('input', event => { const slot = slotFor('companion', activeCompanionSlotId || assignmentsFor(selectedId).companion); const index = Number(event.target.dataset.companionLevel); slot.members[index] = { ...(slot.members[index] || {}), level: Number(event.target.value) || 1 }; persist(); exposeCompanionBridge(); }));
   $('companionUnlockedCount')?.addEventListener('change', event => { state.companionSlotCount = Math.max(1, Math.min(6, Number(event.target.value) || 6)); persist(); render(); exposeCompanionBridge(); });
-  root.querySelectorAll('[data-equip-slot]').forEach(button => button.addEventListener('click', () => { const type = state.activeLibraryType; const slot = slotFor(type, button.dataset.equipSlot); assignmentsFor(selectedId)[type] = slot.id; if (type === 'companion') activeCompanionSlotId = slot.id; if (type === 'stats' && slot.snapshot) applySnapshot(slot.snapshot); persist(); render(); exposeCompanionBridge(); }));
-  root.querySelectorAll('[data-save-slot]').forEach(button => button.addEventListener('click', () => { const slot = slotFor('stats', button.dataset.saveSlot); slot.snapshot = formSnapshot(STAT_FIELD_IDS); assignmentsFor(selectedId).stats = slot.id; persist(); render(); }));
-  root.querySelectorAll('[data-apply-slot]').forEach(button => button.addEventListener('click', () => { const slot = slotFor('stats', button.dataset.applySlot); if (slot.snapshot) applySnapshot(slot.snapshot); assignmentsFor(selectedId).stats = slot.id; persist(); render(); }));
+  root.querySelectorAll('[data-equip-slot]').forEach(button => button.addEventListener('click', () => { const type = state.activeLibraryType; const slot = slotFor(type, button.dataset.equipSlot); assignmentsFor(selectedId)[type] = slot.id; if (type === 'companion') activeCompanionSlotId = slot.id; else if (type === 'stats') { activeStatSlotId = slot.id; if (slot.snapshot) applySnapshot(slot.snapshot); } persist(); render(); exposeCompanionBridge(); }));
+  root.querySelectorAll('[data-save-slot]').forEach(button => button.addEventListener('click', () => { const slot = slotFor('stats', button.dataset.saveSlot); slot.snapshot = formSnapshot(STAT_FIELD_IDS); assignmentsFor(selectedId).stats = slot.id; activeStatSlotId = slot.id; persist(); render(); }));
+  root.querySelectorAll('[data-apply-slot]').forEach(button => button.addEventListener('click', () => { const slot = slotFor('stats', button.dataset.applySlot); if (slot.snapshot) applySnapshot(slot.snapshot); assignmentsFor(selectedId).stats = slot.id; activeStatSlotId = slot.id; persist(); render(); }));
   $('addPresetSlot')?.addEventListener('click', () => { const slots = slotsFor(state.activeLibraryType); slots.push(createSlot(state.activeLibraryType, slots.length)); persist(); render(); });
   $('contentPresetEnabled')?.addEventListener('change', event => { settings.enabled = event.target.checked; persist(); render(); });
   $('contentHpThreshold')?.addEventListener('input', event => { settings.hpThreshold = Number(event.target.value) || 0; persist(); });
