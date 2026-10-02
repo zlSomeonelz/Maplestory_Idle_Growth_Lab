@@ -74,4 +74,12 @@ const rerollHit = cubeTargetSummary([slotA, slotA, slotA], ['A'], 'any', 100, ['
 assert.equal(rerollHit.rerollExclusion.currentIsGoal, true);
 assert.equal(Number((rerollHit.probability * 100).toFixed(4)), 20.6746, 'reroll probability when current state is a goal state should exclude exact current state');
 
+// Combat power for defensive/utility options
+const basePowerInput = { attackFlat: 1000, maxHp: 10000, playerDefense: 1000, maxMp: 500 };
+const basePower = calculateCombatPower(basePowerInput, rules);
+const hpPower = calculateCombatPower({ ...basePowerInput, maxHp: 20000 }, rules);
+const defPower = calculateCombatPower({ ...basePowerInput, playerDefense: 3000 }, rules);
+assert.ok(hpPower.power > basePower.power, 'increasing Max HP should increase combat power');
+assert.ok(defPower.power > basePower.power, 'increasing Defense should increase combat power');
+
 console.log('engine tests passed');

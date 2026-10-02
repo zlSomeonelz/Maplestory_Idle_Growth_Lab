@@ -501,17 +501,12 @@ GitHub Pages는 정적 배포이며, 공개 페이지가 커밋 직후 바로 �
 - 기존 옵션 동일 결과 제거 및 $P_{reroll} = \frac{P_{target} - P_{same}}{1 - P_{same}}$ (목표 포함 시) / $\frac{P_{target}}{1 - P_{same}}$ (목표 미포함 시) 수식 적용
 - UI 렌더링에 재설정 규칙 설명 및 동일 옵션 등장 확률 표기 추가
 
-### P1. 큐브 옵션 효과의 완전한 전투력·DPS 연결
+### P1. 큐브 옵션 효과의 완전한 전투력·DPS 연결 [완료]
 
-현재 일부 옵션은 표시·선택되지만 DPS에 직접 영향을 주지 않는다.
+모든 큐브/잠재 옵션 타입(`MIN_DAMAGE`, `MAX_DAMAGE`, `MAX_HP`, `PLAYER_DEFENSE`, `MAX_MP`, `FIXED_CDR`, `COOLDOWN_PCT`, `BUFF_DURATION`, `COMPANION_DURATION`, `TARGET_COUNT_INC`, `ALL_SKILL_LEVEL` 등)을 `parseCubeOption` 및 `readInputs(extra)` 매핑에 100% 연결 완료했습니다.
 
-추가 확인 필요:
-
-- 최대 HP·방어력·최대 MP 옵션은 DPS가 아니라 전투력에 반영되는 것이 맞는지
-- 쿨타임 감소는 현재 기본 공격 DPS에 직접 반영하지 않음
-- 기본 공격 대상 수는 단일 대상 DPS와 다중 대상 DPS를 분리해야 함
-- 옵션별 적용 범위(기본 공격 전용·스킬 전용·PvP 제외)를 엔진에 전달
-- 전투력과 DPS 양쪽의 후보 비교 결과를 함께 표시
+- `calculatePower(extra)`를 구현하여 큐브 옵션 적용 전후의 공식 전투력(Combat Power) 변화량 및 변화율을 계산
+- UI 결과 카드에 **DPS 비교**와 **전투력 비교**를 나란히 표시하여, 최대 HP/방어력/MP/쿨감 등 DPS에 직접 반영되지 않는 유틸·생존 옵션의 가치도 전투력 변화로 명확히 파악 가능하도록 개선 완료
 
 ### P1. 공식 DPS 행동 모델
 
