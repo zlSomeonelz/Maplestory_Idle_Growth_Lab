@@ -520,6 +520,10 @@ GitHub Pages는 정적 배포이며, 공개 페이지가 커밋 직후 바로 �
 
 PvP 피해 공식(`calculatePvpDamage`)에 명중률(`accuracyFactor`), 방어자 크리티컬 저항(`targetCritResist` -> `effectiveCritRate`) 보정 수식을 추가하고, `pvpCore` 및 `pvpDenominator` 등 핵심 중간값을 결과 객체에 리턴하여 디버깅이 가능하도록 고도화했습니다.
 
+### P1. Mekicalc 방식 직관적 스탯 프리셋 편집 UX [완료]
+
+기존 상단 폼 입력 스냅샷 방식에서 탈피하여, 콘텐츠 프리셋 카드 내 슬롯별 상세 스탯 수치(공격력, 주/부스탯, 데미지, 보뎀, 크확, 크뎀, 관통 등)를 직접 편집/저장하고 실시간 요약 태그(`stat-summary-tag`)로 확인할 수 있는 Mekicalc 방식의 인라인 스탯 편집 UI를 `content-presets.js` 및 `styles.css`에 구축 완료했습니다.
+
 ### P2. 동료 전투 모델
 
 현재는 검증된 동료 장착 효과만 일반 능력치에 반영한다.
