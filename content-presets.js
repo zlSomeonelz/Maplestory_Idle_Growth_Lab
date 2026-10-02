@@ -30,6 +30,10 @@ const CONTENTS = [
   { group: '이벤트', items: [{ id: 'event', label: '이벤트' }] },
   { group: '월드 아레나', items: [{ id: 'world-arena', label: '월드 아레나', targetType: 'pvp' }] },
 ];
+const COMPANION_MEMBER_COUNT = 6;
+const RUNTIME_JOB = { hero:'hero', paladin:'paladin', darkKnight:'dark-knight', archMageIceLightning:'archmage-il', archMageFirePoison:'archmage-fp', bishop:'bishop', bowmaster:'bowmaster', sniper:'marksman', nightLord:'night-lord', shadower:'shadower', viper:'viper', captain:'captain', nightWalker:'night-walker', windBreaker:'wind-breaker' };
+let companionRuntime = null;
+let activeCompanionSlotId = null;
 const STAT_FIELD_IDS = ['job', 'level', 'attackFlat', 'attackPct', 'mainStat', 'mainStatPct', 'subStat', 'damage', 'damageAmp', 'finalDamage', 'critRate', 'critDamage', 'minDamage', 'maxDamage', 'mastery', 'skillCoefficient', 'attackInterval', 'attackSpeed', 'targetDefense', 'targetHp', 'defPen', 'bossDamage', 'normalDamage', 'targetTaken', 'basicDamage', 'skillDamage', 'accuracy'];
 const COMPONENTS = [
   ['stats', '스탯'],
@@ -48,7 +52,7 @@ const defaultKind = content => {
   return 'hunt';
 };
 function createSlot(type, index) {
-  return { id: `${type}-${index + 1}`, name: `${index + 1}번 프리셋`, snapshot: null };
+  return { id: `${type}-${index + 1}`, name: `${index + 1}번 프리셋`, snapshot: null, ...(type === 'companion' ? { members: Array.from({ length: COMPANION_MEMBER_COUNT }, () => ({})) } : {}) };
 }
 function createLibrary() {
   return Object.fromEntries(COMPONENTS.map(([type]) => [type, Array.from({ length: SLOT_COUNT }, (_, index) => createSlot(type, index))]));
@@ -66,7 +70,7 @@ function migrateState(saved) {
     const oldTypeFor = type => type === 'stats' ? (saved.library.stats || saved.library.ability || saved.library.equipment) : saved.library[type];
     const normalizeSlots = (type, oldSlots) => {
       const source = Array.isArray(oldSlots) ? oldSlots : [];
-      const slots = source.map((slot, index) => ({ ...createSlot(type, index), ...slot, id: `${type}-${index + 1}` }));
+      const slots = source.map((slot, index) => ({ ...createSlot(type, index), ...slot, id: `${type}-${index + 1}`, ...(type === 'companion' ? { members: Array.isArray(slot.members) ? slot.members : Array.from({ length: COMPANION_MEMBER_COUNT }, () => ({})) } : {}) }));
       while (slots.length < SLOT_COUNT) slots.push(createSlot(type, slots.length));
       return slots;
     };
@@ -136,6 +140,38 @@ function applySnapshot(snapshot) {
     el.dispatchEvent(new Event('input', { bubbles: true }));
   });
 }
+function runtimeJob() { return RUNTIME_JOB[$('job')?.value] || ''; }
+function companionCandidates() { return companionRuntime?.supporters?.filter(item => !runtimeJob() || item.typeId === runtimeJob()) || []; }
+function companionLabel(item) { return `${item.typeId || '동료'} · ${item.grade || '등급 미상'} · #${item.creatureIndex || item.supporterIndex}`; }
+function companionEffect() {
+  if (!companionRuntime) return null;
+  const slot = slotFor('companion', assignmentsFor(selectedId).companion);
+  const values = {};
+  const members = [];
+  (slot.members || []).forEach(member => {
+    const supporter = companionRuntime.supporters?.find(item => item.supporterIndex === Number(member.supporterIndex));
+    if (!supporter) return;
+    const record = companionRuntime.equippedStats?.[`${supporter.typeId}:${supporter.grade}`];
+    const maxLevel = record?.levels?.length || supporter.maxLevel || 1;
+    const level = Math.max(1, Math.min(Number(member.level) || 1, maxLevel));
+    const effect = record?.levels?.[level - 1] || {};
+    Object.entries(effect).forEach(([key, value]) => { if (Number.isFinite(Number(value))) values[key] = (values[key] || 0) + Number(value); });
+    members.push({ supporterIndex: supporter.supporterIndex, label: companionLabel(supporter), level, effect });
+  });
+  return members.length ? { level: '', grade: slot.name, record: null, values, members } : null;
+}
+function exposeCompanionBridge() {
+  window.MapleGrowthCompanion = { getEffect: companionEffect };
+  window.dispatchEvent(new Event('maple:presets-changed'));
+}
+function renderCompanionEditor(slot) {
+  if (!slot) return '';
+  if (!companionRuntime) return `<div class="companion-slot-editor"><strong>동료 데이터 불러오는 중…</strong></div>`;
+  const candidates = companionCandidates();
+  const options = `<option value="">미지정</option>${candidates.map(item => `<option value="${item.supporterIndex}">${companionLabel(item)}</option>`).join('')}`;
+  const members = Array.from({ length: COMPANION_MEMBER_COUNT }, (_, index) => slot.members?.[index] || {});
+  return `<div class="companion-slot-editor"><div class="companion-slot-editor-heading"><div><strong>${slot.name} 구성</strong><p>현재 직업에 맞는 동료를 선택하고 레벨을 입력하세요.</p></div><span class="badge provisional">OCR 연결 예정</span></div><div class="companion-member-grid">${members.map((member, index) => { const chosen = candidates.find(item => item.supporterIndex === Number(member.supporterIndex)); const max = chosen?.maxLevel || 1; return `<div class="companion-member-row"><span>${index + 1}</span><select data-companion-supporter="${index}">${options.replace(`value="${member.supporterIndex}"`, `value="${member.supporterIndex}" selected`)}</select><input data-companion-level="${index}" type="number" min="1" max="${max}" value="${member.level || 1}" aria-label="동료 ${index + 1} 레벨"></div>`; }).join('')}</div><p class="hint">저장된 동료 슬롯은 등급·레벨별 기존 효과 데이터를 계산에 합산합니다. 인식 결과를 확인한 뒤 OCR 가져오기를 연결할 수 있습니다.</p></div>`;
+}
 function activateContent(id, { load = true } = {}) {
   selectedId = id;
   const content = contentById(id);
@@ -154,6 +190,7 @@ function activateContent(id, { load = true } = {}) {
   }
   persist();
   render();
+  exposeCompanionBridge();
 }
 function slotOptions(type, selected) {
   return slotsFor(type).map(slot => `<option value="${slot.id}"${slot.id === selected ? ' selected' : ''}>${slot.name}</option>`).join('');
@@ -172,7 +209,7 @@ function renderLibrary() {
   const type = state.activeLibraryType;
   const assignments = assignmentsFor(selectedId);
   const slots = slotsFor(type);
-  return `<div class="preset-library"><div class="preset-library-heading"><div><h3>${componentLabel(type)} 프리셋 슬롯</h3><p>슬롯 이름은 자유롭게 바꿀 수 있습니다. 현재 콘텐츠에 장착된 슬롯은 표시됩니다.</p></div><button type="button" class="button secondary" id="addPresetSlot">슬롯 추가</button></div><div class="preset-type-tabs">${COMPONENTS.map(([id, label]) => `<button type="button" class="tab${id === type ? ' active' : ''}" data-library-type="${id}">${label}</button>`).join('')}</div><div class="preset-slot-list">${slots.map((slot, index) => { const equipped = assignments[type] === slot.id; const statActions = type === 'stats' ? `<button type="button" class="button ghost" data-save-slot="${slot.id}">현재값 저장</button>${slot.snapshot ? `<button type="button" class="button secondary" data-apply-slot="${slot.id}">적용</button>` : ''}` : ''; return `<div class="preset-slot-row${equipped ? ' equipped' : ''}"><span class="preset-slot-number">${index + 1}</span><input data-slot-name="${slot.id}" value="${slot.name}" aria-label="${slot.name} 이름"><span class="preset-slot-state">${equipped ? '현재 장착' : slot.snapshot ? '내용 저장됨' : '빈 슬롯'}</span>${statActions}<button type="button" class="button ${equipped ? 'secondary' : 'ghost'}" data-equip-slot="${slot.id}">${equipped ? '장착 중' : '장착'}</button></div>`; }).join('')}</div></div>`;
+  return `<div class="preset-library"><div class="preset-library-heading"><div><h3>${componentLabel(type)} 프리셋 슬롯</h3><p>슬롯 이름은 자유롭게 바꿀 수 있습니다. 현재 콘텐츠에 장착된 슬롯은 표시됩니다.</p></div><button type="button" class="button secondary" id="addPresetSlot">슬롯 추가</button></div><div class="preset-type-tabs">${COMPONENTS.map(([id, label]) => `<button type="button" class="tab${id === type ? ' active' : ''}" data-library-type="${id}">${label}</button>`).join('')}</div><div class="preset-slot-list">${slots.map((slot, index) => { const equipped = assignments[type] === slot.id; const statActions = type === 'stats' ? `<button type="button" class="button ghost" data-save-slot="${slot.id}">현재값 저장</button>${slot.snapshot ? `<button type="button" class="button secondary" data-apply-slot="${slot.id}">적용</button>` : ''}` : ''; const companionAction = type === 'companion' ? `<button type="button" class="button ghost" data-edit-companion="${slot.id}">편집</button>` : ''; return `<div class="preset-slot-row${equipped ? ' equipped' : ''}"><span class="preset-slot-number">${index + 1}</span><input data-slot-name="${slot.id}" value="${slot.name}" aria-label="${slot.name} 이름"><span class="preset-slot-state">${equipped ? '현재 장착' : slot.snapshot ? '내용 저장됨' : '빈 슬롯'}</span>${statActions}${companionAction}<button type="button" class="button ${equipped ? 'secondary' : 'ghost'}" data-equip-slot="${slot.id}">${equipped ? '장착 중' : '장착'}</button></div>`; }).join('')}</div>${type === 'companion' ? renderCompanionEditor(slotFor('companion', activeCompanionSlotId || assignments.companion)) : ''}</div>`;
 }
 function render() {
   const root = $('contentPresetRoot');
@@ -192,11 +229,14 @@ function render() {
       ${renderLibrary()}
     </div></div>`;
   root.querySelectorAll('[data-content-id]').forEach(button => button.addEventListener('click', () => activateContent(button.dataset.contentId)));
-  root.querySelectorAll('[data-assignment-type]').forEach(select => select.addEventListener('change', event => { assignmentsFor(selectedId)[event.target.dataset.assignmentType] = event.target.value; persist(); render(); }));
-  root.querySelectorAll('[data-manage-type]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = button.dataset.manageType; persist(); render(); }));
-  root.querySelectorAll('[data-library-type]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = button.dataset.libraryType; persist(); render(); }));
+  root.querySelectorAll('[data-assignment-type]').forEach(select => select.addEventListener('change', event => { const type = event.target.dataset.assignmentType; assignmentsFor(selectedId)[type] = event.target.value; if (type === 'companion') activeCompanionSlotId = event.target.value; persist(); render(); exposeCompanionBridge(); }));
+  root.querySelectorAll('[data-manage-type]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = button.dataset.manageType; if (state.activeLibraryType === 'companion') activeCompanionSlotId = assignmentsFor(selectedId).companion; persist(); render(); }));
+  root.querySelectorAll('[data-library-type]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = button.dataset.libraryType; if (state.activeLibraryType === 'companion') activeCompanionSlotId = assignmentsFor(selectedId).companion; persist(); render(); }));
   root.querySelectorAll('[data-slot-name]').forEach(input => input.addEventListener('change', event => { const slot = slotsFor(state.activeLibraryType).find(item => item.id === event.target.dataset.slotName); if (slot && event.target.value.trim()) { slot.name = event.target.value.trim(); persist(); render(); } }));
-  root.querySelectorAll('[data-equip-slot]').forEach(button => button.addEventListener('click', () => { const type = state.activeLibraryType; const slot = slotFor(type, button.dataset.equipSlot); assignmentsFor(selectedId)[type] = slot.id; if (type === 'stats' && slot.snapshot) applySnapshot(slot.snapshot); persist(); render(); }));
+  root.querySelectorAll('[data-edit-companion]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = 'companion'; activeCompanionSlotId = button.dataset.editCompanion; persist(); render(); }));
+  root.querySelectorAll('[data-companion-supporter]').forEach(select => select.addEventListener('change', event => { const slot = slotFor('companion', activeCompanionSlotId || assignmentsFor(selectedId).companion); const index = Number(event.target.dataset.companionSupporter); slot.members[index] = { supporterIndex: Number(event.target.value) || null, level: 1 }; persist(); render(); exposeCompanionBridge(); }));
+  root.querySelectorAll('[data-companion-level]').forEach(input => input.addEventListener('input', event => { const slot = slotFor('companion', activeCompanionSlotId || assignmentsFor(selectedId).companion); const index = Number(event.target.dataset.companionLevel); slot.members[index] = { ...(slot.members[index] || {}), level: Number(event.target.value) || 1 }; persist(); exposeCompanionBridge(); }));
+  root.querySelectorAll('[data-equip-slot]').forEach(button => button.addEventListener('click', () => { const type = state.activeLibraryType; const slot = slotFor(type, button.dataset.equipSlot); assignmentsFor(selectedId)[type] = slot.id; if (type === 'companion') activeCompanionSlotId = slot.id; if (type === 'stats' && slot.snapshot) applySnapshot(slot.snapshot); persist(); render(); exposeCompanionBridge(); }));
   root.querySelectorAll('[data-save-slot]').forEach(button => button.addEventListener('click', () => { const slot = slotFor('stats', button.dataset.saveSlot); slot.snapshot = formSnapshot(STAT_FIELD_IDS); assignmentsFor(selectedId).stats = slot.id; persist(); render(); }));
   root.querySelectorAll('[data-apply-slot]').forEach(button => button.addEventListener('click', () => { const slot = slotFor('stats', button.dataset.applySlot); if (slot.snapshot) applySnapshot(slot.snapshot); assignmentsFor(selectedId).stats = slot.id; persist(); render(); }));
   $('addPresetSlot')?.addEventListener('click', () => { const slots = slotsFor(state.activeLibraryType); slots.push(createSlot(state.activeLibraryType, slots.length)); persist(); render(); });
@@ -207,11 +247,19 @@ function render() {
   $('copyContentPreset')?.addEventListener('click', () => { const source = $('copyFromContent')?.value; if (!source || !contentById(source)) return; state.assignments[selectedId] = { ...assignmentsFor(source) }; state.contentSnapshots[selectedId] = state.contentSnapshots[source] ? JSON.parse(JSON.stringify(state.contentSnapshots[source])) : null; const sourceSettings = settingsFor(source); settings.hpThreshold = sourceSettings.hpThreshold; settings.mpThreshold = sourceSettings.mpThreshold; settings.enabled = true; persist(); render(); });
   $('resetContentPreset')?.addEventListener('click', () => { if (!confirm(`${content.label} 설정을 초기화할까요?`)) return; delete state.assignments[content.id]; delete state.contentSnapshots[content.id]; delete state.contentSettings[content.id]; persist(); render(); });
 }
-function init() {
+async function init() {
   if (!$('contentPresetRoot')) return;
   render();
   const originalLabel = $('activePresetLabel');
   if (originalLabel) originalLabel.title = '상단 프리셋은 전체 계산 입력, 콘텐츠 프리셋은 세부 콘텐츠별 적용 설정입니다.';
+  $('job')?.addEventListener('input', () => { if (state.activeLibraryType === 'companion') render(); exposeCompanionBridge(); });
+  try {
+    companionRuntime = await fetch('data/companion-runtime-data.json').then(response => response.json());
+    render();
+    exposeCompanionBridge();
+  } catch (error) {
+    console.warn('동료 런타임 데이터를 불러오지 못했습니다.', error);
+  }
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
 else init();
