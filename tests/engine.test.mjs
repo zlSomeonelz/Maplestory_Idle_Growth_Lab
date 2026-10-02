@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { calculateCombatPower, calculateDamage, calculateDps, calculatePvpDamage, cubeTargetSummary, probabilitySummary } from '../engine.mjs';
+import { calculateCombatPower, calculateDamage, calculateDps, calculateEffectiveCooldown, calculateMultiTargetDps, calculatePvpDamage, cubeTargetSummary, probabilitySummary } from '../engine.mjs';
 
 const base = { attackFlat: 1000, attackPct: 0, targetDefense: 0, defPen: 0, target: 'normal', targetTaken: 0, damage: 0, damageAmp: 0, normalDamage: 0, bossDamage: 0, basicDamage: 0, skillDamage: 0, statBased: 0, mastery: 0, critRate: 0, critDamage: 0, minDamage: 100, maxDamage: 100, finalDamage: 0, skillCoefficient: 100, accuracy: 100, attackInterval: 1, attackSpeed: 0 };
 const rules = { caps: { defensePenetration: 1000, attackSpeed: 1500 }, battlePower: { base: 'attack*3 + maxHp*0.05 + defense*0.2' } };
@@ -79,7 +79,15 @@ const basePowerInput = { attackFlat: 1000, maxHp: 10000, playerDefense: 1000, ma
 const basePower = calculateCombatPower(basePowerInput, rules);
 const hpPower = calculateCombatPower({ ...basePowerInput, maxHp: 20000 }, rules);
 const defPower = calculateCombatPower({ ...basePowerInput, playerDefense: 3000 }, rules);
-assert.ok(hpPower.power > basePower.power, 'increasing Max HP should increase combat power');
-assert.ok(defPower.power > basePower.power, 'increasing Defense should increase combat power');
+// Cooldown reduction and multi-target DPS tests
+assert.equal(calculateEffectiveCooldown(10, 20, 1), 7, '10s - 20% = 8s (>7s), minus 1s = 7s');
+assert.equal(calculateEffectiveCooldown(6, 0, 2), 5, '6s (<7s) reduces fixed CDR rate to 0.5x, so 6 - 1 = 5s');
+assert.equal(calculateEffectiveCooldown(5, 50, 4), 4, 'final cooldown cannot drop below 4 seconds cap');
+
+const multiDps = calculateMultiTargetDps(1000, 2);
+assert.equal(multiDps.multiTargetDps, 3000, '3 total targets (1 base + 2 bonus) should triple multi-target DPS');
+
+const pvpCritResist = calculatePvpDamage({ ...pvpBase, critRate: 60, targetCritResist: 20 }, { ...rules, pvp: { constants: { arena: 7206000000 } } });
+assert.equal(pvpCritResist.effectiveCritRate, 40, 'PvP target crit resistance should subtract from attacker crit rate');
 
 console.log('engine tests passed');

@@ -19,23 +19,56 @@ export function diminishingSum(base, additions = [], cap) {
 }
 
 /**
- * DPS is intentionally isolated from one-hit damage.
- * Attack-speed conversion remains provisional until the official action table
- * is encoded; the cap and the applied result are returned for transparency.
- */
-export function calculateDps(averageDamage, s, rules = {}) {
-  const attackSpeedCap = Number(rules?.caps?.attackSpeed || 1500) / 10;
-  const effectiveAttackSpeed = diminishingSum(s.attackSpeed, s.attackSpeedAdditions, attackSpeedCap);
-  const speedFactor = 1 + effectiveAttackSpeed / 100;
-  const interval = Number(s.attackInterval) || 0;
-  return {
-    dps: interval > 0 ? Number(averageDamage || 0) * speedFactor / interval : 0,
-    effectiveAttackSpeed,
-    speedFactor,
-    interval,
-    provisional: true,
-  };
-}
+  * Official fixed/percent cooldown reduction rule:
+  * 1. Percent reduction applies first (capped at 100%).
+  * 2. Fixed reduction applies at 0.5s per second under 7s remaining, else 1s per second.
+  * 3. Final cooldown cannot drop below 4 seconds.
+  */
+ export function calculateEffectiveCooldown(baseCooldown = 0, cooldownPercent = 0, fixedCdrSeconds = 0) {
+   const base = Math.max(0, Number(baseCooldown) || 0);
+   if (!base) return 0;
+   const pctCDR = clamp(Number(cooldownPercent) || 0, 0, 100);
+   const t1 = base * (1 - pctCDR / 100);
+   const fixedRate = t1 < 7 ? 0.5 : 1.0;
+   const effectiveFixed = (Number(fixedCdrSeconds) || 0) * fixedRate;
+   return Math.max(4, t1 - effectiveFixed);
+ }
+ 
+ export function calculateMultiTargetDps(singleTargetDps = 0, targetCountIncrease = 0) {
+   const dps = Math.max(0, Number(singleTargetDps) || 0);
+   const extraTargets = Math.max(0, Number(targetCountIncrease) || 0);
+   const targetFactor = 1 + extraTargets;
+   return {
+     singleTargetDps: dps,
+     multiTargetDps: dps * targetFactor,
+     targetFactor,
+   };
+ }
+ 
+ /**
+  * DPS is intentionally isolated from one-hit damage.
+  * Attack-speed conversion remains provisional until the official action table
+  * is encoded; the cap and the applied result are returned for transparency.
+  */
+ export function calculateDps(averageDamage, s, rules = {}) {
+   const attackSpeedCap = Number(rules?.caps?.attackSpeed || 1500) / 10;
+   const effectiveAttackSpeed = diminishingSum(s.attackSpeed, s.attackSpeedAdditions, attackSpeedCap);
+   const speedFactor = 1 + effectiveAttackSpeed / 100;
+   const interval = Number(s.attackInterval) || 0;
+   const singleDps = interval > 0 ? Number(averageDamage || 0) * speedFactor / interval : 0;
+   const multiTarget = calculateMultiTargetDps(singleDps, s.basicAttackTargetCountIncrease);
+   const effectiveCooldown = s.baseCooldown ? calculateEffectiveCooldown(s.baseCooldown, s.cooldownReductionPercent, s.fixedCooldownReductionSeconds) : null;
+   return {
+     dps: singleDps,
+     effectiveAttackSpeed,
+     speedFactor,
+     interval,
+     multiTargetDps: multiTarget.multiTargetDps,
+     targetFactor: multiTarget.targetFactor,
+     effectiveCooldown,
+     provisional: true,
+   };
+ }
 
 export function calculateDamage(s, rules = {}) {
   const attack = (Number(s.attackFlat) || 0) * pct(s.attackPct);
@@ -99,18 +132,22 @@ export function calculatePvpDamage(s, rules = {}) {
   const attack = (Number(s.attackFlat) || 0) * pct(s.attackPct);
   const targetDefense = Math.max(0, Number(s.targetDefense) || 0);
   const targetMaxHp = Math.max(1, Number(s.targetMaxHp ?? s.targetHp) || 1);
+  const targetCritResist = Math.max(0, Number(s.targetCritResist) || 0);
   const defPenCap = Number(rules?.caps?.defensePenetration || 1000) / 10;
   const effectiveDefPen = diminishingSum(s.defPen, s.defPenAdditions, defPenCap);
   const afterDef = targetDefense * (1 - effectiveDefPen / 100);
   const defenseFactor = targetDefense > 0 ? 5000 / (afterDef + 6000) : 1;
   const targetReduction = clamp(Number(s.targetReceivedDamageReduction) || 0, 0, 95);
   const basicAndSkill = ((Number(s.basicDamage) || 0) + (Number(s.skillDamage) || 0)) / 2;
-  const critChance = clamp((Number(s.critRate) || 0) / 100, 0, 1);
+  const rawCritRate = Math.max(0, Number(s.critRate) || 0);
+  const effectiveCritRate = clamp(rawCritRate - targetCritResist, 0, 100);
+  const critChance = clamp(effectiveCritRate / 100, 0, 1);
   const critFactor = 1 + critChance * ((Number(s.critDamage) || 0) / 100);
   const min = Number(s.minDamage) > 0 ? Number(s.minDamage) / 100 : 1;
   const max = Number(s.maxDamage) > 0 ? Number(s.maxDamage) / 100 : 1;
   const rangeFactor = (min + Math.max(min, max)) / 2;
-  const generalBase = attack * defenseFactor * pct(s.targetTaken) * (1 - targetReduction / 100) * pct(s.damage) * pct(s.damageAmp) * pct(basicAndSkill) * pct(Number(s.statBased) || 0) * pct(s.mastery) * critFactor * rangeFactor * pct(s.finalDamage);
+  const accuracyFactor = clamp((Number(s.accuracy) || 0) / 100, 0, 1);
+  const generalBase = attack * defenseFactor * pct(s.targetTaken) * (1 - targetReduction / 100) * pct(s.damage) * pct(s.damageAmp) * pct(basicAndSkill) * pct(Number(s.statBased) || 0) * pct(s.mastery) * critFactor * rangeFactor * pct(s.finalDamage) * accuracyFactor;
   const baseWithoutSkill = Math.max(0, generalBase);
 
   const damage = permille(s.damage);
@@ -118,7 +155,7 @@ export function calculatePvpDamage(s, rules = {}) {
   const basicSkillPermille = permille(basicAndSkill);
   const statBased = permille(s.statBased);
   const critDamage = 300 + permille(s.critDamage);
-  const critRate = Math.min(1000, permille(s.critRate));
+  const critRate = Math.min(1000, permille(effectiveCritRate));
   const minMaxAverage = (permille(s.minDamage) + permille(s.maxDamage)) / 2;
   const finalDamage = permille(s.finalDamage);
   const pvpCore = attack * Math.max(0, effectiveDefPen * 10) * Math.max(0, damage) * Math.max(0, damageAmp) * Math.max(0, basicSkillPermille / 2) * Math.max(0, statBased) * Math.max(0, critDamage * critRate / 1000) * Math.max(0, minMaxAverage) * Math.max(0, finalDamage) + 1000000000;
@@ -147,6 +184,10 @@ export function calculatePvpDamage(s, rules = {}) {
     content,
     targetReduction,
     targetMaxHp,
+    targetCritResist,
+    effectiveCritRate,
+    pvpCore,
+    pvpDenominator: denominator,
     provisional: false,
   };
 }
