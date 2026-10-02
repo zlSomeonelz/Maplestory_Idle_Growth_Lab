@@ -283,84 +283,206 @@ function initOcrModal(){
     skillDamage: '스킬 데미지%'
   };
 
+  const STAT_LABELS = {
+    attackFlat: '공격력 (+)',
+    attackPct: '공격력%',
+    mainStat: '주스탯 (+)',
+    mainStatPct: '주스탯%',
+    subStat: '부스탯 (+)',
+    playerDefense: '캐릭터 방어력',
+    maxHp: '최대 HP',
+    maxMp: '최대 MP',
+    damage: '데미지%',
+    damageAmp: '데미지 증폭%',
+    finalDamage: '최종 데미지%',
+    bossDamage: '보스 몬스터 데미지%',
+    normalDamage: '일반 몬스터 데미지%',
+    critRate: '크리티컬 확률%',
+    critDamage: '크리티컬 데미지%',
+    defPen: '방어 관통력%',
+    attackSpeed: '공격 속도%',
+    minDamage: '최소 데미지 배율%',
+    maxDamage: '최대 데미지 배율%',
+    basicDamage: '기본 공격 데미지%',
+    skillDamage: '스킬 데미지%',
+    statSTR: 'STR',
+    statDEX: 'DEX',
+    statINT: 'INT',
+    statLUK: 'LUK'
+  };
+
+  const STAT_CONFIG = [
+    { target: 'bossDamage', keywords: ['보스 몬스터 데미지', '보스 몬스터데미지', '보스 몬스터', '보스데미지', '보스 데미지', '보뎀'] },
+    { target: 'normalDamage', keywords: ['일반 몬스터 데미지', '일반 몬스터데미지', '일반 몬스터', '일반데미지', '일반 데미지', '일공'] },
+    { target: 'damageAmp', keywords: ['데미지 증폭', '데미지증폭', '데미지 55', '데미지55'] },
+    { target: 'finalDamage', keywords: ['최종 데미지', '최종데미지', '최종 데미7', '최종데미7', '치종 데미', '치종데미'] },
+    { target: 'basicDamage', keywords: ['기본 공격 데미지', '기본공격데미지', '본 공격 데미지', '본공격데미지', '기본 공격 데미7'] },
+    { target: 'skillDamage', keywords: ['스킬 데미지', '스킬데미지', '스킬 데미^', '스킬 데미7'] },
+    { target: 'critRate', keywords: ['크리티컬 확률', '크리티컬확률', '치명타 확률', '크확'] },
+    { target: 'critDamage', keywords: ['크리티컬 데미지', '크리티컬데미지', '치명타 데미지', '크뎀', '크리티컬 데미7'] },
+    { target: 'defPen', keywords: ['방어 관통력', '방어관통력', '방어력 관통', '방관'] },
+    { target: 'minDamage', keywords: ['최소 데미지 배율', '최소데미지 배율', '최소 데미지', '최소 데미7', '미지 배용', '최소 배율'] },
+    { target: 'maxDamage', keywords: ['최대 데미지 배율', '최대데미지 배율', '최대 데미지', '최대 데미7', '미지 Hf', '최대 배율'] },
+    { target: 'attackSpeed', keywords: ['공격 속도', '공격속도'] },
+    { target: 'playerDefense', keywords: ['방어력'] },
+    { target: 'maxHp', keywords: ['최대 HP', '최대HP', 'XC HP', '치대 HP'] },
+    { target: 'maxMp', keywords: ['최대 MP', '최대MP'] },
+    { target: 'damage', keywords: ['스탯 비례 데미지', '스탯비례데미지', 'AEH 비례 데미지', '비례 데미지', '데미지'] },
+    { target: 'attack', keywords: ['공격력'] },
+    { target: 'statSTR', keywords: ['STR'] },
+    { target: 'statDEX', keywords: ['DEX'] },
+    { target: 'statINT', keywords: ['INT'] },
+    { target: 'statLUK', keywords: ['LUK'] },
+    { target: 'mainStat', keywords: ['주 스탯', '주스탯', '주 스탓', '벨당 주 스탓'] },
+    { target: 'subStat', keywords: ['부 스탯', '부스탯'] }
+  ];
+
   function parseSingleOcrText(text) {
+    if (!text) return {};
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
     const detected = {};
-    let currentHeader = null;
-    const HEADER_MAP = [
-      { target: 'bossDamage', keywords: ['보스 몬스터 데미지', '보스 데미지', '보뎀'] },
-      { target: 'normalDamage', keywords: ['일반 몬스터 데미지', '일반 데미지', '일공'] },
-      { target: 'damageAmp', keywords: ['데미지 증폭'] },
-      { target: 'finalDamage', keywords: ['최종 데미지'] },
-      { target: 'damage', keywords: ['데미지'] },
-      { target: 'attack', keywords: ['공격력'] },
-      { target: 'playerDefense', keywords: ['방어력'] },
-      { target: 'maxHp', keywords: ['최대 HP', '최대HP', 'HP'] },
-      { target: 'attackSpeed', keywords: ['공격 속도', '공격속도'] },
-      { target: 'mainStat', keywords: ['주 스탯', '주스탯', 'LUK', 'STR', 'DEX', 'INT'] },
-      { target: 'subStat', keywords: ['부 스탯', '부스탯'] },
-      { target: 'critRate', keywords: ['크리티컬 확률', '치명타 확률', '크확'] },
-      { target: 'critDamage', keywords: ['크리티컬 데미지', '치명타 데미지', '크뎀'] },
-      { target: 'defPen', keywords: ['방어 관통력', '방어력 관통', '방관'] },
-      { target: 'minDamage', keywords: ['최소 데미지 배율', '최소 데미지'] },
-      { target: 'maxDamage', keywords: ['최대 데미지 배율', '최대 데미지'] },
-      { target: 'basicDamage', keywords: ['기본 공격 데미지'] },
-      { target: 'skillDamage', keywords: ['스킬 데미지'] }
-    ];
 
-    for (const line of lines) {
-      for (const h of HEADER_MAP) {
-        if (h.keywords.some(kw => line === kw || line.startsWith(kw))) {
-          currentHeader = h.target;
-          break;
-        }
-      }
-      if (currentHeader) break;
-    }
+    const cleanLines = lines.filter(l => 
+      !l.includes('증가합니다') && 
+      !l.includes('획득한') && 
+      !l.includes('기준으로') && 
+      !l.includes('피해의 기본') &&
+      !l.includes('포함되지 않은') &&
+      !l.includes('효과는 합산')
+    );
 
-    for (const line of lines) {
-      const plusMatch = line.match(/\+\s*[:;\-]?\s*([0-9만억조,\.]+)/);
-      if (plusMatch && currentHeader) {
-        const val = parseKoreanNumber(plusMatch[1]);
-        if (val !== null && val > 0) {
-          if (currentHeader === 'attack') detected['attackFlat'] = val;
-          else if (currentHeader === 'mainStat') detected['mainStat'] = val;
-          else if (currentHeader === 'subStat') detected['subStat'] = val;
-          else if (currentHeader === 'playerDefense') detected['playerDefense'] = val;
-          else if (currentHeader === 'maxHp') detected['maxHp'] = val;
+    const isFormatA = cleanLines.some(l => 
+      l.includes('현재 보유') || 
+      l.includes('보유 중인') || 
+      /^\+\s*[:;\-]/.test(l) || 
+      /^%\s*[:;\-]/.test(l) ||
+      /합산\s*[:;\-]/.test(l)
+    );
+
+    if (isFormatA) {
+      let detailHeader = null;
+      for (const line of cleanLines) {
+        for (const item of STAT_CONFIG) {
+          if (item.keywords.some(kw => line === kw || line.startsWith(kw))) {
+            detailHeader = item.target;
+            break;
+          }
         }
+        if (detailHeader) break;
       }
 
-      const pctMatch = line.match(/%\s*[:;\-]?\s*([0-9만억조,\.]+)/);
-      if (pctMatch && currentHeader) {
-        const val = parseKoreanNumber(pctMatch[1]);
-        if (val !== null && val > 0) {
-          if (currentHeader === 'attack') detected['attackPct'] = val;
-          else if (currentHeader === 'mainStat') detected['mainStatPct'] = val;
-          else if (currentHeader === 'subStat') detected['subStatPct'] = val;
-          else detected[currentHeader] = val;
-        }
-      }
+      if (detailHeader) {
+        for (const line of cleanLines) {
+          const plusMatch = line.match(/\+\s*[:;\-]?\s*([0-9만억조,\.]+)/);
+          if (plusMatch) {
+            const val = parseKoreanNumber(plusMatch[1]);
+            if (val !== null && val > 0) {
+              if (detailHeader === 'attack') detected['attackFlat'] = val;
+              else if (['statLUK', 'statSTR', 'statDEX', 'statINT', 'mainStat'].includes(detailHeader)) {
+                detected['mainStat'] = val;
+                if (detailHeader.startsWith('stat')) detected[detailHeader] = val;
+              } else if (detailHeader === 'subStat') detected['subStat'] = val;
+              else if (detailHeader === 'playerDefense') detected['playerDefense'] = val;
+              else if (detailHeader === 'maxHp') detected['maxHp'] = val;
+            }
+          }
 
-      for (const h of HEADER_MAP) {
-        if (h.keywords.some(kw => line.includes(kw))) {
-          const numMatches = line.match(/([0-9만억조,\.]+%?)/g);
-          if (numMatches) {
-            for (const m of numMatches) {
-              const val = parseKoreanNumber(m);
-              if (val !== null && val > 0) {
-                if (h.target === 'attack' && line.includes('%')) detected['attackPct'] = val;
-                else if (h.target === 'attack' && !line.includes('%')) detected['attackFlat'] = val;
-                else if (h.target === 'mainStat' && line.includes('%')) detected['mainStatPct'] = val;
-                else if (h.target === 'mainStat') detected['mainStat'] = val;
-                else if (!detected[h.target]) detected[h.target] = val;
-              }
+          const pctMatch = line.match(/%\s*[:;\-]?\s*([0-9만억조,\.]+)/);
+          if (pctMatch) {
+            const val = parseKoreanNumber(pctMatch[1]);
+            if (val !== null && val > 0) {
+              if (detailHeader === 'attack') detected['attackPct'] = val;
+              else if (['statLUK', 'statSTR', 'statDEX', 'statINT', 'mainStat'].includes(detailHeader)) {
+                detected['mainStatPct'] = val;
+              } else if (detailHeader === 'subStat') detected['subStatPct'] = val;
+              else detected[detailHeader] = val;
             }
           }
         }
       }
+      return detected;
     }
+
+    // Format B: List Table
+    cleanLines.forEach(line => {
+      for (const item of STAT_CONFIG) {
+        if (item.keywords.some(kw => line.includes(kw))) {
+          let cleanLine = line;
+          item.keywords.forEach(kw => { cleanLine = cleanLine.replace(kw, ''); });
+          cleanLine = cleanLine.replace(/[ⓘi|()\[\]G!a]/g, ' ').trim();
+
+          const allNums = Array.from(cleanLine.matchAll(/([0-9만억조,\.]+%?)/g)).map(m => m[1]);
+          if (allNums.length > 0) {
+            let bestNumStr = allNums.find(n => n.includes('%')) || allNums[allNums.length - 1];
+            const val = parseKoreanNumber(bestNumStr);
+            if (val !== null && val > 0) {
+              if (item.target === 'attack' && line.includes('%')) {
+                if (!detected['attackPct']) detected['attackPct'] = val;
+              } else if (item.target === 'attack') {
+                if (!detected['attackFlat']) detected['attackFlat'] = val;
+              } else if (['statSTR', 'statDEX', 'statINT', 'statLUK'].includes(item.target)) {
+                detected[item.target] = val;
+              } else {
+                if (!detected[item.target]) detected[item.target] = val;
+              }
+            }
+          }
+          break;
+        }
+      }
+    });
+
     return detected;
+  }
+
+  function preprocessImageFile(file) {
+    return new Promise((resolve) => {
+      if (typeof document === 'undefined') {
+        resolve({ canvas: file, isCropped: false });
+        return;
+      }
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const origW = img.naturalWidth || img.width;
+        const origH = img.naturalHeight || img.height;
+
+        let cropX = 0, cropY = 0, cropW = origW, cropH = origH;
+        if (origW >= 500 && origH >= 500) {
+          cropX = Math.floor(origW * 0.25);
+          cropY = Math.floor(origH * 0.15);
+          cropW = Math.floor(origW * 0.50);
+          cropH = Math.floor(origH * 0.70);
+        }
+
+        const scale = 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = cropW * scale;
+        canvas.height = cropH * scale;
+
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
+
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const d = imgData.data;
+        for (let i = 0; i < d.length; i += 4) {
+          const gray = (d[i] * 0.299 + d[i+1] * 0.587 + d[i+2] * 0.114);
+          const c = gray > 180 ? 255 : (gray < 80 ? 0 : gray);
+          d[i] = d[i+1] = d[i+2] = c;
+        }
+        ctx.putImageData(imgData, 0, 0);
+
+        resolve({ canvas, isCropped: origW >= 500 && origH >= 500 });
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve({ canvas: file, isCropped: false });
+      };
+      img.src = url;
+    });
   }
 
   async function processFiles(files){
@@ -386,11 +508,36 @@ function initOcrModal(){
       for (const file of fileArray) {
         processedCount++;
         statusEl.textContent = `OCR 분석 중… (${processedCount}/${fileArray.length} 이미지 처리 완료)`;
-        const { data: { text } } = await worker.recognize(file);
-        const parsed = parseSingleOcrText(text);
+        
+        const { canvas, isCropped } = await preprocessImageFile(file);
+        let text = '';
+        try {
+          const res = await worker.recognize(canvas);
+          text = res.data.text;
+        } catch (e) {
+          console.warn('Cropped canvas OCR failed, trying original file:', e);
+        }
+
+        let parsed = parseSingleOcrText(text);
+
+        if (Object.keys(parsed).length === 0 && isCropped) {
+          const resFull = await worker.recognize(file);
+          parsed = parseSingleOcrText(resFull.data.text);
+        }
+
         Object.assign(pendingOcrStats, parsed);
       }
       await worker.terminate();
+
+      const maxRawStat = Math.max(
+        pendingOcrStats.statSTR || 0,
+        pendingOcrStats.statDEX || 0,
+        pendingOcrStats.statINT || 0,
+        pendingOcrStats.statLUK || 0
+      );
+      if (maxRawStat > 0 && (!pendingOcrStats.mainStat || pendingOcrStats.mainStat < maxRawStat)) {
+        pendingOcrStats.mainStat = maxRawStat;
+      }
 
       const foundCount = Object.keys(pendingOcrStats).length;
       if (foundCount === 0) {
