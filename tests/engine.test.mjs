@@ -63,4 +63,15 @@ assert.equal(Number(cube.expectedCost.toFixed(2)), 13672.29, 'expected cube cost
 const cubeAll = cubeTargetSummary([cubeSlots, cubeSlots, cubeSlots], ['A', 'B'], 'all');
 assert.equal(Number((cubeAll.probability * 100).toFixed(4)), 0.5805, 'all-target probability should require every selected option');
 
+// Exact 3-slot reroll state model tests
+const slotA = [{ option: 'A', settingPercent: 10 }, { option: 'B', settingPercent: 90 }];
+const rerollMiss = cubeTargetSummary([slotA, slotA, slotA], ['A'], 'any', 100, ['B', 'B', 'B']);
+assert.equal(rerollMiss.rerollExclusion.rerollAdjusted, true);
+assert.equal(Number((rerollMiss.rerollExclusion.sameProbability * 100).toFixed(2)), 72.9);
+assert.equal(rerollMiss.probability, 1, 'when current options is the only miss state, reroll probability to hit target must be 100%');
+
+const rerollHit = cubeTargetSummary([slotA, slotA, slotA], ['A'], 'any', 100, ['A', 'B', 'B']);
+assert.equal(rerollHit.rerollExclusion.currentIsGoal, true);
+assert.equal(Number((rerollHit.probability * 100).toFixed(4)), 20.6746, 'reroll probability when current state is a goal state should exclude exact current state');
+
 console.log('engine tests passed');

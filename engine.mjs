@@ -233,15 +233,27 @@ export function calculateCombatPower(s = {}, rules = {}) {
   };
 }
 
-export function cubeTargetSummary(slotOptions = [], goals = [], mode = 'any', cost = 0) {
+export function cubeTargetSummary(slotOptions = [], goals = [], mode = 'any', cost = 0, currentOptions = null) {
   const targetGoals = [...new Set((goals || []).filter(Boolean))];
   const slots = (slotOptions || []).map(options => {
     const probabilities = {};
     for (const item of options || []) probabilities[item.option] = clamp((Number(item.settingPercent) || 0) / 100, 0, 1);
     return probabilities;
   });
-  if (!targetGoals.length || !slots.length) return { goals: targetGoals, mode, probability: 0, expectedAttempts: Infinity, expectedCost: null, slotProbabilities: [] };
-  let probability;
+  if (!targetGoals.length || !slots.length) {
+    return {
+      goals: targetGoals,
+      mode,
+      probability: 0,
+      rawProbability: 0,
+      expectedAttempts: Infinity,
+      expectedCost: null,
+      slotProbabilities: [],
+      rerollExclusion: { sameProbability: 0, currentIsGoal: false, rerollAdjusted: false }
+    };
+  }
+
+  let rawProbability;
   if (mode === 'all') {
     let states = new Map([[0, 1]]);
     for (const slot of slots) {
@@ -258,18 +270,66 @@ export function cubeTargetSummary(slotOptions = [], goals = [], mode = 'any', co
       }
       states = next;
     }
-    probability = states.get((1 << targetGoals.length) - 1) || 0;
+    rawProbability = states.get((1 << targetGoals.length) - 1) || 0;
   } else {
-    probability = 1 - slots.reduce((miss, slot) => miss * (1 - targetGoals.reduce((sum, goal) => sum + (slot[goal] || 0), 0)), 1);
+    rawProbability = 1 - slots.reduce((miss, slot) => miss * (1 - targetGoals.reduce((sum, goal) => sum + (slot[goal] || 0), 0)), 1);
   }
+
+  let sameProbability = 0;
+  let currentIsGoal = false;
+  let rerollAdjusted = false;
+
+  if (Array.isArray(currentOptions) && currentOptions.length === slots.length && currentOptions.every(Boolean)) {
+    let matchProd = 1;
+    let validMatch = true;
+    for (let i = 0; i < slots.length; i++) {
+      const opt = currentOptions[i];
+      if (slots[i] && typeof slots[i][opt] != null && slots[i][opt] !== undefined) {
+        matchProd *= slots[i][opt];
+      } else {
+        validMatch = false;
+        break;
+      }
+    }
+    if (validMatch) {
+      sameProbability = matchProd;
+      if (mode === 'all') {
+        let mask = 0;
+        currentOptions.forEach(opt => {
+          const idx = targetGoals.indexOf(opt);
+          if (idx >= 0) mask |= (1 << idx);
+        });
+        currentIsGoal = mask === ((1 << targetGoals.length) - 1);
+      } else {
+        currentIsGoal = currentOptions.some(opt => targetGoals.includes(opt));
+      }
+      rerollAdjusted = sameProbability > 0;
+    }
+  }
+
+  let probability = rawProbability;
+  if (rerollAdjusted && sameProbability < 1) {
+    if (currentIsGoal) {
+      probability = Math.max(0, (rawProbability - sameProbability) / (1 - sameProbability));
+    } else {
+      probability = Math.min(1, rawProbability / (1 - sameProbability));
+    }
+  }
+
   const expectedAttempts = probability > 0 ? 1 / probability : Infinity;
   return {
     goals: targetGoals,
     mode,
     probability,
+    rawProbability,
     expectedAttempts,
     expectedCost: cost ? expectedAttempts * Number(cost) : null,
     slotProbabilities: slots.map(slot => targetGoals.reduce((sum, goal) => sum + (slot[goal] || 0), 0)),
+    rerollExclusion: {
+      sameProbability,
+      currentIsGoal,
+      rerollAdjusted
+    }
   };
 }
 
