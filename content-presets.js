@@ -30,6 +30,7 @@ const CONTENTS = [
   { group: '이벤트', items: [{ id: 'event', label: '이벤트' }] },
   { group: '월드 아레나', items: [{ id: 'world-arena', label: '월드 아레나', targetType: 'pvp' }] },
 ];
+const STAT_FIELD_IDS = ['job', 'level', 'attackFlat', 'attackPct', 'mainStat', 'mainStatPct', 'subStat', 'damage', 'damageAmp', 'finalDamage', 'critRate', 'critDamage', 'minDamage', 'maxDamage', 'mastery', 'skillCoefficient', 'attackInterval', 'attackSpeed', 'targetDefense', 'targetHp', 'defPen', 'bossDamage', 'normalDamage', 'targetTaken', 'basicDamage', 'skillDamage', 'accuracy'];
 const COMPONENTS = [
   ['stats', '스탯'],
   ['skill', '스킬'],
@@ -120,11 +121,10 @@ function settingsFor(id) {
   if (!state.contentSettings[id]) state.contentSettings[id] = { enabled: true, hpThreshold: 80, mpThreshold: 20 };
   return state.contentSettings[id];
 }
-function formSnapshot() {
+function formSnapshot(fieldIds = null) {
   const snapshot = {};
-  document.querySelectorAll('#characterForm input[id],#characterForm select[id],#targetForm input[id],#targetForm select[id],#cubeCost,#cubeProbability,#successRate,#attempts,#attemptCost').forEach(el => {
-    snapshot[el.id] = el.type === 'checkbox' ? el.checked : el.value;
-  });
+  const selector = fieldIds ? fieldIds.map(id => `#${id}`).join(',') : '#characterForm input[id],#characterForm select[id],#targetForm input[id],#targetForm select[id],#cubeCost,#cubeProbability,#successRate,#attempts,#attemptCost';
+  document.querySelectorAll(selector).forEach(el => { snapshot[el.id] = el.type === 'checkbox' ? el.checked : el.value; });
   return snapshot;
 }
 function applySnapshot(snapshot) {
@@ -142,6 +142,8 @@ function activateContent(id, { load = true } = {}) {
   const settings = settingsFor(id);
   const effectiveId = settings.enabled ? id : 'chapter-hunt';
   if (load && state.contentSnapshots[effectiveId]) applySnapshot(state.contentSnapshots[effectiveId]);
+  const equippedStats = slotFor('stats', assignmentsFor(id).stats);
+  if (load && equippedStats.snapshot) applySnapshot(equippedStats.snapshot);
   if (content?.stageMode && $('stageMode')) {
     $('stageMode').value = content.stageMode;
     $('stageMode').dispatchEvent(new Event('input', { bubbles: true }));
@@ -170,7 +172,7 @@ function renderLibrary() {
   const type = state.activeLibraryType;
   const assignments = assignmentsFor(selectedId);
   const slots = slotsFor(type);
-  return `<div class="preset-library"><div class="preset-library-heading"><div><h3>${componentLabel(type)} 프리셋 슬롯</h3><p>슬롯 이름은 자유롭게 바꿀 수 있습니다. 현재 콘텐츠에 장착된 슬롯은 표시됩니다.</p></div><button type="button" class="button secondary" id="addPresetSlot">슬롯 추가</button></div><div class="preset-type-tabs">${COMPONENTS.map(([id, label]) => `<button type="button" class="tab${id === type ? ' active' : ''}" data-library-type="${id}">${label}</button>`).join('')}</div><div class="preset-slot-list">${slots.map((slot, index) => { const equipped = assignments[type] === slot.id; return `<div class="preset-slot-row${equipped ? ' equipped' : ''}"><span class="preset-slot-number">${index + 1}</span><input data-slot-name="${slot.id}" value="${slot.name}" aria-label="${slot.name} 이름"><span class="preset-slot-state">${equipped ? '현재 장착' : slot.snapshot ? '내용 저장됨' : '빈 슬롯'}</span><button type="button" class="button ${equipped ? 'secondary' : 'ghost'}" data-equip-slot="${slot.id}">${equipped ? '장착 중' : '장착'}</button></div>`; }).join('')}</div></div>`;
+  return `<div class="preset-library"><div class="preset-library-heading"><div><h3>${componentLabel(type)} 프리셋 슬롯</h3><p>슬롯 이름은 자유롭게 바꿀 수 있습니다. 현재 콘텐츠에 장착된 슬롯은 표시됩니다.</p></div><button type="button" class="button secondary" id="addPresetSlot">슬롯 추가</button></div><div class="preset-type-tabs">${COMPONENTS.map(([id, label]) => `<button type="button" class="tab${id === type ? ' active' : ''}" data-library-type="${id}">${label}</button>`).join('')}</div><div class="preset-slot-list">${slots.map((slot, index) => { const equipped = assignments[type] === slot.id; const statActions = type === 'stats' ? `<button type="button" class="button ghost" data-save-slot="${slot.id}">현재값 저장</button>${slot.snapshot ? `<button type="button" class="button secondary" data-apply-slot="${slot.id}">적용</button>` : ''}` : ''; return `<div class="preset-slot-row${equipped ? ' equipped' : ''}"><span class="preset-slot-number">${index + 1}</span><input data-slot-name="${slot.id}" value="${slot.name}" aria-label="${slot.name} 이름"><span class="preset-slot-state">${equipped ? '현재 장착' : slot.snapshot ? '내용 저장됨' : '빈 슬롯'}</span>${statActions}<button type="button" class="button ${equipped ? 'secondary' : 'ghost'}" data-equip-slot="${slot.id}">${equipped ? '장착 중' : '장착'}</button></div>`; }).join('')}</div></div>`;
 }
 function render() {
   const root = $('contentPresetRoot');
@@ -194,7 +196,9 @@ function render() {
   root.querySelectorAll('[data-manage-type]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = button.dataset.manageType; persist(); render(); }));
   root.querySelectorAll('[data-library-type]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = button.dataset.libraryType; persist(); render(); }));
   root.querySelectorAll('[data-slot-name]').forEach(input => input.addEventListener('change', event => { const slot = slotsFor(state.activeLibraryType).find(item => item.id === event.target.dataset.slotName); if (slot && event.target.value.trim()) { slot.name = event.target.value.trim(); persist(); render(); } }));
-  root.querySelectorAll('[data-equip-slot]').forEach(button => button.addEventListener('click', () => { assignmentsFor(selectedId)[state.activeLibraryType] = button.dataset.equipSlot; persist(); render(); }));
+  root.querySelectorAll('[data-equip-slot]').forEach(button => button.addEventListener('click', () => { const type = state.activeLibraryType; const slot = slotFor(type, button.dataset.equipSlot); assignmentsFor(selectedId)[type] = slot.id; if (type === 'stats' && slot.snapshot) applySnapshot(slot.snapshot); persist(); render(); }));
+  root.querySelectorAll('[data-save-slot]').forEach(button => button.addEventListener('click', () => { const slot = slotFor('stats', button.dataset.saveSlot); slot.snapshot = formSnapshot(STAT_FIELD_IDS); assignmentsFor(selectedId).stats = slot.id; persist(); render(); }));
+  root.querySelectorAll('[data-apply-slot]').forEach(button => button.addEventListener('click', () => { const slot = slotFor('stats', button.dataset.applySlot); if (slot.snapshot) applySnapshot(slot.snapshot); assignmentsFor(selectedId).stats = slot.id; persist(); render(); }));
   $('addPresetSlot')?.addEventListener('click', () => { const slots = slotsFor(state.activeLibraryType); slots.push(createSlot(state.activeLibraryType, slots.length)); persist(); render(); });
   $('contentPresetEnabled')?.addEventListener('change', event => { settings.enabled = event.target.checked; persist(); render(); });
   $('contentHpThreshold')?.addEventListener('input', event => { settings.hpThreshold = Number(event.target.value) || 0; persist(); });
