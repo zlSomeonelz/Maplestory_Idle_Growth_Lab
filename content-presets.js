@@ -61,8 +61,10 @@ function defaultAssignments() {
   return Object.fromEntries(COMPONENTS.map(([type]) => [type, `${type}-1`]));
 }
 function defaultState() {
-  return { activeContent: 'chapter-hunt', activeLibraryType: 'stats', companionSlotCount: 6, library: createLibrary(), assignments: {}, contentSnapshots: {}, contentSettings: {} };
+  return { activeContent: 'chapter-hunt', activeLibraryType: 'stats', companionSlotCount: 6, library: createLibrary(), statLibraries: {}, assignments: {}, contentSnapshots: {}, contentSettings: {} };
 }
+function cloneSlots(slots, type = 'stats') { return (Array.isArray(slots) ? slots : []).map((slot, index) => ({ ...createSlot(type, index), ...slot, id: `${type}-${index + 1}` })); }
+function ensureStatLibraries(baseSlots, savedLibraries = {}) { const result = {}; allContents().forEach(content => { result[content.id] = cloneSlots(savedLibraries[content.id] || baseSlots, 'stats'); while (result[content.id].length < SLOT_COUNT) result[content.id].push(createSlot('stats', result[content.id].length)); }); return result; }
 function migrateState(saved) {
   const next = defaultState();
   if (!saved || typeof saved !== 'object') return next;
@@ -75,6 +77,7 @@ function migrateState(saved) {
       return slots;
     };
     next.library = Object.fromEntries(COMPONENTS.map(([type]) => [type, normalizeSlots(type, oldTypeFor(type))]));
+    next.statLibraries = ensureStatLibraries(next.library.stats, saved.statLibraries || {});
     next.assignments = Object.fromEntries(Object.entries(saved.assignments).map(([contentId, assignment]) => {
       const nextAssignment = {};
       COMPONENTS.forEach(([type]) => {
@@ -97,6 +100,7 @@ function migrateState(saved) {
     next.contentSnapshots[contentId] = old.snapshot || null;
     next.contentSettings[contentId] = { enabled: old.enabled !== false, hpThreshold: old.hpThreshold ?? 80, mpThreshold: old.mpThreshold ?? 20 };
   });
+  next.statLibraries = ensureStatLibraries(next.library.stats);
   next.activeContent = saved.activeContent || next.activeContent;
   next.companionSlotCount = Math.max(1, Math.min(6, Number(saved.companionSlotCount) || 6));
   return next;
@@ -110,12 +114,18 @@ function persist() {
   state.activeContent = selectedId;
   localStorage.setItem(STORE, JSON.stringify(state));
 }
-function slotsFor(type) {
+function slotsFor(type, contentId = selectedId) {
+  if (type === 'stats') {
+    if (!state.statLibraries) state.statLibraries = {};
+    if (!state.statLibraries[contentId]) state.statLibraries[contentId] = cloneSlots(state.library?.stats || createLibrary().stats, 'stats');
+    while (state.statLibraries[contentId].length < SLOT_COUNT) state.statLibraries[contentId].push(createSlot('stats', state.statLibraries[contentId].length));
+    return state.statLibraries[contentId];
+  }
   if (!state.library[type]) state.library[type] = createLibrary()[type];
   return state.library[type];
 }
-function slotFor(type, id) {
-  return slotsFor(type).find(slot => slot.id === id) || slotsFor(type)[0];
+function slotFor(type, id, contentId = selectedId) {
+  return slotsFor(type, contentId).find(slot => slot.id === id) || slotsFor(type, contentId)[0];
 }
 function assignmentsFor(id) {
   const current = state.assignments[id] || {};
@@ -212,7 +222,7 @@ function renderLibrary() {
   const type = state.activeLibraryType;
   const assignments = assignmentsFor(selectedId);
   const slots = slotsFor(type);
-  return `<div class="preset-library"><div class="preset-library-heading"><div><h3>${componentLabel(type)} 프리셋 슬롯</h3><p>슬롯 이름은 자유롭게 바꿀 수 있습니다. 현재 콘텐츠에 장착된 슬롯은 표시됩니다.</p></div><button type="button" class="button secondary" id="addPresetSlot">슬롯 추가</button></div><div class="preset-type-tabs">${COMPONENTS.map(([id, label]) => `<button type="button" class="tab${id === type ? ' active' : ''}" data-library-type="${id}">${label}</button>`).join('')}</div><div class="preset-slot-list">${slots.map((slot, index) => { const equipped = assignments[type] === slot.id; const statActions = type === 'stats' ? `<button type="button" class="button ghost" data-save-slot="${slot.id}">현재값 저장</button>${slot.snapshot ? `<button type="button" class="button secondary" data-apply-slot="${slot.id}">적용</button>` : ''}` : ''; const companionAction = type === 'companion' ? `<button type="button" class="button ghost" data-edit-companion="${slot.id}">편집</button>` : ''; return `<div class="preset-slot-row${equipped ? ' equipped' : ''}"><span class="preset-slot-number">${index + 1}</span><input data-slot-name="${slot.id}" value="${slot.name}" aria-label="${slot.name} 이름"><span class="preset-slot-state">${equipped ? '현재 장착' : slot.snapshot ? '내용 저장됨' : '빈 슬롯'}</span>${statActions}${companionAction}<button type="button" class="button ${equipped ? 'secondary' : 'ghost'}" data-equip-slot="${slot.id}">${equipped ? '장착 중' : '장착'}</button></div>`; }).join('')}</div>${type === 'companion' ? renderCompanionEditor(slotFor('companion', activeCompanionSlotId || assignments.companion)) : ''}</div>`;
+  return `<div class="preset-library"><div class="preset-library-heading"><div><h3>${componentLabel(type)} 프리셋 슬롯</h3><p>${type === 'stats' ? '이 콘텐츠에만 적용되는 스탯 슬롯입니다. 다른 콘텐츠와 자동으로 공유되지 않습니다.' : '슬롯 이름은 자유롭게 바꿀 수 있습니다. 현재 콘텐츠에 장착된 슬롯은 표시됩니다.'}</p></div><button type="button" class="button secondary" id="addPresetSlot">슬롯 추가</button></div><div class="preset-type-tabs">${COMPONENTS.map(([id, label]) => `<button type="button" class="tab${id === type ? ' active' : ''}" data-library-type="${id}">${label}</button>`).join('')}</div><div class="preset-slot-list">${slots.map((slot, index) => { const equipped = assignments[type] === slot.id; const statActions = type === 'stats' ? `<button type="button" class="button ghost" data-save-slot="${slot.id}">현재값 저장</button>${slot.snapshot ? `<button type="button" class="button secondary" data-apply-slot="${slot.id}">적용</button>` : ''}` : ''; const companionAction = type === 'companion' ? `<button type="button" class="button ghost" data-edit-companion="${slot.id}">편집</button>` : ''; return `<div class="preset-slot-row${equipped ? ' equipped' : ''}"><span class="preset-slot-number">${index + 1}</span><input data-slot-name="${slot.id}" value="${slot.name}" aria-label="${slot.name} 이름"><span class="preset-slot-state">${equipped ? '현재 장착' : slot.snapshot ? '내용 저장됨' : '빈 슬롯'}</span>${statActions}${companionAction}<button type="button" class="button ${equipped ? 'secondary' : 'ghost'}" data-equip-slot="${slot.id}">${equipped ? '장착 중' : '장착'}</button></div>`; }).join('')}</div>${type === 'companion' ? renderCompanionEditor(slotFor('companion', activeCompanionSlotId || assignments.companion)) : ''}</div>`;
 }
 function render() {
   const root = $('contentPresetRoot');
@@ -248,8 +258,8 @@ function render() {
   $('contentHpThreshold')?.addEventListener('input', event => { settings.hpThreshold = Number(event.target.value) || 0; persist(); });
   $('contentMpThreshold')?.addEventListener('input', event => { settings.mpThreshold = Number(event.target.value) || 0; persist(); });
   $('saveContentPreset')?.addEventListener('click', () => { state.contentSnapshots[selectedId] = formSnapshot(); settings.enabled = true; persist(); render(); });
-  $('copyContentPreset')?.addEventListener('click', () => { const source = $('copyFromContent')?.value; if (!source || !contentById(source)) return; state.assignments[selectedId] = { ...assignmentsFor(source) }; state.contentSnapshots[selectedId] = state.contentSnapshots[source] ? JSON.parse(JSON.stringify(state.contentSnapshots[source])) : null; const sourceSettings = settingsFor(source); settings.hpThreshold = sourceSettings.hpThreshold; settings.mpThreshold = sourceSettings.mpThreshold; settings.enabled = true; persist(); render(); });
-  $('resetContentPreset')?.addEventListener('click', () => { if (!confirm(`${content.label} 설정을 초기화할까요?`)) return; delete state.assignments[content.id]; delete state.contentSnapshots[content.id]; delete state.contentSettings[content.id]; persist(); render(); });
+  $('copyContentPreset')?.addEventListener('click', () => { const source = $('copyFromContent')?.value; if (!source || !contentById(source)) return; state.assignments[selectedId] = { ...assignmentsFor(source) }; state.statLibraries[selectedId] = cloneSlots(slotsFor('stats', source), 'stats'); state.contentSnapshots[selectedId] = state.contentSnapshots[source] ? JSON.parse(JSON.stringify(state.contentSnapshots[source])) : null; const sourceSettings = settingsFor(source); settings.hpThreshold = sourceSettings.hpThreshold; settings.mpThreshold = sourceSettings.mpThreshold; settings.enabled = true; persist(); render(); });
+  $('resetContentPreset')?.addEventListener('click', () => { if (!confirm(`${content.label} 설정을 초기화할까요?`)) return; delete state.assignments[content.id]; delete state.statLibraries[content.id]; delete state.contentSnapshots[content.id]; delete state.contentSettings[content.id]; persist(); render(); });
 }
 async function init() {
   if (!$('contentPresetRoot')) return;
