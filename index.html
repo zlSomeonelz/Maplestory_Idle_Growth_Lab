@@ -256,7 +256,8 @@
         </div>
         <div id="ocrModalStatus" class="status-strip" style="margin-top:10px;">이미지를 선택하거나 클립보드에서 붙여넣으세요.</div>
         <div id="ocrModalResults" class="stat-grid" style="margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;"></div>
-        <div class="modal-actions" style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;">
+        <div class="modal-actions" style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+          <button type="button" class="button secondary" id="ocrPasteClipboardBtn">📋 클립보드 붙여넣기 (Ctrl+V)</button>
           <button type="button" class="button secondary" id="runOcrModalBtn">OCR 분석 실행</button>
           <button type="button" class="button primary" id="applyOcrModalBtn">검토된 수치 캐릭터 폼에 반영</button>
         </div>

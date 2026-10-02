@@ -208,7 +208,174 @@ function renderAll(){renderJobStatMapping();renderCombat();renderCube();renderPr
 async function loadData(){try{const [combat,stats,jobs,probabilities,potentialProbabilities,companionRuntime,companionRules,stageData,bossData,growthDungeonData,guildData,dropTableData]=await Promise.all([fetch('data/combat-rules.json').then(r=>r.json()),fetch('data/stat-rules.json').then(r=>r.json()),fetch('data/job-stats.json').then(r=>r.json()),fetch('data/probabilities.json').then(r=>r.json()),fetch('data/potential-probabilities.json').then(r=>r.json()),fetch('data/companion-runtime-data.json').then(r=>r.json()),fetch('data/companion-rules.json').then(r=>r.json()),fetch('data/stage-data.json').then(r=>r.json()),fetch('data/boss-data.json').then(r=>r.json()),fetch('data/growth-dungeon-data.json').then(r=>r.json()),fetch('data/guild-data.json').then(r=>r.json()),fetch('data/drop-table-data.json').then(r=>r.json())]);Object.assign(DATA,{combat,stats,jobs,probabilities,potentialProbabilities,companionRuntime,companionRules,stageData,bossData,growthDungeonData,guildData,dropTableData});fillJobs();fillStageChapters();loadLocal();fillStageChapters();renderCompanionEffect();$('probabilitySource').textContent=`공식 설정 확률 데이터 로드 완료 · ${probabilities?.source?.verificationStatus||'검증 상태 확인 필요'}`;setStatus(`공식 전투·능력치·확률 데이터 로드 완료 · 직업 매핑은 ${jobs.status||'provisional'}`, 'good');renderAll()}catch(e){setStatus('데이터 파일을 불러오지 못했습니다. 기본 입력으로 계산하지만 공식 데이터 상태를 확인하세요.','bad');$('probabilitySource').textContent='확률 데이터 로드 실패: '+e.message;renderAll()}}
 
 let pendingOcrStats={};
-function initOcrModal(){const modal=$('ocrModal');const openBtns=[$('openOcrModalBtn'),$('openOcrInFormBtn')].filter(Boolean);const closeBtn=$('closeOcrModalBtn');const runBtn=$('runOcrModalBtn');const applyBtn=$('applyOcrModalBtn');const fileInput=$('ocrModalFile');const dropZone=$('ocrModalDrop');const statusEl=$('ocrModalStatus');const resultsEl=$('ocrModalResults');if(!modal)return;openBtns.forEach(btn=>btn?.addEventListener('click',()=>{if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','true')}));closeBtn?.addEventListener('click',()=>{if(typeof modal.close==='function')modal.close();else modal.removeAttribute('open')});const STAT_FIELD_MAP=[{label:'공격력 합계',target:'attackFlat',keywords:['공격력 합계','공격력']},{label:'공격력%',target:'attackPct',keywords:['공격력%']},{label:'주스탯(+)',target:'mainStat',keywords:['주 스탯 수치','주스탯 수치','주스탯(+)']},{label:'주스탯%',target:'mainStatPct',keywords:['주 스탯%','주스탯%']},{label:'부스탯(+)',target:'subStat',keywords:['부 스탯 수치','부스탯 수치','부스탯(+)']},{label:'데미지%',target:'damage',keywords:['데미지']},{label:'데미지 증폭%',target:'damageAmp',keywords:['데미지 증폭']},{label:'최종 데미지%',target:'finalDamage',keywords:['최종 데미지']},{label:'보스 데미지%',target:'bossDamage',keywords:['보스 몬스터 데미지','보스 데미지']},{label:'일반 몬스터 데미지%',target:'normalDamage',keywords:['일반 몬스터 데미지']},{label:'크리티컬 확률%',target:'critRate',keywords:['크리티컬 확률','치명타 확률']},{label:'크리티컬 데미지%',target:'critDamage',keywords:['크리티컬 데미지','치명타 데미지']},{label:'방어 관통력%',target:'defPen',keywords:['방어 관통력','방어력 관통']},{label:'공격 속도%',target:'attackSpeed',keywords:['공격 속도']},{label:'최소 데미지 배율%',target:'minDamage',keywords:['최소 데미지 배율']},{label:'최대 데미지 배율%',target:'maxDamage',keywords:['최대 데미지 배율']}];async function processFiles(files){if(!files||!files.length)return;if(typeof window.Tesseract==='undefined'){statusEl.textContent='Tesseract OCR 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도하세요.';return}statusEl.textContent='OCR 분석 진행 중… 잠시만 기다려주세요.';pendingOcrStats={};resultsEl.innerHTML='';try{const worker=await window.Tesseract.createWorker('kor+eng');for(const file of files){const {data:{text}}=await worker.recognize(file);const lines=text.split('\n');for(const line of lines){for(const def of STAT_FIELD_MAP){for(const kw of def.keywords){if(line.includes(kw)){const match=line.match(/([0-9,]+(?:\.[0-9]+)?)/);if(match){const val=Number(match[1].replace(/,/g,''));if(Number.isFinite(val))pendingOcrStats[def.target]=val}}}}}}await worker.terminate();const foundCount=Object.keys(pendingOcrStats).length;if(foundCount===0){statusEl.textContent='이미지에서 스탯 수치를 찾지 못했습니다. 글자가 선명한 스탯 팝업 스크린샷을 사용하세요.'}else{statusEl.textContent=`${foundCount}개의 스탯 항목을 감지했습니다. 수치 확인 후 적용을 누르세요.`;resultsEl.innerHTML=Object.entries(pendingOcrStats).map(([field,val])=>{const def=STAT_FIELD_MAP.find(d=>d.target===field);return `<div class="stat-row" style="border:1px solid var(--line);border-radius:8px;padding:6px;background:#fff;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;">${def?.label||field}</span><input data-ocr-field="${field}" type="number" step="0.01" value="${val}" style="width:100px;padding:4px;border:1px solid var(--line);border-radius:6px;"></div>`}).join('')}}catch(err){statusEl.textContent='OCR 처리 중 오류가 발생했습니다: '+err.message}}runBtn?.addEventListener('click',()=>processFiles(fileInput?.files));fileInput?.addEventListener('change',e=>processFiles(e.target.files));dropZone?.addEventListener('paste',e=>{const items=(e.clipboardData||e.originalEvent?.clipboardData)?.items;const list=[];for(const item of items||[]){if(item.type.indexOf('image')===0)list.push(item.getAsFile())}if(list.length)processFiles(list)});applyBtn?.addEventListener('click',()=>{resultsEl.querySelectorAll('[data-ocr-field]').forEach(input=>{const field=input.dataset.ocrField;const val=Number(input.value);if($(field)&&Number.isFinite(val))$(field).value=val});renderCompanionEffect();renderCombat();if(typeof modal.close==='function')modal.close();else modal.removeAttribute('open');setStatus('OCR 스탯 수치가 캐릭터 폼에 적용되었습니다.','good');});}
+function initOcrModal(){
+  const modal=$('ocrModal');
+  const openBtns=[$('openOcrModalBtn'),$('openOcrInFormBtn')].filter(Boolean);
+  const closeBtn=$('closeOcrModalBtn');
+  const runBtn=$('runOcrModalBtn');
+  const applyBtn=$('applyOcrModalBtn');
+  const clipBtn=$('ocrPasteClipboardBtn');
+  const fileInput=$('ocrModalFile');
+  const dropZone=$('ocrModalDrop');
+  const statusEl=$('ocrModalStatus');
+  const resultsEl=$('ocrModalResults');
+  if(!modal)return;
+
+  openBtns.forEach(btn=>btn?.addEventListener('click',()=>{
+    if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','true');
+    dropZone?.focus();
+  }));
+  closeBtn?.addEventListener('click',()=>{
+    if(typeof modal.close==='function')modal.close();else modal.removeAttribute('open');
+  });
+
+  const STAT_FIELD_MAP=[
+    {label:'공격력 합계',target:'attackFlat',keywords:['공격력 합계','공격력']},
+    {label:'공격력%',target:'attackPct',keywords:['공격력%']},
+    {label:'주스탯(+)',target:'mainStat',keywords:['주 스탯 수치','주스탯 수치','주스탯(+)']},
+    {label:'주스탯%',target:'mainStatPct',keywords:['주 스탯%','주스탯%']},
+    {label:'부스탯(+)',target:'subStat',keywords:['부 스탯 수치','부스탯 수치','부스탯(+)']},
+    {label:'데미지%',target:'damage',keywords:['데미지']},
+    {label:'데미지 증폭%',target:'damageAmp',keywords:['데미지 증폭']},
+    {label:'최종 데미지%',target:'finalDamage',keywords:['최종 데미지']},
+    {label:'보스 데미지%',target:'bossDamage',keywords:['보스 몬스터 데미지','보스 데미지']},
+    {label:'일반 몬스터 데미지%',target:'normalDamage',keywords:['일반 몬스터 데미지']},
+    {label:'크리티컬 확률%',target:'critRate',keywords:['크리티컬 확률','치명타 확률']},
+    {label:'크리티컬 데미지%',target:'critDamage',keywords:['크리티컬 데미지','치명타 데미지']},
+    {label:'방어 관통력%',target:'defPen',keywords:['방어 관통력','방어력 관통']},
+    {label:'공격 속도%',target:'attackSpeed',keywords:['공격 속도']},
+    {label:'최소 데미지 배율%',target:'minDamage',keywords:['최소 데미지 배율']},
+    {label:'최대 데미지 배율%',target:'maxDamage',keywords:['최대 데미지 배율']}
+  ];
+
+  async function processFiles(files){
+    if(!files||!files.length)return;
+    if(typeof window.Tesseract==='undefined'){
+      statusEl.textContent='Tesseract OCR 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도하세요.';
+      return;
+    }
+    statusEl.textContent='OCR 분석 진행 중… 잠시만 기다려주세요.';
+    pendingOcrStats={};
+    resultsEl.innerHTML='';
+    try{
+      const worker=await window.Tesseract.createWorker('kor+eng');
+      for(const file of files){
+        const {data:{text}}=await worker.recognize(file);
+        const lines=text.split('\n');
+        for(const line of lines){
+          for(const def of STAT_FIELD_MAP){
+            for(const kw of def.keywords){
+              if(line.includes(kw)){
+                const match=line.match(/([0-9,]+(?:\.[0-9]+)?)/);
+                if(match){
+                  const val=Number(match[1].replace(/,/g,''));
+                  if(Number.isFinite(val))pendingOcrStats[def.target]=val;
+                }
+              }
+            }
+          }
+        }
+      }
+      await worker.terminate();
+      const foundCount=Object.keys(pendingOcrStats).length;
+      if(foundCount===0){
+        statusEl.textContent='이미지에서 스탯 수치를 찾지 못했습니다. 글자가 선명한 스탯 팝업 스크린샷을 사용하세요.';
+      }else{
+        statusEl.textContent=`${foundCount}개의 스탯 항목을 감지했습니다. 수치 확인 후 적용을 누르세요.`;
+        resultsEl.innerHTML=Object.entries(pendingOcrStats).map(([field,val])=>{
+          const def=STAT_FIELD_MAP.find(d=>d.target===field);
+          return `<div class="stat-row" style="border:1px solid var(--line);border-radius:8px;padding:6px;background:#fff;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;">${def?.label||field}</span><input data-ocr-field="${field}" type="number" step="0.01" value="${val}" style="width:100px;padding:4px;border:1px solid var(--line);border-radius:6px;"></div>`;
+        }).join('');
+      }
+    }catch(err){
+      statusEl.textContent='OCR 처리 중 오류가 발생했습니다: '+err.message;
+    }
+  }
+
+  function extractImageFiles(e){
+    const clipboardData = e.clipboardData || window.clipboardData || e.originalEvent?.clipboardData;
+    const list = [];
+    if (clipboardData) {
+      if (clipboardData.files && clipboardData.files.length > 0) {
+        for (let i = 0; i < clipboardData.files.length; i++) {
+          if (clipboardData.files[i].type.startsWith('image/')) list.push(clipboardData.files[i]);
+        }
+      }
+      if (list.length === 0 && clipboardData.items) {
+        for (let i = 0; i < clipboardData.items.length; i++) {
+          const item = clipboardData.items[i];
+          if (item.type.indexOf('image') === 0 || item.kind === 'file') {
+            const blob = item.getAsFile();
+            if (blob) list.push(blob);
+          }
+        }
+      }
+    }
+    return list;
+  }
+
+  function handlePaste(e){
+    const files = extractImageFiles(e);
+    if (files.length > 0) {
+      e.preventDefault();
+      if (typeof modal.showModal === 'function' && !modal.open) modal.showModal();
+      else modal.setAttribute('open', 'true');
+      processFiles(files);
+    }
+  }
+
+  window.addEventListener('paste', handlePaste);
+  document.addEventListener('paste', handlePaste);
+  modal.addEventListener('paste', handlePaste);
+  dropZone?.addEventListener('paste', handlePaste);
+
+  [dropZone, modal].filter(Boolean).forEach(el => {
+    el.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); });
+    el.addEventListener('drop', e => {
+      e.preventDefault(); e.stopPropagation();
+      const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/'));
+      if (files.length > 0) processFiles(files);
+    });
+  });
+
+  clipBtn?.addEventListener('click', async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.read) {
+        const items = await navigator.clipboard.read();
+        const files = [];
+        for (const item of items) {
+          for (const type of item.types) {
+            if (type.startsWith('image/')) {
+              const blob = await item.getType(type);
+              files.push(new File([blob], 'clipboard-image.png', { type }));
+            }
+          }
+        }
+        if (files.length > 0) {
+          processFiles(files);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Async Clipboard API read failed:', err);
+    }
+    statusEl.textContent = '클립보드 이미지를 읽는 중입니다. Ctrl+V 키를 누르시면 즉시 분석됩니다.';
+  });
+
+  runBtn?.addEventListener('click', () => processFiles(fileInput?.files));
+  fileInput?.addEventListener('change', e => processFiles(e.target.files));
+  applyBtn?.addEventListener('click', () => {
+    resultsEl.querySelectorAll('[data-ocr-field]').forEach(input => {
+      const field = input.dataset.ocrField;
+      const val = Number(input.value);
+      if ($(field) && Number.isFinite(val)) $(field).value = val;
+    });
+    renderCompanionEffect();
+    renderCombat();
+    if (typeof modal.close === 'function') modal.close(); else modal.removeAttribute('open');
+    setStatus('OCR 스탯 수치가 캐릭터 폼에 적용되었습니다.', 'good');
+  });
+}
 
 function bind(){initOcrModal();window.addEventListener('maple:presets-changed',()=>{renderCompanionEffect();renderAll()});document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('.tab-panel').forEach(x=>x.classList.toggle('active',x.dataset.panel===btn.dataset.tab))}));document.querySelectorAll('#characterForm input,#characterForm select,#targetForm input,#targetForm select').forEach(el=>el.addEventListener('input',()=>{renderCompanionEffect();if(['stageMode','stageChapter'].includes(el.id)){if(el.id==='stageMode')fillStageChapters();else fillStages()}else if(el.id==='stageSelect')applyStageTarget();renderCombat()}));$('calculateCombat').addEventListener('click',renderCombat);$('calculateCube').addEventListener('click',renderCube);$('cubeGrade').addEventListener('change',fillCubeSources);$('cubeEquipment').addEventListener('change',fillCubeSources);$('cubeSlot').addEventListener('change',fillCubeSources);$('cubeOptionSelect').addEventListener('change',()=>{setCubeProbability();renderCubeTargetSummary();});$('cubeGoalMode').addEventListener('change',renderCubeTargetSummary);['cubeGoal1','cubeGoal2','cubeGoal3'].forEach(id=>$(id).addEventListener('change',renderCubeTargetSummary));$('applyCubeOption').addEventListener('click',applySelectedCubeOption);$('calculateProbability').addEventListener('click',renderProbability);document.querySelectorAll('#currentOptions,#candidateOptions').forEach(el=>el.addEventListener('input',renderCube));$('saveQuick').addEventListener('click',()=>{saveLocal();$('activePresetLabel').textContent='현재 입력 저장됨';});$('resetAll').addEventListener('click',()=>{if(confirm('현재 입력을 초기화할까요?')){localStorage.removeItem(STORE);location.reload()}});$('savePreset').addEventListener('click',()=>{const name=$('presetName').value.trim();if(!name){alert('프리셋 이름을 입력하세요.');return}const p=profiles();p[name]=snapshot();saveProfiles(p);$('presetSelect').value=name;$('activePresetLabel').textContent=name;saveLocal()});$('loadPreset').addEventListener('click',()=>{const name=$('presetSelect').value,p=profiles();if(name&&p[name]){$('activePresetLabel').textContent=name;applySnapshot(p[name]);saveLocal()}});$('deletePreset').addEventListener('click',()=>{const name=$('presetSelect').value;if(!name)return;const p=profiles();delete p[name];saveProfiles(p);$('activePresetLabel').textContent='현재 입력'});}
 renderOptionRows();renderProfileSelect();bind();loadData();renderAll();
