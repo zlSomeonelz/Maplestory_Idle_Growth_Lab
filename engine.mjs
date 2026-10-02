@@ -233,16 +233,43 @@ export function calculateCombatPower(s = {}, rules = {}) {
   };
 }
 
-export function cubeTargetSummary(slotProbabilities = [], cost = 0) {
-  const probabilities = (slotProbabilities || []).map(value => clamp((Number(value) || 0) / 100, 0, 1));
-  const missProbability = probabilities.reduce((miss, probability) => miss * (1 - probability), 1);
-  const probability = 1 - missProbability;
+export function cubeTargetSummary(slotOptions = [], goals = [], mode = 'any', cost = 0) {
+  const targetGoals = [...new Set((goals || []).filter(Boolean))];
+  const slots = (slotOptions || []).map(options => {
+    const probabilities = {};
+    for (const item of options || []) probabilities[item.option] = clamp((Number(item.settingPercent) || 0) / 100, 0, 1);
+    return probabilities;
+  });
+  if (!targetGoals.length || !slots.length) return { goals: targetGoals, mode, probability: 0, expectedAttempts: Infinity, expectedCost: null, slotProbabilities: [] };
+  let probability;
+  if (mode === 'all') {
+    let states = new Map([[0, 1]]);
+    for (const slot of slots) {
+      const next = new Map();
+      const targetProbability = targetGoals.reduce((sum, goal) => sum + (slot[goal] || 0), 0);
+      const outcomes = [[0, Math.max(0, 1 - targetProbability)]];
+      targetGoals.forEach((goal, index) => outcomes.push([1 << index, slot[goal] || 0]));
+      for (const [mask, stateProbability] of states) {
+        for (const [outcomeMask, outcomeProbability] of outcomes) {
+          if (!outcomeProbability) continue;
+          const nextMask = mask | outcomeMask;
+          next.set(nextMask, (next.get(nextMask) || 0) + stateProbability * outcomeProbability);
+        }
+      }
+      states = next;
+    }
+    probability = states.get((1 << targetGoals.length) - 1) || 0;
+  } else {
+    probability = 1 - slots.reduce((miss, slot) => miss * (1 - targetGoals.reduce((sum, goal) => sum + (slot[goal] || 0), 0)), 1);
+  }
   const expectedAttempts = probability > 0 ? 1 / probability : Infinity;
   return {
-    slotProbabilities: probabilities,
+    goals: targetGoals,
+    mode,
     probability,
     expectedAttempts,
     expectedCost: cost ? expectedAttempts * Number(cost) : null,
+    slotProbabilities: slots.map(slot => targetGoals.reduce((sum, goal) => sum + (slot[goal] || 0), 0)),
   };
 }
 

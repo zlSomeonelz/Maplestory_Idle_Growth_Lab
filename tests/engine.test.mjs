@@ -55,9 +55,12 @@ assert.ok(pvpHigherDefense.average < pvp.average, 'higher target defense should 
 const colosseum = calculatePvpDamage({ ...pvpBase, pvpContent: 'colosseum', level: 120 }, { ...rules, pvp: { constants: { colosseum: 4323600000 } } });
 assert.ok(colosseum.average < pvp.average, 'Colosseum constant and level penalty should reduce damage');
 
-const cube = cubeTargetSummary([2.5, 2.5, 2.5], 1000);
+const cubeSlots = [{ option: 'A', settingPercent: 2.5 }, { option: 'B', settingPercent: 4 }];
+const cube = cubeTargetSummary([cubeSlots, cubeSlots, cubeSlots], ['A'], 'any', 1000);
 assert.equal(Number((cube.probability * 100).toFixed(4)), 7.3141, 'three-slot target probability should combine independent slot chances');
 assert.equal(Number(cube.expectedAttempts.toFixed(4)), 13.6723, 'expected cube count should use the one-or-more target probability');
 assert.equal(Number(cube.expectedCost.toFixed(2)), 13672.29, 'expected cube cost should use cube cost');
+const cubeAll = cubeTargetSummary([cubeSlots, cubeSlots, cubeSlots], ['A', 'B'], 'all');
+assert.equal(Number((cubeAll.probability * 100).toFixed(4)), 0.5805, 'all-target probability should require every selected option');
 
 console.log('engine tests passed');
