@@ -105,7 +105,8 @@ function activateContent(id, { load = true } = {}) {
   selectedId = id;
   const content = contentById(id);
   const record = recordFor(id);
-  if (load && record.snapshot) applySnapshot(record.snapshot);
+  const sourceRecord = record.enabled ? record : recordFor('chapter-hunt');
+  if (load && sourceRecord.snapshot) applySnapshot(sourceRecord.snapshot);
   if (content?.stageMode && $('stageMode')) {
     $('stageMode').value = content.stageMode;
     $('stageMode').dispatchEvent(new Event('input', { bubbles: true }));
@@ -143,8 +144,8 @@ function render() {
           <label>HP 물약 자동 사용 기준%<input id="contentHpThreshold" type="number" min="0" max="100" step="1" value="${record.hpThreshold}"></label>
           <label>MP 물약 자동 사용 기준%<input id="contentMpThreshold" type="number" min="0" max="100" step="1" value="${record.mpThreshold}"></label>
         </div>
-        <div class="content-preset-actions"><button type="button" class="button primary" id="saveContentPreset">현재 입력을 이 콘텐츠에 저장</button><button type="button" class="button secondary" id="copyContentPreset">현재 프리셋 조합 복사</button><button type="button" class="button ghost" id="resetContentPreset">콘텐츠 설정 초기화</button></div>
-        <div class="content-preset-status" aria-live="polite">${record.snapshot ? '저장된 계산 입력이 있어 콘텐츠 선택 시 함께 적용됩니다.' : '저장된 계산 입력 없음 · 현재 캐릭터 프리셋을 사용합니다.'}</div>
+        <div class="content-preset-actions"><button type="button" class="button primary" id="saveContentPreset">현재 입력을 이 콘텐츠에 저장</button><select id="copyFromContent" aria-label="복사할 콘텐츠">${allContents().map(item => `<option value="${item.id}"${item.id === content.id ? ' disabled' : ''}>${item.label}</option>`).join('')}</select><button type="button" class="button secondary" id="copyContentPreset">선택한 콘텐츠에서 복사</button><button type="button" class="button ghost" id="resetContentPreset">콘텐츠 설정 초기화</button></div>
+        <div class="content-preset-status" aria-live="polite">${!record.enabled ? '비활성화 상태 · 챕터 사냥 프리셋 조합을 사용합니다.' : record.snapshot ? '저장된 계산 입력이 있어 콘텐츠 선택 시 함께 적용됩니다.' : '저장된 계산 입력 없음 · 현재 캐릭터 프리셋을 사용합니다.'}</div>
       </div>
     </div>`;
   root.querySelectorAll('[data-content-id]').forEach(button => button.addEventListener('click', () => activateContent(button.dataset.contentId)));
@@ -154,12 +155,11 @@ function render() {
   $('contentMpThreshold')?.addEventListener('input', event => { record.mpThreshold = Number(event.target.value) || 0; persist(); });
   $('saveContentPreset')?.addEventListener('click', () => { record.snapshot = formSnapshot(); record.enabled = true; persist(); render(); });
   $('copyContentPreset')?.addEventListener('click', () => {
-    const source = prompt('복사할 콘텐츠 ID를 입력하세요. 예: chapter-hunt');
+    const source = $('copyFromContent')?.value;
     if (!source || !contentById(source)) return;
     const sourceRecord = recordFor(source);
     record.components = { ...sourceRecord.components };
     record.hpThreshold = sourceRecord.hpThreshold;
-    record.mpThreshold = sourceRecord.mpThreshold;
     record.mpThreshold = sourceRecord.mpThreshold;
     record.snapshot = sourceRecord.snapshot ? JSON.parse(JSON.stringify(sourceRecord.snapshot)) : null;
     persist();
