@@ -172,7 +172,7 @@ function renderStatEditor(slot) {
     <div class="stat-slot-editor">
       <div class="stat-slot-editor-heading">
         <div>
-          <strong>${escapeHtml(slot.name)} 상세 스탯 편집 (Mekicalc 방식)</strong>
+          <strong>${escapeHtml(slot.name)} 상세 스탯 직접 편집</strong>
           <p>이 슬롯의 스탯 수치를 직접 수정하거나 현재 폼에서 불러올 수 있습니다.</p>
         </div>
         <div class="stat-preset-quick-actions">
