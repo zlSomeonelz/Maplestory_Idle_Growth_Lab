@@ -45,3 +45,6 @@ GitHub Pages 정적 사이트입니다.
 
 - 저장소: https://github.com/zlSomeonelz/Maplestory_Idle_Growth_Lab
 - 사이트: https://zlsomeonelz.github.io/Maplestory_Idle_Growth_Lab/
+## 인수인계
+
+계산 알고리즘, 데이터 상태, 검증 방법, 남은 작업은 [`HANDOFF.md`](HANDOFF.md)에 정리되어 있습니다.
