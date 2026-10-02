@@ -53,6 +53,10 @@
               <label>레벨<input id="level" type="number" min="1" value="100"></label>
               <label>공격력(+)<input id="attackFlat" type="number" min="0" step="0.01" value="1000"></label>
               <label>공격력%<input id="attackPct" type="number" min="0" step="0.01" value="0"></label>
+              <label>최대 HP<input id="maxHp" type="number" min="0" step="1" value="0"></label>
+              <label>캐릭터 방어력<input id="playerDefense" type="number" min="0" step="1" value="0"></label>
+              <label>최대 MP<input id="maxMp" type="number" min="0" step="1" value="500"></label>
+              <label>회피<input id="evasion" type="number" min="0" step="0.01" value="0"></label>
               <label>주스탯(+)<input id="mainStat" type="number" min="0" step="0.01" value="1000"></label>
               <label>주스탯%<input id="mainStatPct" type="number" min="0" step="0.01" value="0"></label>
               <label>부스탯(+)<input id="subStat" type="number" min="0" step="0.01" value="400"></label>
@@ -68,6 +72,27 @@
               <label>기본 공격 간격(초)<input id="attackInterval" type="number" min="0.01" step="0.01" value="1"></label>
               <label>공격 속도%<input id="attackSpeed" type="number" min="0" step="0.01" value="0"></label>
             </div>
+            <details class="companion-box" open>
+              <summary class="companion-heading"><strong>전투력 보조 능력치</strong><span class="badge official">공식 전투력 식</span></summary>
+              <p class="hint">전투력에만 사용하는 선택 입력입니다. 모르는 값은 0으로 두어도 되지만, 실제 게임 전투력과의 비교에는 입력 범위를 맞춰야 합니다.</p>
+              <div class="fields compact">
+                <label>상태이상 데미지%<input id="statusDamage" type="number" step="0.01" value="0"></label>
+                <label>버프 지속시간 증가%<input id="buffDuration" type="number" step="0.01" value="0"></label>
+                <label>동료 소환 지속시간 증가%<input id="companionSummonDuration" type="number" step="0.01" value="0"></label>
+                <label>고정 쿨타임 감소(초)<input id="fixedCooldownReductionSeconds" type="number" min="0" step="0.01" value="0"></label>
+                <label>쿨타임 감소%<input id="cooldownReductionPercent" type="number" min="0" step="0.01" value="0"></label>
+                <label>기본 공격 대상 수 증가<input id="basicAttackTargetCountIncrease" type="number" min="0" step="1" value="0"></label>
+                <label>받는 피해 감소%<input id="receivedDamageReduction" type="number" min="0" step="0.01" value="0"></label>
+                <label>1차 스킬 레벨<input id="firstSkillLevel" type="number" min="0" step="1" value="0"></label>
+                <label>2차 스킬 레벨<input id="secondSkillLevel" type="number" min="0" step="1" value="0"></label>
+                <label>3차 스킬 레벨<input id="thirdSkillLevel" type="number" min="0" step="1" value="0"></label>
+                <label>4차 스킬 레벨<input id="fourthSkillLevel" type="number" min="0" step="1" value="0"></label>
+                <label>모든 스킬 레벨<input id="allSkillLevel" type="number" min="0" step="1" value="0"></label>
+                <label>주스탯 마스터리 개수<input id="mainMasteryCount" type="number" min="0" step="1" value="0"></label>
+                <label>부스탯 마스터리 개수<input id="subMasteryCount" type="number" min="0" step="1" value="0"></label>
+              </div>
+            </details>
+
             <div class="companion-box">
               <div class="companion-heading"><strong>메인 동료 장착 효과</strong><span class="badge provisional">외부 클라이언트 데이터</span></div>
               <div class="fields compact">
@@ -109,6 +134,7 @@
             <div class="metric"><span>예상 DPS</span><strong id="dps">—</strong><small id="dpsNote">기본 공격 간격·공격 속도 기준</small></div>
             <div class="metric"><span>방어 적용 배율</span><strong id="defenseFactor">—</strong><small id="defenseNote">방어력 입력 전</small></div>
             <div class="metric"><span>스탯 비례 데미지</span><strong id="statDamage">—</strong><small>주스탯 100당 1%, 부스탯 400당 1%</small></div>
+            <div class="metric power-metric"><span>전투력</span><strong id="combatPower">—</strong><small id="combatPowerNote">DPS와 별도로 공식식 계산</small></div>
           </div>
           <div class="breakdown" id="combatBreakdown">입력을 바꾸면 계산 결과가 여기에 표시됩니다.</div>
           <div class="stage-verdict" id="stageVerdict">목표 스테이지를 선택하면 클리어 가능성과 병목을 진단합니다.</div>

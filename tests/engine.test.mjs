@@ -1,13 +1,16 @@
 import assert from 'node:assert/strict';
-import { calculateDamage, probabilitySummary } from '../engine.mjs';
+import { calculateCombatPower, calculateDamage, calculateDps, probabilitySummary } from '../engine.mjs';
 
 const base = { attackFlat: 1000, attackPct: 0, targetDefense: 0, defPen: 0, target: 'normal', targetTaken: 0, damage: 0, damageAmp: 0, normalDamage: 0, bossDamage: 0, basicDamage: 0, skillDamage: 0, statBased: 0, mastery: 0, critRate: 0, critDamage: 0, minDamage: 100, maxDamage: 100, finalDamage: 0, skillCoefficient: 100, accuracy: 100, attackInterval: 1, attackSpeed: 0 };
-
-const rules = { caps: { defensePenetration: 1000, attackSpeed: 1500 } };
+const rules = { caps: { defensePenetration: 1000, attackSpeed: 1500 }, battlePower: { base: 'attack*3 + maxHp*0.05 + defense*0.2' } };
 
 let r = calculateDamage(base, rules);
 assert.equal(r.average, 1000, 'baseline damage should equal attack when every multiplier is neutral');
 assert.equal(r.dps, 1000, 'baseline DPS should equal damage at one-second interval');
+assert.equal(calculateDps(1000, base, rules).dps, 1000, 'DPS helper should match calculateDamage');
+
+r = calculateDamage({ ...base, statBased: 10 }, rules);
+assert.equal(r.average, 1100, '10% stat-based damage should apply as a 1.1 multiplier');
 
 r = calculateDamage({ ...base, targetDefense: 6000 }, rules);
 assert.equal(r.defenseFactor, 5000 / 12000, 'defense formula must use +6000 denominator');
@@ -36,5 +39,10 @@ assert.equal(Number(r.effectiveDefPen.toFixed(6)), 60, 'defense penetration addi
 
 r = calculateDamage({ ...base, attackSpeed: 100, attackSpeedAdditions: [20] }, rules);
 assert.equal(Number(r.effectiveAttackSpeed.toFixed(6)), 106.666667, 'attack speed additions use remaining-gap diminishing');
+
+const power = calculateCombatPower({ attackFlat: 1000, attackPct: 0, maxHp: 0, playerDefense: 0, maxMp: 500, minDamage: 65, maxDamage: 100, accuracy: 0 }, rules);
+assert.equal(power.power, 3000, 'neutral battle-power inputs should equal attack*3');
+const powered = calculateCombatPower({ attackFlat: 1000, maxHp: 10000, playerDefense: 5000, maxMp: 1500, damage: 20, attackSpeed: 10, critRate: 50, critDamage: 20, minDamage: 65, maxDamage: 100, accuracy: 100 }, rules);
+assert.ok(powered.power > power.power, 'positive battle-power stats should increase power');
 
 console.log('engine tests passed');
