@@ -61,7 +61,7 @@ function defaultAssignments() {
   return Object.fromEntries(COMPONENTS.map(([type]) => [type, `${type}-1`]));
 }
 function defaultState() {
-  return { activeContent: 'chapter-hunt', activeLibraryType: 'stats', library: createLibrary(), assignments: {}, contentSnapshots: {}, contentSettings: {} };
+  return { activeContent: 'chapter-hunt', activeLibraryType: 'stats', companionSlotCount: 6, library: createLibrary(), assignments: {}, contentSnapshots: {}, contentSettings: {} };
 }
 function migrateState(saved) {
   const next = defaultState();
@@ -88,6 +88,7 @@ function migrateState(saved) {
     next.contentSettings = saved.contentSettings || {};
     next.activeContent = saved.activeContent || next.activeContent;
     next.activeLibraryType = COMPONENTS.some(([type]) => type === saved.activeLibraryType) ? saved.activeLibraryType : 'stats';
+    next.companionSlotCount = Math.max(1, Math.min(6, Number(saved.companionSlotCount) || 6));
     return next;
   }
   // Preserve the previous 1차 content settings where possible.
@@ -97,6 +98,7 @@ function migrateState(saved) {
     next.contentSettings[contentId] = { enabled: old.enabled !== false, hpThreshold: old.hpThreshold ?? 80, mpThreshold: old.mpThreshold ?? 20 };
   });
   next.activeContent = saved.activeContent || next.activeContent;
+  next.companionSlotCount = Math.max(1, Math.min(6, Number(saved.companionSlotCount) || 6));
   return next;
 }
 function loadState() {
@@ -148,7 +150,7 @@ function companionEffect() {
   const slot = slotFor('companion', assignmentsFor(selectedId).companion);
   const values = {};
   const members = [];
-  (slot.members || []).forEach(member => {
+  (slot.members || []).slice(0, state.companionSlotCount || 6).forEach(member => {
     const supporter = companionRuntime.supporters?.find(item => item.supporterIndex === Number(member.supporterIndex));
     if (!supporter) return;
     const record = companionRuntime.equippedStats?.[`${supporter.typeId}:${supporter.grade}`];
@@ -170,7 +172,8 @@ function renderCompanionEditor(slot) {
   const candidates = companionCandidates();
   const options = `<option value="">미지정</option>${candidates.map(item => `<option value="${item.supporterIndex}">${companionLabel(item)}</option>`).join('')}`;
   const members = Array.from({ length: COMPANION_MEMBER_COUNT }, (_, index) => slot.members?.[index] || {});
-  return `<div class="companion-slot-editor"><div class="companion-slot-editor-heading"><div><strong>${slot.name} 구성</strong><p>현재 직업에 맞는 동료를 선택하고 레벨을 입력하세요.</p></div><span class="badge provisional">OCR 연결 예정</span></div><div class="companion-member-grid">${members.map((member, index) => { const chosen = candidates.find(item => item.supporterIndex === Number(member.supporterIndex)); const max = chosen?.maxLevel || 1; return `<div class="companion-member-row"><span>${index + 1}</span><select data-companion-supporter="${index}">${options.replace(`value="${member.supporterIndex}"`, `value="${member.supporterIndex}" selected`)}</select><input data-companion-level="${index}" type="number" min="1" max="${max}" value="${member.level || 1}" aria-label="동료 ${index + 1} 레벨"></div>`; }).join('')}</div><p class="hint">저장된 동료 슬롯은 등급·레벨별 기존 효과 데이터를 계산에 합산합니다. 인식 결과를 확인한 뒤 OCR 가져오기를 연결할 수 있습니다.</p></div>`;
+  const unlocked = Math.max(1, Math.min(6, Number(state.companionSlotCount) || 6));
+  return `<div class="companion-slot-editor"><div class="companion-slot-editor-heading"><div><strong>${slot.name} 구성</strong><p>현재 직업에 맞는 동료를 선택하고 레벨을 입력하세요.</p></div><span class="badge provisional">OCR 연결 예정</span></div><label class="companion-unlocked-label">현재 열린 동료 슬롯 수<select id="companionUnlockedCount">${Array.from({ length: 6 }, (_, index) => `<option value="${index + 1}"${unlocked === index + 1 ? ' selected' : ''}>${index + 1}개</option>`).join('')}</select></label><div class="companion-member-grid">${members.map((member, index) => { const chosen = candidates.find(item => item.supporterIndex === Number(member.supporterIndex)); const max = chosen?.maxLevel || 1; const locked = index >= unlocked; return `<div class="companion-member-row${locked ? ' locked' : ''}"><span>${index + 1}</span><select data-companion-supporter="${index}"${locked ? ' disabled' : ''}>${options.replace(`value="${member.supporterIndex}"`, `value="${member.supporterIndex}" selected`)}</select><input data-companion-level="${index}" type="number" min="1" max="${max}" value="${member.level || 1}" aria-label="동료 ${index + 1} 레벨"${locked ? ' disabled' : ''}></div>`; }).join('')}</div><p class="hint">열린 슬롯 수만 효과 계산과 동료 최적화에 사용합니다. 잠긴 슬롯은 미리 저장해 둘 수 있지만 계산에서 제외됩니다.</p></div>`;
 }
 function activateContent(id, { load = true } = {}) {
   selectedId = id;
@@ -236,6 +239,7 @@ function render() {
   root.querySelectorAll('[data-edit-companion]').forEach(button => button.addEventListener('click', () => { state.activeLibraryType = 'companion'; activeCompanionSlotId = button.dataset.editCompanion; persist(); render(); }));
   root.querySelectorAll('[data-companion-supporter]').forEach(select => select.addEventListener('change', event => { const slot = slotFor('companion', activeCompanionSlotId || assignmentsFor(selectedId).companion); const index = Number(event.target.dataset.companionSupporter); slot.members[index] = { supporterIndex: Number(event.target.value) || null, level: 1 }; persist(); render(); exposeCompanionBridge(); }));
   root.querySelectorAll('[data-companion-level]').forEach(input => input.addEventListener('input', event => { const slot = slotFor('companion', activeCompanionSlotId || assignmentsFor(selectedId).companion); const index = Number(event.target.dataset.companionLevel); slot.members[index] = { ...(slot.members[index] || {}), level: Number(event.target.value) || 1 }; persist(); exposeCompanionBridge(); }));
+  $('companionUnlockedCount')?.addEventListener('change', event => { state.companionSlotCount = Math.max(1, Math.min(6, Number(event.target.value) || 6)); persist(); render(); exposeCompanionBridge(); });
   root.querySelectorAll('[data-equip-slot]').forEach(button => button.addEventListener('click', () => { const type = state.activeLibraryType; const slot = slotFor(type, button.dataset.equipSlot); assignmentsFor(selectedId)[type] = slot.id; if (type === 'companion') activeCompanionSlotId = slot.id; if (type === 'stats' && slot.snapshot) applySnapshot(slot.snapshot); persist(); render(); exposeCompanionBridge(); }));
   root.querySelectorAll('[data-save-slot]').forEach(button => button.addEventListener('click', () => { const slot = slotFor('stats', button.dataset.saveSlot); slot.snapshot = formSnapshot(STAT_FIELD_IDS); assignmentsFor(selectedId).stats = slot.id; persist(); render(); }));
   root.querySelectorAll('[data-apply-slot]').forEach(button => button.addEventListener('click', () => { const slot = slotFor('stats', button.dataset.applySlot); if (slot.snapshot) applySnapshot(slot.snapshot); assignmentsFor(selectedId).stats = slot.id; persist(); render(); }));
