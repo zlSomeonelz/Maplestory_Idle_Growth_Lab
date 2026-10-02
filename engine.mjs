@@ -74,6 +74,83 @@ export function calculateDamage(s, rules = {}) {
 const permille = value => (Number(value) || 0) * 10;
 const powerFactor = value => 1 + (Number(value) || 0) / 1000000;
 
+const PVP_CONTENT_KEYS = { arena: 'arena', worldArena: 'worldArena', colosseum: 'colosseum' };
+
+function pvpLevelAdjustment(level, content = 'arena') {
+  const value = Math.max(1, Math.floor(Number(level) || 1));
+  const brackets = content === 'colosseum'
+    ? [[31, 60, 0.005], [61, 70, 0.013], [71, 100, 0.015], [101, Infinity, 0.025]]
+    : [[31, 60, 0.005], [61, 100, 0.013], [101, Infinity, 0.015]];
+  let multiplier = 1;
+  for (const [from, to, penalty] of brackets) {
+    const count = Math.max(0, Math.min(value, to) - from + 1);
+    if (count > 0) multiplier *= Math.pow(1 - penalty, count);
+  }
+  return multiplier;
+}
+
+/**
+ * PvP damage from the official arena/world-arena/colosseum rules.
+ * The target's max HP, defense, and received-damage reduction are supplied in
+ * targetMaxHp/targetDefense/targetReceivedDamageReduction.
+ */
+export function calculatePvpDamage(s, rules = {}) {
+  const content = PVP_CONTENT_KEYS[s.pvpContent] || 'arena';
+  const attack = (Number(s.attackFlat) || 0) * pct(s.attackPct);
+  const targetDefense = Math.max(0, Number(s.targetDefense) || 0);
+  const targetMaxHp = Math.max(1, Number(s.targetMaxHp ?? s.targetHp) || 1);
+  const defPenCap = Number(rules?.caps?.defensePenetration || 1000) / 10;
+  const effectiveDefPen = diminishingSum(s.defPen, s.defPenAdditions, defPenCap);
+  const afterDef = targetDefense * (1 - effectiveDefPen / 100);
+  const defenseFactor = targetDefense > 0 ? 5000 / (afterDef + 6000) : 1;
+  const targetReduction = clamp(Number(s.targetReceivedDamageReduction) || 0, 0, 95);
+  const basicAndSkill = ((Number(s.basicDamage) || 0) + (Number(s.skillDamage) || 0)) / 2;
+  const critChance = clamp((Number(s.critRate) || 0) / 100, 0, 1);
+  const critFactor = 1 + critChance * ((Number(s.critDamage) || 0) / 100);
+  const min = Number(s.minDamage) > 0 ? Number(s.minDamage) / 100 : 1;
+  const max = Number(s.maxDamage) > 0 ? Number(s.maxDamage) / 100 : 1;
+  const rangeFactor = (min + Math.max(min, max)) / 2;
+  const generalBase = attack * defenseFactor * pct(s.targetTaken) * (1 - targetReduction / 100) * pct(s.damage) * pct(s.damageAmp) * pct(basicAndSkill) * pct(Number(s.statBased) || 0) * pct(s.mastery) * critFactor * rangeFactor * pct(s.finalDamage);
+  const baseWithoutSkill = Math.max(0, generalBase);
+
+  const damage = permille(s.damage);
+  const damageAmp = permille(s.damageAmp);
+  const basicSkillPermille = permille(basicAndSkill);
+  const statBased = permille(s.statBased);
+  const critDamage = 300 + permille(s.critDamage);
+  const critRate = Math.min(1000, permille(s.critRate));
+  const minMaxAverage = (permille(s.minDamage) + permille(s.maxDamage)) / 2;
+  const finalDamage = permille(s.finalDamage);
+  const pvpCore = attack * Math.max(0, effectiveDefPen * 10) * Math.max(0, damage) * Math.max(0, damageAmp) * Math.max(0, basicSkillPermille / 2) * Math.max(0, statBased) * Math.max(0, critDamage * critRate / 1000) * Math.max(0, minMaxAverage) * Math.max(0, finalDamage) + 1000000000;
+  const constant = Number(rules?.pvp?.constants?.[content] || 7206000000);
+  const denominator = Math.pow(pvpCore, 0.23)
+    * Math.pow(targetMaxHp * 100000000, 0.12)
+    * Math.pow((targetDefense + 6000) * 1000000000000, 0.14)
+    * Math.pow((1000 + permille(targetReduction)) * 1000000, 0.5)
+    / 10000000;
+  const pvpDamageAdjustment = denominator > 0 ? constant / denominator / 1000000 : 0;
+  const levelAdjustment = pvpLevelAdjustment(s.level, content);
+  const skillCoefficient = (Number(s.skillCoefficient) || 0) / 100;
+  const average = Math.sqrt(baseWithoutSkill) * skillCoefficient * levelAdjustment * pvpDamageAdjustment * 2;
+  const dps = calculateDps(average, s, rules);
+  return {
+    average,
+    min: average * (min / Math.max(rangeFactor, 0.0001)),
+    max: average * (Math.max(min, max) / Math.max(rangeFactor, 0.0001)),
+    ...dps,
+    attack,
+    afterDef,
+    effectiveDefPen,
+    defenseFactor,
+    levelAdjustment,
+    pvpDamageAdjustment,
+    content,
+    targetReduction,
+    targetMaxHp,
+    provisional: false,
+  };
+}
+
 /**
  * Official battle-power calculation.
  * Inputs use the same display units as the calculator UI. Optional fields that

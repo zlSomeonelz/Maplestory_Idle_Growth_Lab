@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { calculateCombatPower, calculateDamage, calculateDps, probabilitySummary } from '../engine.mjs';
+import { calculateCombatPower, calculateDamage, calculateDps, calculatePvpDamage, probabilitySummary } from '../engine.mjs';
 
 const base = { attackFlat: 1000, attackPct: 0, targetDefense: 0, defPen: 0, target: 'normal', targetTaken: 0, damage: 0, damageAmp: 0, normalDamage: 0, bossDamage: 0, basicDamage: 0, skillDamage: 0, statBased: 0, mastery: 0, critRate: 0, critDamage: 0, minDamage: 100, maxDamage: 100, finalDamage: 0, skillCoefficient: 100, accuracy: 100, attackInterval: 1, attackSpeed: 0 };
 const rules = { caps: { defensePenetration: 1000, attackSpeed: 1500 }, battlePower: { base: 'attack*3 + maxHp*0.05 + defense*0.2' } };
@@ -44,5 +44,15 @@ const power = calculateCombatPower({ attackFlat: 1000, attackPct: 0, maxHp: 0, p
 assert.equal(power.power, 3000, 'neutral battle-power inputs should equal attack*3');
 const powered = calculateCombatPower({ attackFlat: 1000, maxHp: 10000, playerDefense: 5000, maxMp: 1500, damage: 20, attackSpeed: 10, critRate: 50, critDamage: 20, minDamage: 65, maxDamage: 100, accuracy: 100 }, rules);
 assert.ok(powered.power > power.power, 'positive battle-power stats should increase power');
+
+
+const pvpBase = { ...base, target: 'pvp', pvpContent: 'arena', level: 30, targetMaxHp: 100000, targetReceivedDamageReduction: 0, accuracy: 100, defPen: 20, damage: 50, damageAmp: 20, basicDamage: 30, skillDamage: 40, statBased: 10, critRate: 50, critDamage: 30, minDamage: 65, maxDamage: 100, finalDamage: 20, skillCoefficient: 100 };
+const pvp = calculatePvpDamage(pvpBase, { ...rules, pvp: { constants: { arena: 7206000000, worldArena: 5764800000, colosseum: 4323600000 } } });
+assert.ok(Number.isFinite(pvp.average) && pvp.average > 0, 'PvP damage should be finite and positive');
+assert.equal(pvp.levelAdjustment, 1, 'level 30 should have no PvP level penalty');
+const pvpHigherDefense = calculatePvpDamage({ ...pvpBase, targetDefense: 10000 }, { ...rules, pvp: { constants: { arena: 7206000000 } } });
+assert.ok(pvpHigherDefense.average < pvp.average, 'higher target defense should reduce PvP damage');
+const colosseum = calculatePvpDamage({ ...pvpBase, pvpContent: 'colosseum', level: 120 }, { ...rules, pvp: { constants: { colosseum: 4323600000 } } });
+assert.ok(colosseum.average < pvp.average, 'Colosseum constant and level penalty should reduce damage');
 
 console.log('engine tests passed');
