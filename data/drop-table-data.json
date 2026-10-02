@@ -1,0 +1,47 @@
+{
+  "_metadata": {
+    "source_uri": "https://mapleidleindex.com/droptable/",
+    "extracted_at": "2026-10-02",
+    "description": "Party Quest monster stats, equipment drop table rates, and burning bonus rates"
+  },
+  "pq_meta": {
+    "first": {
+      "name": "첫 번째 동행",
+      "item": "반지1",
+      "chaos": true
+    },
+    "dimensional": {
+      "name": "차원의 균열",
+      "item": "목걸이",
+      "chaos": true
+    },
+    "goddess": {
+      "name": "여신의 흔적",
+      "item": "얼굴장식",
+      "chaos": true
+    },
+    "romeo": {
+      "name": "로미오와 줄리엣",
+      "item": "반지2",
+      "chaos": false
+    }
+  },
+  "rates": {
+    "easy": {
+      "normal": 0.25,
+      "burning_up": 0.5
+    },
+    "normal": {
+      "normal": 0.3,
+      "burning_up": 0.6
+    },
+    "hard": {
+      "normal": 0.35,
+      "burning_up": 0.7
+    },
+    "chaos": {
+      "normal": 0.4,
+      "burning_up": 0.8
+    }
+  }
+}

@@ -90,5 +90,30 @@ const effs = calculateStatEfficiencies(base, rules);
 assert.ok(Array.isArray(effs) && effs.length === 12, 'calculateStatEfficiencies should return array of 12 ranked stat gains');
 assert.equal(effs[0].key, 'ATK_FLAT', '+1,000 attack flat on 1,000 base should give top percentage DPS increase (+100%)');
 
+// Dataset Integrity Tests
+import fs from 'node:fs';
+
+const bossData = JSON.parse(fs.readFileSync('data/boss-data.json', 'utf8'));
+assert.ok(bossData.pinkbean_raid.length >= 6, 'pinkbean_raid should have at least 6 difficulty rows');
+assert.ok(bossData.boss_raid.length >= 16, 'boss_raid should have at least 16 difficulty rows');
+assert.ok(bossData.world_boss.length >= 20, 'world_boss should have 20 level rows');
+
+const growthData = JSON.parse(fs.readFileSync('data/growth-dungeon-data.json', 'utf8'));
+assert.equal(growthData.weapon_dungeon.length, 150, 'weapon_dungeon should have 150 stage rows');
+assert.equal(growthData.exp_dungeon.length, 150, 'exp_dungeon should have 150 stage rows');
+assert.equal(growthData.gear_dungeon.length, 150, 'gear_dungeon should have 150 stage rows');
+assert.equal(growthData.training_ground.length, 150, 'training_ground should have 150 stage rows');
+assert.equal(growthData.enhance_dungeon.length, 150, 'enhance_dungeon should have 150 stage rows');
+
+const guildData = JSON.parse(fs.readFileSync('data/guild-data.json', 'utf8'));
+assert.equal(guildData.guild_boss.length, 51, 'guild_boss should have 51 tier rows');
+assert.equal(guildData.guild_league.length, 81, 'guild_league should have 81 wave rows');
+assert.equal(guildData.training_regular.length, 50, 'training_regular should have 50 stage rows');
+assert.equal(guildData.training_special.length, 50, 'training_special should have 50 stage rows');
+
+const dropData = JSON.parse(fs.readFileSync('data/drop-table-data.json', 'utf8'));
+assert.ok(dropData.pq_meta.first, 'dropTableData should contain PQ metadata for first companion');
+assert.ok(dropData.rates.easy.normal, 'dropTableData should contain rates');
+
 console.log('engine tests passed');
 

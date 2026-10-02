@@ -35,11 +35,161 @@ function applySelectedCubeOption(){const block=selectedCubeBlock(),item=block?.o
 
 function renderJobStatMapping(){const box=$('jobStatMapping');if(!box)return;const job=DATA.jobs?.jobs?.[$('job')?.value];if(!job){box.textContent='직업을 선택하면 주·부 스탯 매핑을 표시합니다.';return}const mode=$('statInputMode')?.value||'aggregate';const main=(job.main||[]).join(', ')||'미확인';const sub=(job.sub||[]).join(', ')||'미확인';box.innerHTML=`주스탯 <b>${main}</b> · 부스탯 <b>${sub}</b> · ${mode==='job'?'원시 스탯 입력을 계산에 사용합니다.':'주·부 스탯 합산값을 직접 사용합니다.'}`;}
 function fillJobs(){const sel=$('job');const jobs=DATA.jobs?.jobs||{};Object.entries(jobs).forEach(([id])=>sel.insertAdjacentHTML('beforeend',`<option value="${id}">${JOB_NAMES[id]||id}</option>`));renderJobStatMapping();renderCompanionEffect()}
-function stageRows(){const mode=$('stageMode')?.value||'hunt';return DATA.stageData?.[mode]||[]}
-function fillStageChapters(){const sel=$('stageChapter');if(!sel)return;const chapters=[...new Set(stageRows().map(x=>x.chapter))].sort((a,b)=>a-b);const current=sel.value;const next=current||String(chapters[0]||'');sel.innerHTML='<option value="">챕터 선택</option>'+chapters.map(c=>`<option value="${c}">${c}장</option>`).join('');if(chapters.includes(Number(next)))sel.value=next;fillStages()}
-function fillStages(){const chapter=Number($('stageChapter')?.value||0),sel=$('stageSelect');if(!sel)return;const rows=stageRows().filter(x=>!chapter||x.chapter===chapter);const current=sel.value;sel.innerHTML='<option value="">스테이지 선택</option>'+rows.map((x,i)=>`<option value="${x.stage}">${x.stage} · ${x.category||'일반'}</option>`).join('');if(rows.some(x=>x.stage===current))sel.value=current;applyStageTarget()}
-function selectedStage(){const stage=$('stageSelect')?.value;return stage?stageRows().find(x=>x.stage===stage)||null:null}
-function applyStageTarget(){const row=selectedStage();if(!row)return;const def=(Number(row.Defence_min||0)+Number(row.Defence_max||row.Defence_min||0))/2;const isBoss=row.category==='보스'||(Boolean(row.BossHp_min)&&!row.NormalHp_min);const hpKey=$('stageMode').value==='trial'?(isBoss?'BossHp':'NormalHp'):'MaxHp';const minVal=Number(row[hpKey+'_min'])||Number(row.MaxHp_min)||Number(row.BossHp_min)||Number(row.NormalHp_min)||0;const maxVal=Number(row[hpKey+'_max'])||Number(row.MaxHp_max)||Number(row.BossHp_max)||Number(row.NormalHp_max)||minVal;const hp=(minVal+maxVal)/2;if(def)$('targetDefense').value=def;if(hp)$('targetHp').value=hp;if($('targetType').value!=='pvp')$('targetType').value=isBoss?'boss':'normal';renderStageVerdict()}
+function stageRows(){
+  const mode = $('stageMode')?.value || 'hunt';
+  if (mode === 'hunt') return DATA.stageData?.hunt || [];
+  if (mode === 'trial') return DATA.stageData?.trial || [];
+  if (mode === 'boss_raid') {
+    const pink = (DATA.bossData?.pinkbean_raid || []).map(x => ({
+      chapter: '핑크빈',
+      stage: `핑크빈 (${x.difficulty})`,
+      category: '보스',
+      Defence_min: Number(x.defence || 0),
+      Defence_max: Number(x.defence || 0),
+      BossHp_min: Number(x.visible_total || x.primary_hp || 0),
+      BossHp_max: Number(x.visible_total || x.primary_hp || 0),
+      avoid: x.avoid,
+      time_sec: x.time_sec || 480
+    }));
+    const raid = (DATA.bossData?.boss_raid || []).map(x => ({
+      chapter: x.boss,
+      stage: `${x.boss} (${x.difficulty})`,
+      category: '보스',
+      Defence_min: Number(x.defence || 0),
+      Defence_max: Number(x.defence || 0),
+      BossHp_min: Number(x.visible_total || x.primary_hp || 0),
+      BossHp_max: Number(x.visible_total || x.primary_hp || 0),
+      avoid: x.avoid,
+      time_sec: 180
+    }));
+    return [...pink, ...raid];
+  }
+  if (mode === 'world_boss') {
+    return (DATA.bossData?.world_boss || []).map(x => ({
+      chapter: '월드 보스',
+      stage: `월드보스 ${x.level}단계`,
+      category: '보스',
+      Defence_min: Number(x.defence || 0),
+      Defence_max: Number(x.defence || 0),
+      BossHp_min: Number(x.hp || 0),
+      BossHp_max: Number(x.hp || 0),
+      avoid: x.avoid,
+      time_sec: 180
+    }));
+  }
+  if (mode === 'growth_dungeon') {
+    const gd = DATA.growthDungeonData || {};
+    const weapon = (gd.weapon_dungeon || []).map(x => ({
+      chapter: '무기 던전',
+      stage: `무기 던전 ${x.stage}단계`,
+      category: '던전',
+      Defence_min: Number(x.defence || 0),
+      Defence_max: Number(x.defence || 0),
+      NormalHp_min: Number(x.hp || 0),
+      NormalHp_max: Number(x.hp || 0),
+      avoid: x.avoid,
+      time_sec: x.time_sec || 22
+    }));
+    const exp = (gd.exp_dungeon || []).map(x => ({
+      chapter: '경험치 던전',
+      stage: `경험치 던전 ${x.stage}단계`,
+      category: '던전',
+      Defence_min: Number(x.normal_defence || 0),
+      Defence_max: Number(x.normal_defence || 0),
+      NormalHp_min: Number(x.normal1_hp || 0),
+      NormalHp_max: Number(x.normal1_hp || 0),
+      avoid: x.normal_avoid,
+      time_sec: x.base_time_sec || 22
+    }));
+    const gear = (gd.gear_dungeon || []).map(x => ({
+      chapter: '장비 던전',
+      stage: `장비 던전 ${x.stage}단계`,
+      category: '던전',
+      Defence_min: Number(x.defence || 0),
+      Defence_max: Number(x.defence || 0),
+      NormalHp_min: Number(x.normal_hp || 0),
+      NormalHp_max: Number(x.normal_hp || 0),
+      avoid: x.normal_avoid,
+      time_sec: x.time_sec || 30
+    }));
+    const train = (gd.training_ground || []).map(x => ({
+      chapter: '용사의 수련장',
+      stage: `용사의 수련장 ${x.stage}단계`,
+      category: '던전',
+      Defence_min: Number(x.boss_defence || x.normal_defence || 0),
+      Defence_max: Number(x.boss_defence || x.normal_defence || 0),
+      BossHp_min: Number(x.boss_hp || x.normal_hp || 0),
+      BossHp_max: Number(x.boss_hp || x.normal_hp || 0),
+      avoid: x.boss_avoid,
+      time_sec: x.total_time_sec || 50
+    }));
+    const enh = (gd.enhance_dungeon || []).map(x => ({
+      chapter: '강화 던전',
+      stage: `강화 던전 ${x.stage}단계`,
+      category: '던전',
+      Defence_min: Number(x.defence || 0),
+      Defence_max: Number(x.defence || 0),
+      NormalHp_min: Number(x.hp || 0),
+      NormalHp_max: Number(x.hp || 0),
+      avoid: x.avoid,
+      time_sec: x.time_sec || 25
+    }));
+    return [...weapon, ...exp, ...gear, ...train, ...enh];
+  }
+  if (mode === 'guild_content') {
+    const g = DATA.guildData || {};
+    const gboss = (g.guild_boss || []).map(x => ({
+      chapter: '길드 토벌전',
+      stage: `길드 토벌전 ${x.stage}단계`,
+      category: '길드',
+      Defence_min: Number(x.defence || 0),
+      Defence_max: Number(x.defence || 0),
+      BossHp_min: Number(x.hp || 0),
+      BossHp_max: Number(x.hp || 0),
+      avoid: x.avoid,
+      time_sec: x.available_time_sec || 50
+    }));
+    const gleague = (g.guild_league || []).map(x => ({
+      chapter: '길드 대항전',
+      stage: `길드 대항전 Wave ${x.wave}`,
+      category: '길드',
+      Defence_min: Number(x.boss_defence || 0),
+      Defence_max: Number(x.boss_defence || 0),
+      BossHp_min: Number(x.wave_effective || x.boss_hp || 0),
+      BossHp_max: Number(x.wave_effective || x.boss_hp || 0),
+      avoid: x.boss_avoid,
+      time_sec: 60
+    }));
+    const gregular = (g.training_regular || []).map((x, i) => ({
+      chapter: '길드 수련장 (일반)',
+      stage: `길드 수련장 일반 ${i + 1}단계`,
+      category: '길드',
+      Defence_min: Number(x.defence || 0),
+      Defence_max: Number(x.defence || 0),
+      NormalHp_min: Number(x.hp || 0),
+      NormalHp_max: Number(x.hp || 0),
+      avoid: x.avoid,
+      time_sec: 60
+    }));
+    const gspecial = (g.training_special || []).map((x, i) => ({
+      chapter: '길드 수련장 (특수)',
+      stage: `길드 수련장 특수 ${i + 1}단계`,
+      category: '길드',
+      Defence_min: Number(x.defence || 0),
+      Defence_max: Number(x.defence || 0),
+      NormalHp_min: Number(x.hp || 0),
+      NormalHp_max: Number(x.hp || 0),
+      avoid: x.avoid,
+      time_sec: 60
+    }));
+    return [...gboss, ...gleague, ...gregular, ...gspecial];
+  }
+  return DATA.stageData?.[mode] || [];
+}
+function fillStageChapters(){const sel=$('stageChapter');if(!sel)return;const chapters=[...new Set(stageRows().map(x=>x.chapter))];chapters.sort((a,b)=>{if(typeof a==='number'&&typeof b==='number')return a-b;return String(a).localeCompare(String(b),'ko')});const current=sel.value;const next=current||String(chapters[0]||'');sel.innerHTML='<option value="">구분/챕터 선택</option>'+chapters.map(c=>`<option value="${c}">${typeof c==='number'?c+'장':c}</option>`).join('');if(chapters.map(String).includes(String(next)))sel.value=next;fillStages()}
+function fillStages(){const chapter=$('stageChapter')?.value||'';const sel=$('stageSelect');if(!sel)return;const rows=stageRows().filter(x=>!chapter||String(x.chapter)===String(chapter));const current=sel.value;sel.innerHTML='<option value="">단계/스테이지 선택</option>'+rows.map((x,i)=>`<option value="${x.stage}">${x.stage} · ${x.category||'일반'}</option>`).join('');if(rows.some(x=>String(x.stage)===String(current)))sel.value=current;applyStageTarget()}
+function selectedStage(){const stage=$('stageSelect')?.value;return stage?stageRows().find(x=>String(x.stage)===String(stage))||null:null}
+function applyStageTarget(){const row=selectedStage();if(!row)return;const def=(Number(row.Defence_min||0)+Number(row.Defence_max||row.Defence_min||0))/2;const isBoss=row.category==='보스'||row.category==='파티보스'||row.category==='월드보스'||(Boolean(row.BossHp_min)&&!row.NormalHp_min);const hpKey=$('stageMode').value==='trial'?(isBoss?'BossHp':'NormalHp'):'MaxHp';const minVal=Number(row[hpKey+'_min'])||Number(row.MaxHp_min)||Number(row.BossHp_min)||Number(row.NormalHp_min)||0;const maxVal=Number(row[hpKey+'_max'])||Number(row.MaxHp_max)||Number(row.BossHp_max)||Number(row.NormalHp_max)||minVal;const hp=(minVal+maxVal)/2;if(def)$('targetDefense').value=def;if(hp)$('targetHp').value=hp;if(row.time_sec)$('stageTimeLimit').value=row.time_sec;if($('targetType').value!=='pvp')$('targetType').value=isBoss?'boss':'normal';renderStageVerdict()}
 function stageSensitivity(){const target=$('targetType').value;const candidates=[['공격력', 'ATK_FLAT',100],['데미지', 'DMG',10],[target==='boss'?'보스 데미지':'일반 몬스터 데미지',target==='boss'?'BOSS_DMG':'NORMAL_DMG',10],['방어 관통력','DEF_PEN',10],['주스탯','MAIN_STAT_FLAT',1000],['크리티컬 데미지','CRIT_DMG',10],['공격 속도','ATK_SPEED',10]];const base=calculate();return candidates.map(([name,stat,amount])=>({name,stat,amount,delta:calculate({[stat]:amount}).dps-base.dps})).sort((a,b)=>b.delta/a.amount-b.delta/a.amount)}
 function renderStageVerdict(){const box=$('stageVerdict');if(!box)return;const row=selectedStage(),r=calculate(),hp=n('targetHp'),limit=n('stageTimeLimit');if(!row||!hp){box.className='stage-verdict';box.innerHTML='목표 스테이지를 선택하면 클리어 가능성과 병목을 진단합니다.';return}const total=r.dps*limit,ratio=hp?total/hp:0;const clear=total>=hp;const ranked=stageSensitivity().slice(0,3);box.className='stage-verdict '+(clear?'good':'warn');box.innerHTML=`<strong>${row.stage} 목표 · ${clear?'클리어 가능':'현재 화력 부족'}</strong><div class="stage-meta">${fmt(r.dps)} DPS × ${limit}초 = ${fmt(total)} · 적 HP ${fmt(hp)} · 필요 비율 ${ratio.toFixed(2)}배</div><div class="bottleneck-list"><span><b>1순위 병목</b><b>${escapeHtml(ranked[0]?.name||'분석 중')} +${fmt(ranked[0]?.delta||0)} DPS</b></span><span><b>2순위</b><b>${escapeHtml(ranked[1]?.name||'—')} +${fmt(ranked[1]?.delta||0)} DPS</b></span><span><b>3순위</b><b>${escapeHtml(ranked[2]?.name||'—')} +${fmt(ranked[2]?.delta||0)} DPS</b></span></div>`}
 function renderStatEfficiencies(){const box=$('statEfficiencyBox');if(!box)return;const inputs=readInputs();const effs=calculateStatEfficiencies(inputs,DATA.combat||{});if(!effs.length){box.innerHTML='';return}const topRows=effs.slice(0,6).map((item,index)=>`<div class="efficiency-row"><span class="eff-rank">${index+1}위</span><span class="eff-label">${escapeHtml(item.label)}</span><span class="eff-delta">+${fmt(item.deltaDps)} DPS</span><span class="eff-badge">${item.ratioPct>=0?'+':''}${item.ratioPct.toFixed(2)}%</span></div>`).join('');box.innerHTML=`<div class="section-heading" style="margin-top:14px;"><div><h3>⚡ 스탯 / 옵션 1%당 딜 효율 순위</h3></div><span class="badge official">현재 상태 기준 한계 효율</span></div><p class="hint">현재 캐릭터 스탯 상태에서 각 옵션을 1% (또는 1,000) 올렸을 때의 예상 DPS 증가 비율입니다.</p><div class="efficiency-grid">${topRows}</div>`;}
@@ -55,7 +205,7 @@ function renderCombat(){const r=calculate();const power=calculatePower();$('avgD
 function renderCube(){const current=calculate(valuesFor('currentOptions'));const candidate=calculate(valuesFor('candidateOptions'));const currentPower=calculatePower(valuesFor('currentOptions'));const candidatePower=calculatePower(valuesFor('candidateOptions'));$('cubeCurrentDps').textContent=fmt(current.dps);$('cubeCandidateDps').textContent=fmt(candidate.dps);const delta=candidate.dps-current.dps;const rate=current.dps?delta/current.dps*100:0;$('cubeDelta').textContent=`${delta>=0?'+':''}${fmt(delta)} (${rate>=0?'+':''}${rate.toFixed(2)}%)`;if($('cubeCurrentPower'))$('cubeCurrentPower').textContent=fmt(currentPower.power);if($('cubeCandidatePower'))$('cubeCandidatePower').textContent=fmt(candidatePower.power);const powerDelta=candidatePower.power-currentPower.power;const powerRate=currentPower.power?powerDelta/currentPower.power*100:0;if($('cubePowerDelta'))$('cubePowerDelta').textContent=`${powerDelta>=0?'+':''}${fmt(powerDelta)} (${powerRate>=0?'+':''}${powerRate.toFixed(2)}%)`;const p=n('cubeProbability')/100,cost=n('cubeCost');$('cubeEconomics').innerHTML=p>0?`후보 1회 달성 기대 횟수 <b>${fmt(1/p)}회</b> · 기대 메소 <b>${fmt(1/p*cost)}</b><br><small>확률이 없는 값은 기대 비용을 계산하지 않습니다.</small>`:'등장 확률을 입력하면 기대 횟수와 비용을 계산합니다.';renderCubeTargetSummary()}
 function renderProbability(){const r=probabilitySummary(n('successRate'),n('attempts'),n('attemptCost'));if(!r.probability&&r.expectedAttempts===Infinity){$('probabilityResult').innerHTML='<div class="big-prob">0%</div>성공 확률이 0이면 달성 확률과 기대값은 계산할 수 없습니다.';return}$('probabilityResult').innerHTML=`<div class="big-prob">${(r.probability*100).toFixed(4)}%</div><ul><li>${r.attempts}회 안에 1회 이상 성공할 확률: <b>${(r.probability*100).toFixed(4)}%</b></li><li>평균 기대 시도 횟수: <b>${fmt(r.expectedAttempts)}회</b></li><li>평균 기대 비용: <b>${r.expectedCost==null?'미입력':fmt(r.expectedCost)}</b></li><li>90% 달성 필요 횟수: <b>${r.need90}회</b></li><li>95% 달성 필요 횟수: <b>${r.need95}회</b></li></ul>`}
 function renderAll(){renderJobStatMapping();renderCombat();renderCube();renderProbability();fillCubeSources()}
-async function loadData(){try{const [combat,stats,jobs,probabilities,potentialProbabilities,companionRuntime,companionRules,stageData]=await Promise.all([fetch('data/combat-rules.json').then(r=>r.json()),fetch('data/stat-rules.json').then(r=>r.json()),fetch('data/job-stats.json').then(r=>r.json()),fetch('data/probabilities.json').then(r=>r.json()),fetch('data/potential-probabilities.json').then(r=>r.json()),fetch('data/companion-runtime-data.json').then(r=>r.json()),fetch('data/companion-rules.json').then(r=>r.json()),fetch('data/stage-data.json').then(r=>r.json())]);Object.assign(DATA,{combat,stats,jobs,probabilities,potentialProbabilities,companionRuntime,companionRules,stageData});fillJobs();fillStageChapters();loadLocal();fillStageChapters();renderCompanionEffect();$('probabilitySource').textContent=`공식 설정 확률 데이터 로드 완료 · ${probabilities?.source?.verificationStatus||'검증 상태 확인 필요'}`;setStatus(`공식 전투·능력치·확률 데이터 로드 완료 · 직업 매핑은 ${jobs.status||'provisional'}`, 'good');renderAll()}catch(e){setStatus('데이터 파일을 불러오지 못했습니다. 기본 입력으로 계산하지만 공식 데이터 상태를 확인하세요.','bad');$('probabilitySource').textContent='확률 데이터 로드 실패: '+e.message;renderAll()}}
+async function loadData(){try{const [combat,stats,jobs,probabilities,potentialProbabilities,companionRuntime,companionRules,stageData,bossData,growthDungeonData,guildData,dropTableData]=await Promise.all([fetch('data/combat-rules.json').then(r=>r.json()),fetch('data/stat-rules.json').then(r=>r.json()),fetch('data/job-stats.json').then(r=>r.json()),fetch('data/probabilities.json').then(r=>r.json()),fetch('data/potential-probabilities.json').then(r=>r.json()),fetch('data/companion-runtime-data.json').then(r=>r.json()),fetch('data/companion-rules.json').then(r=>r.json()),fetch('data/stage-data.json').then(r=>r.json()),fetch('data/boss-data.json').then(r=>r.json()),fetch('data/growth-dungeon-data.json').then(r=>r.json()),fetch('data/guild-data.json').then(r=>r.json()),fetch('data/drop-table-data.json').then(r=>r.json())]);Object.assign(DATA,{combat,stats,jobs,probabilities,potentialProbabilities,companionRuntime,companionRules,stageData,bossData,growthDungeonData,guildData,dropTableData});fillJobs();fillStageChapters();loadLocal();fillStageChapters();renderCompanionEffect();$('probabilitySource').textContent=`공식 설정 확률 데이터 로드 완료 · ${probabilities?.source?.verificationStatus||'검증 상태 확인 필요'}`;setStatus(`공식 전투·능력치·확률 데이터 로드 완료 · 직업 매핑은 ${jobs.status||'provisional'}`, 'good');renderAll()}catch(e){setStatus('데이터 파일을 불러오지 못했습니다. 기본 입력으로 계산하지만 공식 데이터 상태를 확인하세요.','bad');$('probabilitySource').textContent='확률 데이터 로드 실패: '+e.message;renderAll()}}
 
 let pendingOcrStats={};
 function initOcrModal(){const modal=$('ocrModal');const openBtns=[$('openOcrModalBtn'),$('openOcrInFormBtn')].filter(Boolean);const closeBtn=$('closeOcrModalBtn');const runBtn=$('runOcrModalBtn');const applyBtn=$('applyOcrModalBtn');const fileInput=$('ocrModalFile');const dropZone=$('ocrModalDrop');const statusEl=$('ocrModalStatus');const resultsEl=$('ocrModalResults');if(!modal)return;openBtns.forEach(btn=>btn?.addEventListener('click',()=>{if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','true')}));closeBtn?.addEventListener('click',()=>{if(typeof modal.close==='function')modal.close();else modal.removeAttribute('open')});const STAT_FIELD_MAP=[{label:'공격력 합계',target:'attackFlat',keywords:['공격력 합계','공격력']},{label:'공격력%',target:'attackPct',keywords:['공격력%']},{label:'주스탯(+)',target:'mainStat',keywords:['주 스탯 수치','주스탯 수치','주스탯(+)']},{label:'주스탯%',target:'mainStatPct',keywords:['주 스탯%','주스탯%']},{label:'부스탯(+)',target:'subStat',keywords:['부 스탯 수치','부스탯 수치','부스탯(+)']},{label:'데미지%',target:'damage',keywords:['데미지']},{label:'데미지 증폭%',target:'damageAmp',keywords:['데미지 증폭']},{label:'최종 데미지%',target:'finalDamage',keywords:['최종 데미지']},{label:'보스 데미지%',target:'bossDamage',keywords:['보스 몬스터 데미지','보스 데미지']},{label:'일반 몬스터 데미지%',target:'normalDamage',keywords:['일반 몬스터 데미지']},{label:'크리티컬 확률%',target:'critRate',keywords:['크리티컬 확률','치명타 확률']},{label:'크리티컬 데미지%',target:'critDamage',keywords:['크리티컬 데미지','치명타 데미지']},{label:'방어 관통력%',target:'defPen',keywords:['방어 관통력','방어력 관통']},{label:'공격 속도%',target:'attackSpeed',keywords:['공격 속도']},{label:'최소 데미지 배율%',target:'minDamage',keywords:['최소 데미지 배율']},{label:'최대 데미지 배율%',target:'maxDamage',keywords:['최대 데미지 배율']}];async function processFiles(files){if(!files||!files.length)return;if(typeof window.Tesseract==='undefined'){statusEl.textContent='Tesseract OCR 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도하세요.';return}statusEl.textContent='OCR 분석 진행 중… 잠시만 기다려주세요.';pendingOcrStats={};resultsEl.innerHTML='';try{const worker=await window.Tesseract.createWorker('kor+eng');for(const file of files){const {data:{text}}=await worker.recognize(file);const lines=text.split('\n');for(const line of lines){for(const def of STAT_FIELD_MAP){for(const kw of def.keywords){if(line.includes(kw)){const match=line.match(/([0-9,]+(?:\.[0-9]+)?)/);if(match){const val=Number(match[1].replace(/,/g,''));if(Number.isFinite(val))pendingOcrStats[def.target]=val}}}}}}await worker.terminate();const foundCount=Object.keys(pendingOcrStats).length;if(foundCount===0){statusEl.textContent='이미지에서 스탯 수치를 찾지 못했습니다. 글자가 선명한 스탯 팝업 스크린샷을 사용하세요.'}else{statusEl.textContent=`${foundCount}개의 스탯 항목을 감지했습니다. 수치 확인 후 적용을 누르세요.`;resultsEl.innerHTML=Object.entries(pendingOcrStats).map(([field,val])=>{const def=STAT_FIELD_MAP.find(d=>d.target===field);return `<div class="stat-row" style="border:1px solid var(--line);border-radius:8px;padding:6px;background:#fff;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;">${def?.label||field}</span><input data-ocr-field="${field}" type="number" step="0.01" value="${val}" style="width:100px;padding:4px;border:1px solid var(--line);border-radius:6px;"></div>`}).join('')}}catch(err){statusEl.textContent='OCR 처리 중 오류가 발생했습니다: '+err.message}}runBtn?.addEventListener('click',()=>processFiles(fileInput?.files));fileInput?.addEventListener('change',e=>processFiles(e.target.files));dropZone?.addEventListener('paste',e=>{const items=(e.clipboardData||e.originalEvent?.clipboardData)?.items;const list=[];for(const item of items||[]){if(item.type.indexOf('image')===0)list.push(item.getAsFile())}if(list.length)processFiles(list)});applyBtn?.addEventListener('click',()=>{resultsEl.querySelectorAll('[data-ocr-field]').forEach(input=>{const field=input.dataset.ocrField;const val=Number(input.value);if($(field)&&Number.isFinite(val))$(field).value=val});renderCompanionEffect();renderCombat();if(typeof modal.close==='function')modal.close();else modal.removeAttribute('open');setStatus('OCR 스탯 수치가 캐릭터 폼에 적용되었습니다.','good');});}
