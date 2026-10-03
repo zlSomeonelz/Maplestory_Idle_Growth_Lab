@@ -134,4 +134,3 @@ console.log('skill optimizer tests passed');
 console.log(`Night Walker Lv99 best: ${res.best.basic.name} + ${res.best.skills.map(s => s.name).join(', ')}`);
 console.log(`Night Walker Lv120 best: ${res120.best.basic.name} + ${res120.best.skills.map(s => s.name).join(', ')}`);
 console.log('All unified skill simulator & optimizer tests (8.1-8.6) passed cleanly!');
-
