@@ -1,0 +1,99 @@
+{
+  "schemaVersion": "1.0",
+  "source": {
+    "name": "메이플 키우기 장비 강화 (스타포스·주문서) 공식 및 표준 데이터",
+    "updatedAt": "2026-10-03"
+  },
+  "starforce": {
+    "maxStar": 30,
+    "statGains": {
+      "weapon": {
+        "1-15": { "attackFlat": 3, "mainStat": 2, "subStat": 1 },
+        "16-20": { "attackFlat": 8, "mainStat": 4, "subStat": 2 },
+        "21-25": { "attackFlat": 12, "mainStat": 7, "subStat": 3 },
+        "26-30": { "attackFlat": 16, "mainStat": 10, "subStat": 5 }
+      },
+      "glove": {
+        "1-15": { "attackFlat": 1, "mainStat": 2, "subStat": 1, "hp": 15 },
+        "16-20": { "attackFlat": 6, "mainStat": 6, "subStat": 3, "hp": 30 },
+        "21-25": { "attackFlat": 9, "mainStat": 9, "subStat": 4, "hp": 50 },
+        "26-30": { "attackFlat": 12, "mainStat": 13, "subStat": 6, "hp": 80 }
+      },
+      "armor": {
+        "1-15": { "attackFlat": 0, "mainStat": 2, "subStat": 1, "defense": 5, "hp": 20 },
+        "16-20": { "attackFlat": 4, "mainStat": 6, "subStat": 3, "defense": 15, "hp": 40 },
+        "21-25": { "attackFlat": 7, "mainStat": 10, "subStat": 5, "defense": 25, "hp": 70 },
+        "26-30": { "attackFlat": 10, "mainStat": 14, "subStat": 7, "defense": 40, "hp": 100 }
+      },
+      "accessory": {
+        "1-15": { "attackFlat": 0, "mainStat": 2, "subStat": 1, "defense": 3, "hp": 15 },
+        "16-20": { "attackFlat": 4, "mainStat": 6, "subStat": 3, "defense": 10, "hp": 35 },
+        "21-25": { "attackFlat": 7, "mainStat": 9, "subStat": 4, "defense": 20, "hp": 60 },
+        "26-30": { "attackFlat": 10, "mainStat": 13, "subStat": 6, "defense": 30, "hp": 90 }
+      }
+    },
+    "defaultMesoCosts": {
+      "level100": [
+        25000, 35000, 50000, 70000, 100000, 140000, 200000, 280000, 400000, 580000,
+        1200000, 1600000, 2200000, 3000000, 4200000, 7500000, 9500000, 12000000, 15500000, 20000000,
+        35000000, 45000000, 60000000, 80000000, 110000000, 150000000, 210000000, 300000000, 420000000, 600000000
+      ],
+      "level120": [
+        45000, 60000, 85000, 120000, 170000, 240000, 340000, 480000, 680000, 980000,
+        2000000, 2700000, 3700000, 5000000, 7000000, 12500000, 16000000, 20500000, 26000000, 33500000,
+        58000000, 75000000, 100000000, 135000000, 185000000, 250000000, 350000000, 500000000, 700000000, 1000000000
+      ],
+      "level140": [
+        70000, 95000, 130000, 185000, 260000, 370000, 520000, 740000, 1050000, 1500000,
+        3100000, 4200000, 5700000, 7800000, 10800000, 19500000, 25000000, 32000000, 41000000, 53000000,
+        92000000, 120000000, 160000000, 215000000, 290000000, 400000000, 550000000, 800000000, 1100000000, 1600000000
+      ]
+    },
+    "recoveryCostMultiplier": 2.5
+  },
+  "scrolls": {
+    "types": {
+      "scroll100": {
+        "name": "100% 주문서",
+        "successRate": 1.0,
+        "weaponStat": { "attackFlat": 2, "mainStat": 1 },
+        "armorStat": { "mainStat": 2, "subStat": 1, "defense": 3 },
+        "costMeso": 150000
+      },
+      "scroll70": {
+        "name": "70% 주문서",
+        "successRate": 0.7,
+        "weaponStat": { "attackFlat": 3, "mainStat": 2 },
+        "armorStat": { "mainStat": 3, "subStat": 1, "defense": 5 },
+        "costMeso": 300000
+      },
+      "scroll30": {
+        "name": "30% 주문서",
+        "successRate": 0.3,
+        "weaponStat": { "attackFlat": 5, "mainStat": 3 },
+        "armorStat": { "mainStat": 5, "subStat": 2, "defense": 10 },
+        "costMeso": 600000
+      },
+      "scroll15": {
+        "name": "15% 주문서",
+        "successRate": 0.15,
+        "weaponStat": { "attackFlat": 9, "mainStat": 4 },
+        "armorStat": { "mainStat": 7, "subStat": 3, "defense": 15 },
+        "costMeso": 1200000
+      }
+    },
+    "cleanSlate": {
+      "name": "순백의 주문서 10%",
+      "successRate": 0.1,
+      "costMeso": 1500000
+    }
+  },
+  "cubeCosts": {
+    "normal": 30000,
+    "rare": 80000,
+    "epic": 200000,
+    "unique": 600000,
+    "legendary": 1500000,
+    "mystic": 4000000
+  }
+}

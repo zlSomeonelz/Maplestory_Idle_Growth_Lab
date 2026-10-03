@@ -1,0 +1,145 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {
+  getStarforceAttemptCost,
+  getStarforceStatGain,
+  calculateStarforcePath,
+  calculateScrollEnhancement,
+  applyStatGains,
+  optimizeSpecUpPath
+} from '../enhancement-engine.mjs';
+import { calculateDamage } from '../engine.mjs';
+
+const probabilities = JSON.parse(fs.readFileSync('data/probabilities.json', 'utf8'));
+const enhancementRules = JSON.parse(fs.readFileSync('data/enhancement-rules.json', 'utf8'));
+const combatRules = JSON.parse(fs.readFileSync('data/combat-rules.json', 'utf8'));
+
+// 1. Star Force Attempt Cost
+const cost0 = getStarforceAttemptCost(0, 120);
+const cost10 = getStarforceAttemptCost(10, 120);
+const cost15 = getStarforceAttemptCost(15, 120);
+assert.ok(cost0 > 0, '0-star cost must be positive');
+assert.ok(cost10 > cost0, '10-star cost must be greater than 0-star cost');
+assert.ok(cost15 > cost10, '15-star cost must be greater than 10-star cost');
+
+// 2. Star Force Path Markov Chain Tests
+// 2.1 0 to 5 stars (safe zone: no downgrade, no destroy)
+const sf0to5 = calculateStarforcePath(0, 5, {
+  itemLevel: 120,
+  slotType: 'weapon',
+  probabilities: probabilities.starforce,
+  rules: enhancementRules.starforce
+});
+assert.equal(sf0to5.fromStar, 0);
+assert.equal(sf0to5.toStar, 5);
+assert.ok(sf0to5.totalCost > 0);
+assert.ok(sf0to5.totalAttempts >= 5, 'Must take at least 5 attempts');
+assert.equal(sf0to5.totalDestroys, 0, 'No destroys allowed between 0 and 5 stars');
+assert.ok(sf0to5.statGains.attackFlat > 0, 'Weapon starforce must grant flat attack');
+
+// 2.2 10 to 12 stars
+const sf10to12 = calculateStarforcePath(10, 12, {
+  itemLevel: 120,
+  slotType: 'glove',
+  probabilities: probabilities.starforce,
+  rules: enhancementRules.starforce
+});
+assert.ok(sf10to12.totalCost > 0);
+assert.ok(sf10to12.totalAttempts > 2, 'Attempts must account for failure/stay');
+assert.equal(sf10to12.totalDestroys, 0, 'No destroys below 20 stars');
+
+// 2.3 20 to 22 stars (danger zone: destroy and downgrade possible)
+const sf20to22 = calculateStarforcePath(20, 22, {
+  itemLevel: 120,
+  slotType: 'weapon',
+  probabilities: probabilities.starforce,
+  rules: enhancementRules.starforce
+});
+assert.ok(sf20to22.totalDestroys > 0, 'Expected destroys must be positive in 20+ star range');
+assert.ok(sf20to22.totalCost > sf10to12.totalCost, '20+ star range cost must far exceed 10-12 star range');
+
+// 3. Scroll Enhancement Tests
+const sc100 = calculateScrollEnhancement(8, 8, 'scroll100', { slotType: 'weapon', rules: enhancementRules });
+assert.equal(sc100.expectedScrolls, 8, '100% scroll on 8 slots needs exactly 8 scrolls');
+assert.equal(sc100.expectedCleanSlates, 0, '100% scroll has 0 fails, needs 0 clean slates');
+assert.equal(sc100.statGains.attackFlat, 16, '8 slots x 2 attack = 16 attack');
+
+const sc70 = calculateScrollEnhancement(1, 1, 'scroll70', { slotType: 'weapon', rules: enhancementRules });
+assert.ok(Math.abs(sc70.expectedScrolls - 1 / 0.7) < 0.001, '70% scroll expects 1/0.7 attempts');
+assert.ok(sc70.expectedCleanSlates > 0, '70% scroll expects positive clean slate recoveries');
+
+// 4. Dynamic Bucket Saturation / Diminishing Returns Test (User's specific requirement!)
+const baseStats = {
+  attackFlat: 2000,
+  attackPct: 20,
+  mainStat: 5000,
+  subStat: 1000,
+  damage: 50,
+  bossDamage: 50,
+  target: 'boss',
+  critRate: 100,
+  critDamage: 30,
+  skillCoefficient: 100,
+  attackInterval: 0.8,
+  accuracy: 100
+};
+
+// Case A: Adding 15% Boss Damage when Boss Damage is low (50%)
+const dpsLowBoss = calculateDamage(baseStats, combatRules).dps;
+const dpsLowBossPlus = calculateDamage({ ...baseStats, bossDamage: baseStats.bossDamage + 15 }, combatRules).dps;
+const gainLowBossPct = (dpsLowBossPlus / dpsLowBoss - 1) * 100;
+
+// Case B: Adding 15% Boss Damage when Boss Damage is already saturated (250%)
+const highBossStats = { ...baseStats, bossDamage: 250 };
+const dpsHighBoss = calculateDamage(highBossStats, combatRules).dps;
+const dpsHighBossPlus = calculateDamage({ ...highBossStats, bossDamage: highBossStats.bossDamage + 15 }, combatRules).dps;
+const gainHighBossPct = (dpsHighBossPlus / dpsHighBoss - 1) * 100;
+
+assert.ok(gainLowBossPct > gainHighBossPct, 'Adding Boss Damage must have higher relative gain when not saturated');
+
+// Case C: Adding Crit Damage when Crit Rate is 100% vs 20%
+const highCritStats = { ...baseStats, critRate: 100, critDamage: 30 };
+const lowCritStats = { ...baseStats, critRate: 20, critDamage: 30 };
+const dpsHighCritGain = (calculateDamage({ ...highCritStats, critDamage: 40 }, combatRules).dps / calculateDamage(highCritStats, combatRules).dps - 1) * 100;
+const dpsLowCritGain = (calculateDamage({ ...lowCritStats, critDamage: 40 }, combatRules).dps / calculateDamage(lowCritStats, combatRules).dps - 1) * 100;
+assert.ok(dpsHighCritGain > dpsLowCritGain, 'Adding Crit Damage must yield higher DPS increase when Crit Rate is high');
+
+// 5. Spec-Up Portfolio Optimizer (Greedy Frontier)
+const equips = [
+  { name: '앱솔랩스 무기', slotType: 'weapon', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 8, scrollSlotsUsed: 4, cubeGrade: 'unique' },
+  { name: '앱솔랩스 장갑', slotType: 'glove', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 5, cubeGrade: 'epic' },
+  { name: '앱솔랩스 하의', slotType: 'armor', itemLevel: 120, currentStar: 8, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 7, cubeGrade: 'rare' }
+];
+
+const roadmap = optimizeSpecUpPath({
+  budgetMeso: 50000000, // 50M meso
+  playerInputs: baseStats,
+  equipmentList: equips,
+  enhancementRules,
+  starforceProbabilities: probabilities.starforce,
+  potentialProbabilities: probabilities.normalPotentialPartial,
+  combatRules,
+  maxSteps: 20
+});
+
+assert.ok(roadmap.steps.length > 0, 'Optimizer must produce upgrade steps');
+assert.ok(roadmap.finalDps > roadmap.initialDps, 'Final DPS must be strictly greater than initial DPS');
+assert.ok(roadmap.totalDpsGainPct > 0, 'Total DPS gain percent must be positive');
+assert.ok(roadmap.budgetUsed <= roadmap.budgetTotal, 'Budget used must not exceed total budget');
+assert.ok(roadmap.budgetRemaining >= 0, 'Remaining budget must be non-negative');
+
+// Verify that each step had positive ROI and properly updated cumulative stats
+for (let i = 0; i < roadmap.steps.length; i++) {
+  const step = roadmap.steps[i];
+  assert.ok(step.cost > 0, `Step ${i + 1} cost must be positive`);
+  assert.ok(step.dpsDelta >= 0, `Step ${i + 1} DPS delta must be non-negative`);
+  assert.ok(step.roi >= 0, `Step ${i + 1} ROI must be non-negative`);
+}
+
+console.log('enhancement-engine tests passed cleanly!');
+console.log(`Initial DPS: ${roadmap.initialDps.toFixed(1)} -> Final DPS: ${roadmap.finalDps.toFixed(1)} (+${roadmap.totalDpsGainPct.toFixed(2)}%)`);
+console.log(`Budget Used: ${roadmap.budgetUsed.toLocaleString()} / ${roadmap.budgetTotal.toLocaleString()} meso across ${roadmap.steps.length} steps`);
+console.log('Top recommended initial steps:');
+roadmap.steps.slice(0, 3).forEach((s, idx) => {
+  console.log(`  ${idx + 1}. ${s.description} (비용: ${Math.round(s.cost).toLocaleString()} 메소, DPS +${s.dpsGainPct.toFixed(2)}%, ROI: ${s.roi.toFixed(4)})`);
+});

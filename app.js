@@ -1,5 +1,6 @@
 import { calculateCombatPower, calculateDamage, calculatePvpDamage, calculateStatEfficiencies, cubeTargetSummary, probabilitySummary } from './engine.mjs';
 import { buildSkillModels, optimizeLoadout, simulateLoadout, DEFAULT_UNKNOWN_COOLDOWN, LOADOUT_SKILL_SLOTS } from './skill-optimizer.mjs';
+import { calculateStarforcePath, calculateScrollEnhancement, optimizeSpecUpPath, STARFORCE_MAX } from './enhancement-engine.mjs';
 'use strict';
 
 const STORE = 'maple-growth-lab-mvp-v1';
@@ -28,7 +29,8 @@ const DATA = {
   bossData: null,
   growthDungeonData: null,
   guildData: null,
-  dropTableData: null
+  dropTableData: null,
+  enhancementRules: null
 };
 
 let communityGuide = null;
@@ -3560,6 +3562,285 @@ window.addEventListener('message', event => {
 });
 
 /* ==========================================================================
+   Spec-Up Optimizer & MekiCalc Enhancements (자원 기반 스펙업 최적화)
+   ========================================================================== */
+
+const SPECUP_STORE_KEY = 'maple-growth-lab-specup-equips-v01';
+
+const DEFAULT_SPECUP_EQUIPMENT_PRESETS = {
+  120: [
+    { id: 'weapon', name: '앱솔랩스 무기', slotType: 'weapon', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 8, scrollSlotsUsed: 4, cubeGrade: 'unique' },
+    { id: 'hat', name: '앱솔랩스 모자', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic' },
+    { id: 'top_bottom', name: '앱솔랩스 한벌옷', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic' },
+    { id: 'glove', name: '앱솔랩스 장갑', slotType: 'glove', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic' },
+    { id: 'shoes', name: '앱솔랩스 신발', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic' },
+    { id: 'cape', name: '앱솔랩스 망토', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'rare' },
+    { id: 'accessory1', name: '마이스터링', slotType: 'accessory', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 4, scrollSlotsUsed: 2, cubeGrade: 'epic' },
+    { id: 'accessory2', name: '도미네이터 펜던트', slotType: 'accessory', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 4, scrollSlotsUsed: 2, cubeGrade: 'epic' }
+  ],
+  100: [
+    { id: 'weapon', name: '파프니르 무기', slotType: 'weapon', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 7, scrollSlotsUsed: 3, cubeGrade: 'epic' },
+    { id: 'hat', name: '파프니르 모자', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare' },
+    { id: 'top_bottom', name: '파프니르 상/하의', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare' },
+    { id: 'glove', name: '여제 장갑', slotType: 'glove', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare' },
+    { id: 'shoes', name: '여제 신발', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare' },
+    { id: 'cape', name: '여제 망토', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare' },
+    { id: 'accessory1', name: '골든 클로버 벨트', slotType: 'accessory', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 3, scrollSlotsUsed: 1, cubeGrade: 'rare' },
+    { id: 'accessory2', name: '아쿠아틱 레터 눈장식', slotType: 'accessory', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 3, scrollSlotsUsed: 1, cubeGrade: 'rare' }
+  ],
+  140: [
+    { id: 'weapon', name: '아케인셰이드 무기', slotType: 'weapon', itemLevel: 140, currentStar: 15, maxStar: 20, scrollSlotsTotal: 9, scrollSlotsUsed: 6, cubeGrade: 'legendary' },
+    { id: 'hat', name: '아케인셰이드 모자', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique' },
+    { id: 'top_bottom', name: '아케인셰이드 한벌옷', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique' },
+    { id: 'glove', name: '아케인셰이드 장갑', slotType: 'glove', itemLevel: 140, currentStar: 15, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 6, cubeGrade: 'unique' },
+    { id: 'shoes', name: '아케인셰이드 신발', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique' },
+    { id: 'cape', name: '아케인셰이드 망토', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique' },
+    { id: 'accessory1', name: '거대한 공포', slotType: 'accessory', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 5, scrollSlotsUsed: 3, cubeGrade: 'unique' },
+    { id: 'accessory2', name: '커맨더 포스 이어링', slotType: 'accessory', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 5, scrollSlotsUsed: 3, cubeGrade: 'unique' }
+  ]
+};
+
+let specupEquipments = parseLocalJson(SPECUP_STORE_KEY, DEFAULT_SPECUP_EQUIPMENT_PRESETS[120]);
+
+function formatStatGainsSummary(statGains) {
+  if (!statGains || typeof statGains !== 'object') return '—';
+  const parts = [];
+  if (statGains.attackFlat) parts.push(`공격력 +${fmt(statGains.attackFlat)}`);
+  if (statGains.attackPct) parts.push(`공격력 +${fmt(statGains.attackPct)}%`);
+  if (statGains.mainStat) parts.push(`주스탯 +${fmt(statGains.mainStat)}`);
+  if (statGains.mainStatPct) parts.push(`주스탯 +${fmt(statGains.mainStatPct)}%`);
+  if (statGains.subStat) parts.push(`부스탯 +${fmt(statGains.subStat)}`);
+  if (statGains.critDamage) parts.push(`크뎀 +${fmt(statGains.critDamage)}%`);
+  if (statGains.critRate) parts.push(`크확 +${fmt(statGains.critRate)}%`);
+  if (statGains.bossDamage) parts.push(`보공 +${fmt(statGains.bossDamage)}%`);
+  if (statGains.damage) parts.push(`데미지 +${fmt(statGains.damage)}%`);
+  if (statGains.finalDamage) parts.push(`최종뎀 +${fmt(statGains.finalDamage)}%`);
+  if (statGains.defPen) parts.push(`방관 +${fmt(statGains.defPen)}%`);
+  if (statGains.maxHp) parts.push(`HP +${fmt(statGains.maxHp)}`);
+  return parts.length ? parts.join(', ') : '기본 스탯 상승';
+}
+
+function renderSpecupEquipTable() {
+  const tbody = $('specupEquipTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = specupEquipments.map(eq => `
+    <tr style="border-bottom:1px solid var(--line);">
+      <td style="padding:6px 4px;font-weight:700;">
+        <input type="text" data-eq-id="${escapeHtml(eq.id)}" data-field="name" value="${escapeHtml(eq.name)}" style="width:105px;font-size:12px;padding:4px 6px;">
+      </td>
+      <td style="padding:6px 4px;">
+        <select data-eq-id="${escapeHtml(eq.id)}" data-field="itemLevel" style="font-size:12px;padding:4px;">
+          <option value="100" ${eq.itemLevel === 100 ? 'selected' : ''}>100제</option>
+          <option value="120" ${eq.itemLevel === 120 ? 'selected' : ''}>120제</option>
+          <option value="140" ${eq.itemLevel === 140 ? 'selected' : ''}>140제</option>
+          <option value="160" ${eq.itemLevel === 160 ? 'selected' : ''}>160제</option>
+        </select>
+      </td>
+      <td style="padding:6px 4px;">
+        <div style="display:flex;align-items:center;gap:3px;">
+          <input type="number" min="0" max="30" data-eq-id="${escapeHtml(eq.id)}" data-field="currentStar" value="${eq.currentStar}" style="width:46px;font-size:12px;padding:4px;">
+          <span>/</span>
+          <input type="number" min="5" max="30" data-eq-id="${escapeHtml(eq.id)}" data-field="maxStar" value="${eq.maxStar}" style="width:46px;font-size:12px;padding:4px;">
+        </div>
+      </td>
+      <td style="padding:6px 4px;">
+        <div style="display:flex;align-items:center;gap:3px;">
+          <input type="number" min="0" max="15" data-eq-id="${escapeHtml(eq.id)}" data-field="scrollSlotsUsed" value="${eq.scrollSlotsUsed}" style="width:44px;font-size:12px;padding:4px;">
+          <span>/</span>
+          <input type="number" min="1" max="15" data-eq-id="${escapeHtml(eq.id)}" data-field="scrollSlotsTotal" value="${eq.scrollSlotsTotal}" style="width:44px;font-size:12px;padding:4px;">
+        </div>
+      </td>
+      <td style="padding:6px 4px;">
+        <select data-eq-id="${escapeHtml(eq.id)}" data-field="cubeGrade" style="font-size:12px;padding:4px;">
+          <option value="rare" ${eq.cubeGrade === 'rare' ? 'selected' : ''}>레어</option>
+          <option value="epic" ${eq.cubeGrade === 'epic' ? 'selected' : ''}>에픽</option>
+          <option value="unique" ${eq.cubeGrade === 'unique' ? 'selected' : ''}>유니크</option>
+          <option value="legendary" ${eq.cubeGrade === 'legendary' ? 'selected' : ''}>레전더리</option>
+        </select>
+      </td>
+    </tr>
+  `).join('');
+
+  // Bind input changes to update specupEquipments state & persist
+  tbody.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('change', () => {
+      const eqId = el.dataset.eqId;
+      const field = el.dataset.field;
+      const targetEq = specupEquipments.find(e => e.id === eqId);
+      if (targetEq) {
+        if (['itemLevel', 'currentStar', 'maxStar', 'scrollSlotsUsed', 'scrollSlotsTotal'].includes(field)) {
+          targetEq[field] = Number(el.value) || 0;
+        } else {
+          targetEq[field] = el.value;
+        }
+        localStorage.setItem(SPECUP_STORE_KEY, JSON.stringify(specupEquipments));
+      }
+    });
+  });
+}
+
+function applySpecupPreset(level) {
+  const preset = DEFAULT_SPECUP_EQUIPMENT_PRESETS[level];
+  if (preset) {
+    specupEquipments = JSON.parse(JSON.stringify(preset));
+    localStorage.setItem(SPECUP_STORE_KEY, JSON.stringify(specupEquipments));
+    renderSpecupEquipTable();
+    setStatus(`${level}제 장비 프리셋이 적용되었습니다.`, 'good');
+  }
+}
+
+function handleRunSfStandalone() {
+  const slotType = $('sfStandaloneSlot')?.value || 'weapon';
+  const itemLevel = Number($('sfStandaloneLevel')?.value || 120);
+  const startStar = Number($('sfStandaloneStart')?.value || 0);
+  const targetStar = Number($('sfStandaloneTarget')?.value || 10);
+  const resEl = $('sfStandaloneResult');
+  if (!resEl) return;
+
+  if (targetStar <= startStar) {
+    resEl.innerHTML = `<span style="color:var(--amber);">⚠️ 목표 성급(${targetStar}성)은 시작 성급(${startStar}성)보다 커야 합니다.</span>`;
+    return;
+  }
+
+  const res = calculateStarforcePath(startStar, targetStar, {
+    itemLevel,
+    slotType,
+    probabilities: DATA.probabilities,
+    rules: DATA.enhancementRules?.starforce
+  });
+
+  resEl.innerHTML = `
+    <div style="background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:6px;display:grid;gap:6px;">
+      <div style="font-weight:800;color:var(--ink);">${startStar}성 ➔ ${targetStar}성 강화 기대치 (${itemLevel}제 ${slotType})</div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:4px;">
+        <span>기대 소모 메소</span>
+        <strong style="color:var(--primary-dark);">${fmt(res.totalCost)} 메소</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:4px;">
+        <span>기대 시도 횟수</span>
+        <strong>${fmt(res.totalAttempts)} 회</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:4px;">
+        <span>기대 파괴(초기화) 횟수</span>
+        <strong style="color:var(--red);">${fmt(res.totalDestroys)} 회</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:4px;">
+        <span>기대 단계 하락 횟수</span>
+        <strong style="color:var(--amber);">${fmt(res.totalDowngrades)} 회</strong>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">
+        누적 스탯 상승: ${formatStatGainsSummary(res.statGains)}
+      </div>
+    </div>
+  `;
+}
+
+function handleRunScrollStandalone() {
+  const slotType = $('scrollStandaloneSlot')?.value || 'weapon';
+  const scrollKey = $('scrollStandaloneType')?.value || 'scroll70';
+  const targetSuccess = Number($('scrollStandaloneSuccess')?.value || 8);
+  const resEl = $('scrollStandaloneResult');
+  if (!resEl) return;
+
+  const res = calculateScrollEnhancement(0, targetSuccess, scrollKey, {
+    slotType,
+    rules: DATA.enhancementRules
+  });
+
+  resEl.innerHTML = `
+    <div style="background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:6px;display:grid;gap:6px;">
+      <div style="font-weight:800;color:var(--ink);">${res.scrollName} ${targetSuccess}슬롯 완작 기대치 (${slotType})</div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:4px;">
+        <span>기대 주문서 소모량</span>
+        <strong style="color:var(--primary-dark);">${fmt(res.expectedScrolls)} 장</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:4px;">
+        <span>실패 복구용 순백 주문서(10%)</span>
+        <strong style="color:var(--amber);">${fmt(res.expectedCleanSlates)} 장</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:4px;">
+        <span>기대 재화 소모액</span>
+        <strong>${fmt(res.totalCost)} 메소</strong>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">
+        완작 스탯 상승: ${formatStatGainsSummary(res.statGains)}
+      </div>
+    </div>
+  `;
+}
+
+function handleRunSpecupOptimizer() {
+  const budgetMeso = Number($('specupBudgetMeso')?.value || 50000000);
+  const maxSteps = Number($('specupMaxSteps')?.value || 20);
+  const playerInputs = readInputs();
+
+  // Run dynamic portfolio optimization
+  const res = optimizeSpecUpPath({
+    budgetMeso,
+    playerInputs,
+    equipmentList: specupEquipments,
+    enhancementRules: DATA.enhancementRules,
+    starforceProbabilities: DATA.probabilities,
+    potentialProbabilities: DATA.potentialProbabilities,
+    combatRules: DATA.combat,
+    maxSteps
+  });
+
+  if ($('specupDpsSummary')) $('specupDpsSummary').textContent = `${fmt(res.initialDps)} ➔ ${fmt(res.finalDps)}`;
+  if ($('specupDpsGainPct')) $('specupDpsGainPct').textContent = `+${res.totalDpsGainPct.toFixed(2)}% 증가`;
+  if ($('specupPowerSummary')) $('specupPowerSummary').textContent = `${fmt(res.initialPower)} ➔ ${fmt(res.finalPower)}`;
+  if ($('specupPowerGainPct')) $('specupPowerGainPct').textContent = `+${res.totalPowerGainPct.toFixed(2)}% 증가`;
+  if ($('specupBudgetSummary')) $('specupBudgetSummary').textContent = `${fmt(res.budgetUsed)} 메소`;
+  if ($('specupBudgetLeft')) $('specupBudgetLeft').textContent = `남은 예산: ${fmt(res.budgetRemaining)} 메소`;
+  if ($('specupStepsCount')) $('specupStepsCount').textContent = `${res.steps.length} 단계`;
+
+  const listEl = $('specupRoadmapList');
+  if (!listEl) return;
+
+  if (!res.steps || res.steps.length === 0) {
+    listEl.innerHTML = `
+      <div class="stage-verdict warn" style="margin:0;">
+        ⚠️ 현재 보유 예산(${fmt(budgetMeso)} 메소) 내에서 진행 가능한 강화 후보가 없습니다. 예산을 늘리거나 다른 장비 부위를 설정해보세요.
+      </div>
+    `;
+    return;
+  }
+
+  const typeLabels = {
+    starforce: '⭐ 스타포스',
+    scroll: '📜 주문서',
+    cube: '🧊 잠재능력'
+  };
+
+  listEl.innerHTML = res.steps.map(s => `
+    <div class="roadmap-card">
+      <div class="roadmap-head">
+        <span class="roadmap-rank">#${s.stepNumber}</span>
+        <span class="type-badge ${s.type}">${typeLabels[s.type] || s.type}</span>
+        <span class="roadmap-title">${escapeHtml(s.description)}</span>
+        <span class="roadmap-cost">${fmt(s.cost)} 메소</span>
+      </div>
+      <div class="roadmap-metrics">
+        <span class="roadmap-gain">DPS +${s.dpsGainPct.toFixed(2)}% (+${fmt(s.dpsDelta)})</span>
+        <span class="roi-badge">💡 1만 메소당 +${s.roi.toFixed(4)}%</span>
+        <span class="roadmap-stats">획득: ${formatStatGainsSummary(s.statGains)}</span>
+        <span>잔여: ${fmt(s.budgetRemaining)} 메소</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function initSpecupTab() {
+  renderSpecupEquipTable();
+  $('specupPreset120Btn')?.addEventListener('click', () => applySpecupPreset(120));
+  $('specupPreset100Btn')?.addEventListener('click', () => applySpecupPreset(100));
+  $('specupPreset140Btn')?.addEventListener('click', () => applySpecupPreset(140));
+  $('runSpecupOptimizerBtn')?.addEventListener('click', handleRunSpecupOptimizer);
+  $('runSfStandaloneBtn')?.addEventListener('click', handleRunSfStandalone);
+  $('runScrollStandaloneBtn')?.addEventListener('click', handleRunScrollStandalone);
+}
+
+/* ==========================================================================
    Tab Navigation & Rendering
    ========================================================================== */
 
@@ -3574,6 +3855,8 @@ function activateTab(tabName) {
   if (tabName === 'content') {
     renderContentGuide();
     optimizeContent();
+  } else if (tabName === 'specup') {
+    renderSpecupEquipTable();
   }
 }
 
@@ -3584,11 +3867,12 @@ function renderAll() {
   renderCube();
   renderProbability();
   fillCubeSources();
+  renderSpecupEquipTable();
 }
 
 async function loadData() {
   try {
-    const [combat, stats, jobs, probabilities, potentialProbabilities, companionRuntime, companionRules, stageData, bossData, growthDungeonData, guildData, dropTableData, jobSkills, patchNotes] = await Promise.all([
+    const [combat, stats, jobs, probabilities, potentialProbabilities, companionRuntime, companionRules, stageData, bossData, growthDungeonData, guildData, dropTableData, jobSkills, patchNotes, enhancementRules] = await Promise.all([
       fetch('data/combat-rules.json').then(r => r.json()),
       fetch('data/stat-rules.json').then(r => r.json()),
       fetch('data/job-stats.json').then(r => r.json()),
@@ -3602,10 +3886,11 @@ async function loadData() {
       fetch('data/guild-data.json').then(r => r.json()),
       fetch('data/drop-table-data.json').then(r => r.json()),
       fetch('data/job-skills.json').then(r => r.json()),
-      fetch('data/official-patch-notes.json').then(r => r.json())
+      fetch('data/official-patch-notes.json').then(r => r.json()),
+      fetch('data/enhancement-rules.json').then(r => r.json())
     ]);
     Object.assign(DATA, {
-      combat, stats, jobs, probabilities, potentialProbabilities, companionRuntime, companionRules, stageData, bossData, growthDungeonData, guildData, dropTableData, jobSkills, patchNotes
+      combat, stats, jobs, probabilities, potentialProbabilities, companionRuntime, companionRules, stageData, bossData, growthDungeonData, guildData, dropTableData, jobSkills, patchNotes, enhancementRules
     });
     companionDatabase = companionRuntime;
     fillJobs();
@@ -3625,13 +3910,14 @@ async function loadData() {
     renderStageInfo();
     renderContentGuide();
     optimizeContent();
+    initSpecupTab();
     if ($('probabilitySource')) {
       $('probabilitySource').textContent = `공식 설정 확률 데이터 로드 완료 · ${probabilities?.source?.verificationStatus || '검증 상태 확인 필요'}`;
     }
     if ($('stageDataStatus')) {
       $('stageDataStatus').textContent = `스테이지 데이터 로드 완료 · 사냥 ${stageData.hunt?.length || 0}개 · 도전 ${stageData.trial?.length || 0}개 · 보스/던전/길드 연동`;
     }
-    setStatus('공식 전투·능력치·동료·확률 데이터 로드 완료 · 클라우드 준비 완료', 'good');
+    setStatus('공식 전투·능력치·동료·확률·강화 데이터 로드 완료 · 클라우드 준비 완료', 'good');
     renderAll();
   } catch (e) {
     setStatus('데이터 파일을 불러오지 못했습니다: ' + e.message, 'bad');

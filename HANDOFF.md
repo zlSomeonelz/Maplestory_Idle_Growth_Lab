@@ -75,6 +75,12 @@ node tests/engine.test.mjs
   - `calculatePvpDamage`
   - `cubeTargetSummary`
   - `probabilitySummary`
+- `enhancement-engine.mjs`
+  - 순수 수학/확률 계산 엔진 (MekiCalc & 스탯효율 v4 계승)
+  - `calculateStarforcePath`: 0~30성 흡수 마르코프 연쇄(Absorbing Markov Chain) 동적계획법 기반 기대비용·파괴/하락/시도 횟수 계산
+  - `calculateScrollEnhancement`: 음이항 분포 기반 주문서 완작 및 순백의 주문서(10%) 실패 복구 기대치
+  - `applyStatGains`: 강화별 획득 스탯을 캐릭터 스탯 버킷에 순수 함수로 적용
+  - `optimizeSpecUpPath`: 보유 재화(Budget) 한계 내에서 매 단계마다 `calculateDamage`로 실시간 스탯 버킷 포화도(보공/크뎀/공%/주스탯)를 재계산하여 ROI(1만 메소당 DPS 상승률)가 가장 높은 강화 순서를 산출하는 탐욕 프론티어 최적화기
 - `tests/engine.test.mjs`
   - PvE 피해·DPS
   - 점감 능력치
@@ -83,6 +89,11 @@ node tests/engine.test.mjs
   - PvP
   - 큐브 단일·복수 목표 확률
   - 일반 확률 기댓값 회귀 테스트
+- `tests/enhancement-engine.test.mjs`
+  - 스타포스 마르코프 연쇄 무위험/하락/파괴 구간 검증
+  - 주문서 기댓값 검증
+  - 스탯 버킷 포화도(Saturation)에 따른 한계 딜상승 차등 검증
+  - 5천만 메소 예산 기반 실시간 포트폴리오 최적화 로드맵 검증
 - `styles.css`
   - 반응형 iPad·모바일 스타일
 
@@ -114,6 +125,11 @@ node tests/engine.test.mjs
   - 동료 효과의 적용 경계와 조건부 효과 보류 규칙
 - `data/community-companion-guide.json`
   - 동료 관련 커뮤니티 자료
+- `data/enhancement-rules.json`
+  - 스타포스 부위별(무기, 장갑, 방어구, 장신구) 및 성급 구간별(1~15성, 16~20성, 21~25성, 26~30성) 스탯 증가 테이블
+  - 레벨 계수 기반 메소 비용 공식
+  - 주문서(100%, 70%, 30%, 15%, 순백의 주문서 10%) 스탯 및 기본 소모액
+  - 큐브 등급업 소모액 기준표
 
 ### 보조 페이지
 
