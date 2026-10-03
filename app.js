@@ -2457,23 +2457,23 @@ function initOcrModal() {
     { target: 'basicDamage', keywords: ['기본 공격 데미지', '기본공격데미지', '본 공격 데미지', '기본 공격'] },
     { target: 'skillDamage', keywords: ['스킬 데미지', '스킬데미지', 'AZ 데미지', 'AZ 데미', '스킬 데미^', '스킬 데미7', '스킬 데미'] },
     { target: 'critRate', keywords: ['크리티컬 확률', '크리티컬확률', '치명타 확률', '크확'] },
-    { target: 'critDamage', keywords: ['크리티컬 데미지', '크리티컬데미지', '치명타 데미지', '크뎀'] },
+    { target: 'critDamage', keywords: ['크리티컬 데미지', '크리티컬데미지', '치명타 데미지', '크뎀', '크리6걸데미지', '크리6걸 데미지', '크리6걸', '크리 데미지'] },
     { target: 'defPen', keywords: ['방어 관통력', '방어관통력', '방어력 관통', '방관'] },
     { target: 'minDamage', keywords: ['최소 데미지 배율', '최소데미지 배율', '최소 데미지', '최소 데미'] },
     { target: 'maxDamage', keywords: ['최대 데미지 배율', '최대데미지 배율', '최대 데미지', '최대 데미'] },
     { target: 'attackSpeed', keywords: ['공격 속도', '공격속도'] },
     { target: 'playerDefense', keywords: ['방어력'] },
-    { target: 'maxHp', keywords: ['최대 HP', '최대HP', '최대16', '최대 16', '최대1P', '최대 1P', 'Hh HP', 'ZC HP', 'ZICH HP', 'ZIC HP', 'ICH HP', '치대 HP', 'HP'] },
+    { target: 'maxHp', keywords: ['최대 HP', '최대HP', '최대16', '최대 16', '최대1P', '최대 1P', 'Hh HP', 'ZC HP', 'ZICH HP', 'ZIC HP', 'ICH HP', '치대 HP', '부레 치나', 'HP'] },
     { target: 'maxMp', keywords: ['최대 MP', '최대MP', '최대 mp', '최대”', '최대"', '최대 M', 'At MP', 'AL MP', 'MP'] },
     { target: 'accuracy', keywords: ['명중', '명중률'] },
     { target: 'evasion', keywords: ['회피', '회피율'] },
-    { target: 'statBased', keywords: ['스탯 비례 데미지', '스탯비례데미지', 'AEH 비례 데미지', 'AEH 비례', '스 비례 데미지', '스 비례', '비례 데미지', '스탯 비례', '스탯비례'] },
+    { target: 'statBased', keywords: ['스탯 비례 데미지', '스탯비례데미지', 'AEH 비례 데미지', 'HHH 데미지', 'AEH 비례', '스 비례 데미지', '스 비례', '비례 데미지', '스탯 비례', '스탯비례'] },
     { target: 'damage', keywords: ['데미지'] },
     { target: 'attack', keywords: ['공격력'] },
     { target: 'statSTR', keywords: ['STR', '518', 'S1R', 'SIR'] },
     { target: 'statDEX', keywords: ['DEX', 'D EX'] },
-    { target: 'statINT', keywords: ['INT', 'I NT'] },
-    { target: 'statLUK', keywords: ['LUK', 'L UK', 'ㄴ G', 'ㄴ (i)', 'ㄴ(i)', 'ㄴ i', 'ㄴ (|', 'ㄴ('] },
+    { target: 'statINT', keywords: ['INT', 'I NT', '1NT', '스킨 I', '스킨'] },
+    { target: 'statLUK', keywords: ['LUK', 'L UK', 'ㄴ G', 'ㄴ (i)', 'ㄴ(i)', 'ㄴ i', 'ㄴ (|', 'ㄴ(', 'UK (i', 'UK'] },
     { target: 'debuffResist', keywords: ['디버프 내성', '디버프내성'] },
     { target: 'extraTargets', keywords: ['기본 공격 대상 수 증가', '기본 공격 대상 수', '대상 수 증가'] },
     { target: 'cooldownReductionPct', keywords: ['스킬 재사용 대기시간 감소', '재사용 대기시간 감소'] },
@@ -2648,55 +2648,57 @@ function initOcrModal() {
         // Exclude top 4% (title bar) and bottom 4% (taskbar/navigation)
         const yStart = Math.floor(origH * 0.04);
         const yEnd = Math.floor(origH * 0.96);
-        const xSearchMin = Math.floor(origW * 0.28);
-        const xSearchMax = Math.floor(origW * 0.72);
+        const centerX = Math.floor(origW * 0.50);
 
-        const rowBrightCounts = new Array(origH).fill(0);
+        const modalRows = [];
         for (let y = yStart; y < yEnd; y++) {
-          let count = 0;
-          for (let x = xSearchMin; x < xSearchMax; x++) {
+          let brightInCenter = 0;
+          for (let x = centerX - 40; x <= centerX + 40; x++) {
             const idx = (y * origW + x) * 4;
-            if (data[idx] >= 210 && data[idx + 1] >= 210 && data[idx + 2] >= 210) {
-              count++;
-            }
+            if (data[idx] >= 210 && data[idx + 1] >= 210 && data[idx + 2] >= 210) brightInCenter++;
           }
-          rowBrightCounts[y] = count;
-        }
-
-        const threshold = (xSearchMax - xSearchMin) * 0.25;
-        let modalMinY = -1, modalMaxY = -1;
-        for (let y = yStart; y < yEnd; y++) {
-          if (rowBrightCounts[y] >= threshold) {
-            if (modalMinY === -1) modalMinY = y;
-            modalMaxY = y;
-          }
+          if (brightInCenter >= 50) modalRows.push(y);
         }
 
         let isModalFound = false;
         let cropX = 0, cropY = 0, cropW = origW, cropH = origH;
 
-        if (modalMinY !== -1 && (modalMaxY - modalMinY) >= origH * 0.15) {
+        if (modalRows.length >= 20) {
+          const modalMinY = modalRows[0];
+          const modalMaxY = modalRows[modalRows.length - 1];
+
           let minX = origW, maxX = 0;
-          for (let y = modalMinY; y <= modalMaxY; y++) {
-            if (rowBrightCounts[y] < threshold) continue;
-            let rowMinX = -1, rowMaxX = -1;
-            for (let x = Math.floor(origW * 0.15); x < Math.floor(origW * 0.85); x++) {
+          for (const y of modalRows) {
+            let leftEdge = centerX;
+            let darkStreak = 0;
+            for (let x = centerX; x >= 0; x--) {
               const idx = (y * origW + x) * 4;
-              if (data[idx] >= 210 && data[idx + 1] >= 210 && data[idx + 2] >= 210) {
-                if (rowMinX === -1) rowMinX = x;
-                rowMaxX = x;
+              const isBright = data[idx] >= 210 && data[idx + 1] >= 210 && data[idx + 2] >= 210;
+              if (!isBright) {
+                darkStreak++;
+                if (darkStreak >= 10) { leftEdge = x + 10; break; }
+              } else {
+                darkStreak = 0;
               }
             }
-            if (rowMinX !== -1 && (rowMaxX - rowMinX) >= origW * 0.15) {
-              if (rowMinX < minX) minX = rowMinX;
-              if (rowMaxX > maxX) maxX = rowMaxX;
-            }
-          }
 
-          // If minX included the highlighted button on the left (x < 0.25*origW)
-          // and span is wide (> 0.45*origW), clip strictly to the detail card (x >= 0.31*origW)
-          if (minX < origW * 0.25 && (maxX - minX) > origW * 0.45) {
-            minX = Math.floor(origW * 0.31);
+            let rightEdge = centerX;
+            darkStreak = 0;
+            for (let x = centerX; x < origW; x++) {
+              const idx = (y * origW + x) * 4;
+              const isBright = data[idx] >= 210 && data[idx + 1] >= 210 && data[idx + 2] >= 210;
+              if (!isBright) {
+                darkStreak++;
+                if (darkStreak >= 10) { rightEdge = x - 10; break; }
+              } else {
+                darkStreak = 0;
+              }
+            }
+
+            if (rightEdge - leftEdge >= origW * 0.15) {
+              if (leftEdge < minX) minX = leftEdge;
+              if (rightEdge > maxX) maxX = rightEdge;
+            }
           }
 
           if (maxX > minX && (maxX - minX) >= origW * 0.15) {
