@@ -2600,7 +2600,6 @@ function initOcrModal() {
             if (val !== null && val > 0) {
               if (item.target === 'attack') {
                 detected['totalAttack'] = val;
-                if (!detected['attackFlat']) detected['attackFlat'] = val;
               } else if (['statSTR', 'statDEX', 'statINT', 'statLUK'].includes(item.target)) {
                 detected[item.target] = val;
               } else {
@@ -2789,22 +2788,6 @@ function initOcrModal() {
       }
       await worker.terminate();
 
-      // If attackFlat was set only from totalAttack (main stat table), and attackPct is known
-      const currentAtkPct = pendingOcrStats.attackPct !== undefined ? pendingOcrStats.attackPct : (Number($('attackPct')?.value) || 0);
-      if (!detailAttackParsed && pendingOcrStats.totalAttack && currentAtkPct > 0) {
-        pendingOcrStats.attackFlat = Math.round(pendingOcrStats.totalAttack / (1 + currentAtkPct / 100));
-      }
-
-      const maxRawStat = Math.max(
-        pendingOcrStats.statSTR || 0,
-        pendingOcrStats.statDEX || 0,
-        pendingOcrStats.statINT || 0,
-        pendingOcrStats.statLUK || 0
-      );
-      if (!detailMainStatParsed && maxRawStat > 0 && (!pendingOcrStats.mainStat || pendingOcrStats.mainStat < maxRawStat)) {
-        pendingOcrStats.mainStat = maxRawStat;
-      }
-
       const displayStats = Object.entries(pendingOcrStats).filter(([k]) => !k.startsWith('_'));
       const foundCount = displayStats.length;
       if (foundCount === 0) {
@@ -2814,9 +2797,10 @@ function initOcrModal() {
         if (resultsEl) {
           const guideHtml = `
             <div style="grid-column: 1 / -1; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--ink); line-height: 1.6; margin-bottom: 6px;">
-              💡 <strong>스탯 효율 계산 및 다중 스크린샷 안내</strong><br>
-              • 메인 스탯 창의 공격력/스탯은 <strong>총 합산치</strong>입니다. 스탯 효율 계산을 위해서는 <strong>공격력/주스탯 상세 팝업 (+ 및 % 분리)</strong> 스크린샷을 함께 등록하세요.<br>
-              • 스탯 목록 창은 스크롤 방식입니다. <strong>목록을 아래로 스크롤한 하단 스크린샷</strong>을 추가 업로드하시면 보공, 방관, 최종뎀 등 전체 스탯이 일괄 등록됩니다.
+              💡 <strong>스탯 추출 안내</strong><br>
+              • 메인 스탯 창의 수치는 <strong>총 합산치</strong>이므로, 이 스크린샷에서는 절대 수치인 <strong>공격력(+)</strong>과 <strong>주스탯(+)</strong>을 알 수 없어 자동 제외됩니다.<br>
+              • <strong>공격력(+)</strong>과 <strong>주스탯(+)</strong> 및 %를 등록하시려면, 인게임에서 공격력/주스탯을 터치했을 때 나오는 <strong>'상세 팝업 스크린샷'</strong>을 함께 등록해 주세요.<br>
+              • 스탯 창은 스크롤 방식이므로, <strong>스크롤을 아래로 내린 하단 스크린샷</strong>을 함께 올리시면 보공, 방관, 최종뎀 등도 일괄 등록됩니다.
             </div>
           `;
           resultsEl.innerHTML = guideHtml + displayStats.map(([field, val]) => {
