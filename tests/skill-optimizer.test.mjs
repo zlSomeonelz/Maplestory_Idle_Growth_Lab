@@ -68,22 +68,70 @@ const noBuff = simulateLoadout(quad, [], ctx);
 const withBuff = simulateLoadout(quad, [asc], ctx);
 assert.ok(withBuff.total > noBuff.total * 0.98, 'buff loadout should not lose much damage');
 
-// ---- every job parses without throwing; report coverage ----
-for (const key of ['hero', 'paladin', 'darkKnight', 'archMageIceLightning', 'archMageFirePoison', 'bishop', 'bowmaster', 'sniper', 'nightLord', 'shadower', 'viper', 'captain', 'nightWalker', 'windBreaker']) {
-  assert.ok(skills[key], `job ${key} missing`);
+// ---- 8.1 Independent Timer Isolation Test ----
+const s1 = { id: 's1', name: 'Skill1', baseCooldown: 10, directPct: 1000, hits: 1, isBasic: false, notes: [] };
+const s2 = { id: 's2', name: 'Skill2', baseCooldown: 15, directPct: 1500, hits: 1, isBasic: false, notes: [] };
+const basicAttack = { id: 'b1', name: 'Basic', baseCooldown: 0, directPct: 100, hits: 1, isBasic: true, notes: [] };
+const testCtx = {
+  duration: 30, attackInterval: 1, attackSpeed: 0, attackSpeedCap: 150,
+  cooldownReductionPercent: 0, fixedCooldownReductionSeconds: 0, boss: true,
+  damageFor: () => 1000
+};
+const simTimers = simulateLoadout(basicAttack, [s1, s2], testCtx);
+const s1Casts = simTimers.timeline.filter(x => x.name === 'Skill1').map(x => x.t);
+const s2Casts = simTimers.timeline.filter(x => x.name === 'Skill2').map(x => x.t);
+assert.deepEqual(s1Casts, [1, 11, 21], 'Skill1 must cast sequentially at 1, 11, 21 independently');
+assert.deepEqual(s2Casts, [0, 15], 'Skill2 must cast at 0, 15 independently');
+
+// ---- 8.2 0.05s Boundary Time Quantization Test ----
+const quantCtx = {
+  duration: 10, attackInterval: 0.33333333, attackSpeed: 17.5, attackSpeedCap: 150,
+  cooldownReductionPercent: 0, fixedCooldownReductionSeconds: 0, boss: true,
+  damageFor: () => 1000
+};
+const simQuant = simulateLoadout(basicAttack, [s1], quantCtx);
+for (const item of simQuant.timeline) {
+  const rem = Math.abs(item.t * 20 - Math.round(item.t * 20));
+  assert.ok(rem < 1e-6, `Timeline timestamp ${item.t} must be aligned to 0.05s grid`);
+}
+
+// ---- 8.3 CDR Calculation Rules Test ----
+import { calculateEffectiveCooldown } from '../engine.mjs';
+assert.equal(calculateEffectiveCooldown(20, 10, 0), 18, '20s base with 10% CDR = 18s');
+assert.equal(calculateEffectiveCooldown(10, 0, 5), 5, '10s base with 5s fixed CDR (rate 1.0) = 5s');
+assert.equal(calculateEffectiveCooldown(6, 0, 2), 5, '6s base (<7s) with 2s fixed CDR (rate 0.5) = 5s');
+assert.equal(calculateEffectiveCooldown(5, 0, 10), 4, 'Minimum cooldown cap must be 4s');
+
+// ---- 8.4 Provisional State & Warning Test ----
+const provSkill = parseSkillModel({ name: '미확인 스킬', effect: '적 5명에게 1000% 피해' });
+assert.equal(provSkill.cooldownStatus, 'provisional');
+assert.equal(provSkill.provisional, true);
+const simProv = simulateLoadout(basicAttack, [provSkill], testCtx);
+assert.equal(simProv.provisional, true);
+assert.ok(simProv.provisionalWarnings.length > 0, 'Provisional warnings must be populated');
+
+// ---- 8.5 Full 14-Job Coverage Test ----
+const jobKeys = ['hero', 'paladin', 'darkKnight', 'archMageIceLightning', 'archMageFirePoison', 'bishop', 'bowmaster', 'sniper', 'nightLord', 'shadower', 'viper', 'captain', 'nightWalker', 'windBreaker'];
+for (const key of jobKeys) {
+  assert.ok(skills[key], `Job ${key} missing in skills data`);
   const models = buildSkillModels(skills[key], 200);
   const basics = models.filter(m => m.isBasic);
-  assert.ok(basics.length >= 1, `${key} must expose at least one basic attack skill`);
+  assert.ok(basics.length >= 1, `${key} must have at least one basic attack`);
   const r = optimizeLoadout({ models, ctx });
   assert.ok(r.best, `${key} optimizer must return a loadout`);
   if (verbose) {
     console.log(`\n## ${key} → basic ${r.best.basic?.name} + [${r.best.skills.map(s => s.name).join(', ')}] (${r.evaluated} combos)`);
-    for (const m of models) {
-      console.log(`  ${m.isBasic ? 'B' : ' '} Lv${m.requiredLevel} ${m.name} | cd ${m.baseCooldown}${m.cooldownKnown ? '' : '?'} | dmg ${m.directPct}${m.periodic ? ` + ${m.periodic.pct}x${m.periodic.ticks}` : ''} | buff ${m.buff ? JSON.stringify(m.buff) : '-'}${m.servantPct ? ` servant ${m.servantPct}%` : ''}${m.passiveBoost ? ` | passive +${m.passiveBoost}%` : ''} ${m.notes.join('; ')}`);
-    }
   }
 }
+
+// ---- 8.6 Single Engine Parity Check Test ----
+const simA = simulateLoadout(basicAttack, [s1, s2], testCtx);
+const simB = simulateLoadout(basicAttack, [s1, s2], testCtx);
+assert.equal(simA.dps, simB.dps, 'Single engine simulation must be 100% deterministic');
+assert.ok(Math.abs(simA.dps - simB.dps) / Math.max(1, simA.dps) < 0.000001, 'DPS parity tolerance within 0.0001%');
 
 console.log('skill optimizer tests passed');
 console.log(`Night Walker Lv99 best: ${res.best.basic.name} + ${res.best.skills.map(s => s.name).join(', ')}`);
 console.log(`Night Walker Lv120 best: ${res120.best.basic.name} + ${res120.best.skills.map(s => s.name).join(', ')}`);
+console.log('All unified skill simulator & optimizer tests (8.1-8.6) passed cleanly!');
+
