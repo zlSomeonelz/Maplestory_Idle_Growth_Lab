@@ -2446,7 +2446,8 @@ function initOcrModal() {
     cooldownReductionPct: '쿨타임 감소%',
     statBased: '스탯 비례 데미지 (자동 산출)',
     totalAttack: '총 합산 공격력 (인게임 표시)',
-    totalMainStat: '총 합산 주스탯 (인게임 표시)'
+    totalMainStat: '총 합산 주스탯 (인게임 표시)',
+    mainStatPerLevel1: '1레벨당 주 스탯'
   };
 
   const STAT_CONFIG = [
@@ -2454,7 +2455,7 @@ function initOcrModal() {
     { target: 'normalDamage', keywords: ['일반 몬스터 데미지', '일반 몬스터데미지', '일반 몬스터', '일반데미지', '일반 데미지', '일공'] },
     { target: 'damageAmp', keywords: ['데미지 증폭', '데미지증폭'] },
     { target: 'finalDamage', keywords: ['최종 데미지', '최종데미지', '최종 데미7', '치종 데미', '최종'] },
-    { target: 'basicDamage', keywords: ['기본 공격 데미지', '기본공격데미지', '본 공격 데미지', '기본 공격'] },
+    { target: 'basicDamage', keywords: ['기본 공격 데미지', '기본공격데미지', '본 공격 데미지', '기본 공격 데미', '기본공격 데미'] },
     { target: 'skillDamage', keywords: ['스킬 데미지', '스킬데미지', 'AZ 데미지', 'AZ 데미', '스킬 데미^', '스킬 데미7', '스킬 데미'] },
     { target: 'critRate', keywords: ['크리티컬 확률', '크리티컬확률', '치명타 확률', '크확', '1리티컬 확률', '(리티컬 확률', '리티컬 확률', '티컬 확률'] },
     { target: 'critDamage', keywords: ['크리티컬 데미지', '크리티컬데미지', '치명타 데미지', '크뎀', '크리6걸데미지', '크리6걸 데미지', '크리6걸', '크리 데미지', '크리데미지', '크리6걸데미7', '크리티컬 데미7', '(리티컬 데미지', '리티컬 데미지', '리티컬데미지', '티컬 데미지', '(리티컬'] },
@@ -2469,15 +2470,15 @@ function initOcrModal() {
     { target: 'evasion', keywords: ['회피', '회피율'] },
     { target: 'statBased', keywords: ['스탯 비례 데미지', '스탯비례데미지', 'AEH 비례 데미지', 'HHH 데미지', 'AEH 비례', '스 비례 데미지', '스 비례', '비례 데미지', '스탯 비례', '스탯비례', 'o 비례 데미지'] },
     { target: 'damage', keywords: ['데미지'] },
-    { target: 'attack', keywords: ['공격력', '승격력', '홍격력', '증격력', '공격'] },
+    { target: 'attack', keywords: ['공격력', '승격력', '홍격력', '증격력'] },
     { target: 'statSTR', keywords: ['STR', '518', 'S1R', 'SIR'] },
     { target: 'statDEX', keywords: ['DEX', 'D EX'] },
     { target: 'statINT', keywords: ['INT', 'I NT', '1NT', '스킨 I', '스킨'] },
     { target: 'statLUK', keywords: ['LUK', 'L UK', 'ㄴ G', 'ㄴ (i)', 'ㄴ(i)', 'ㄴ i', 'ㄴ (|', 'ㄴ(', 'UK (i', 'UK'] },
     { target: 'debuffResist', keywords: ['디버프 내성', '디버프내성'] },
-    { target: 'extraTargets', keywords: ['기본 공격 대상 수 증가', '기본 공격 대상 수', '대상 수 증가'] },
+    { target: 'extraTargets', keywords: ['기본 공격 대상 수 증가', '기본 공격 대상 수', '기본 공격 대상', '대상 수 증가', '대상 수'] },
     { target: 'cooldownReductionPct', keywords: ['스킬 재사용 대기시간 감소', '재사용 대기시간 감소'] },
-    { target: 'mainStatPerLevel1', keywords: ['1레벨당 주 스탯', '1레벨당 주스탯', '1HES FAH', '1레벨당 FAR', '1레벨당'] }
+    { target: 'mainStatPerLevel1', keywords: ['1레벨당 주 스탯', '1레벨당 주스탯', '1HES FAH', '12ES FAH', '12ES', 'FAH', '1레벨당 FAR', '1레벨당'] }
   ];
 
   function parseSingleOcrText(text) {
@@ -2609,6 +2610,14 @@ function initOcrModal() {
           ) {
             continue;
           }
+        }
+
+        if (item.target === 'basicDamage' && (line.includes('대상') || line.includes('수 증가'))) {
+          continue;
+        }
+
+        if (item.target === 'attack' && (line.includes('속도') || line.includes('대상') || line.includes('간격'))) {
+          continue;
         }
 
         const isCritDamageMatch = item.target === 'critDamage' && (
@@ -2817,6 +2826,13 @@ function initOcrModal() {
         }
       }
       await worker.terminate();
+
+      if (pendingOcrStats.mainStat && !pendingOcrStats.subStat) {
+        if (pendingOcrStats.statLUK && pendingOcrStats.statDEX) pendingOcrStats.subStat = pendingOcrStats.statDEX;
+        else if (pendingOcrStats.statSTR && pendingOcrStats.statDEX) pendingOcrStats.subStat = pendingOcrStats.statDEX;
+        else if (pendingOcrStats.statDEX && pendingOcrStats.statSTR) pendingOcrStats.subStat = pendingOcrStats.statSTR;
+        else if (pendingOcrStats.statINT && pendingOcrStats.statLUK) pendingOcrStats.subStat = pendingOcrStats.statLUK;
+      }
 
       const displayStats = Object.entries(pendingOcrStats).filter(([k]) => !k.startsWith('_'));
       const foundCount = displayStats.length;
