@@ -2838,6 +2838,9 @@ function renderCubeTargetSummary() {
   const goals = ['cubeGoal1', 'cubeGoal2', 'cubeGoal3'].map(id => $(id)?.value).filter(Boolean);
   if (!goals.length || !blocks.length) {
     box.textContent = '목표 옵션을 선택하면 3개 슬롯 기준 기대값을 계산합니다.';
+    const ecoBox = $('cubeEconomics');
+    if (ecoBox) ecoBox.textContent = '목표 옵션과 1회 비용을 입력하면 달성 기대 횟수, 기대 비용 및 가성비(ROI)를 분석합니다.';
+    renderCubeStopGuide();
     return;
   }
   const slotOptions = blocks.map(block => block.options || []);
@@ -2849,6 +2852,136 @@ function renderCubeTargetSummary() {
     ? `<br><small>※ 동일 옵션 3슬롯 재설정 보정: 동일 조합 확률 ${(result.rerollExclusion.sameProbability * 100).toFixed(6)}% (현재 목표 ${result.rerollExclusion.currentIsGoal ? '포함' : '미포함'})</small>`
     : '<br><small>※ 기존 옵션과 3슬롯(종류·수치·순서)이 완전히 동일하면 다른 결과가 나올 때까지 재설정 규칙 반영</small>';
   box.innerHTML = `<strong>3슬롯 목표 옵션 분석</strong><br><span>${goals.map(escapeHtml).join(' + ')}</span><br><small>${modeLabel} · 슬롯별 독립 확률: ${slots}</small>${rerollInfo}<br>1회 큐브 달성 확률 <b>${(result.probability * 100).toFixed(4)}%</b> · 기대 횟수 <b>${fmt(result.expectedAttempts)}회</b>${result.expectedCost == null ? '' : ' · 기대 메소 <b>' + fmt(result.expectedCost) + '</b>'}`;
+
+  // MekiCalc Style Cube Bang-for-the-Buck (ROI) Economics
+  const ecoBox = $('cubeEconomics');
+  if (ecoBox) {
+    const rate = window._lastCubeRate || 0;
+    const delta = window._lastCubeDelta || 0;
+    const expCost = Number(result.expectedCost) || 0;
+    const roiPerMillion = expCost > 0 ? (rate / (expCost / 1000000)) : 0;
+
+    let tierLabel = '옵션 가성비 분석';
+    let tierColor = '#64748b';
+    let advice = '현재 옵션과 후보 옵션의 기대비용을 비교하여 적정 단계에서 스톱하세요.';
+
+    if (expCost > 0 && rate > 0) {
+      if (roiPerMillion >= 0.05) {
+        tierLabel = '👑 가성비 극상 (S-Tier)';
+        tierColor = '#0b7a58';
+        advice = '적은 메소로 큰 딜 상승을 얻을 수 있는 필수 가성비 옵션입니다. 최우선 강화를 권장합니다!';
+      } else if (roiPerMillion >= 0.01) {
+        tierLabel = '⭐ 추천 종결 라인 (A-Tier)';
+        tierColor = '#4f46d9';
+        advice = '실전 딜 상승과 비용의 균형이 가장 우수한 표준 종결 구간입니다.';
+      } else if (roiPerMillion >= 0.002) {
+        tierLabel = '⚖️ 보통 (B-Tier)';
+        tierColor = '#d97706';
+        advice = '비용 대비 딜 상승이 다소 낮습니다. 스타포스나 주문서 작이 덜 되었다면 다른 부위를 먼저 올리는 것이 효율적입니다.';
+      } else {
+        tierLabel = '⚠️ 극옵 초고자본 (C-Tier)';
+        tierColor = '#b42318';
+        advice = '기대 비용이 매우 높고 가성비가 낮습니다. 다른 모든 부위 15성/완작 후 마지막에 도전하세요.';
+      }
+    }
+
+    ecoBox.innerHTML = `
+      <div style="border:1px solid var(--line);border-radius:10px;padding:12px;background:#fbfcfe;display:grid;gap:6px;margin-top:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <strong style="font-size:14px;color:var(--ink);">💰 큐브 가성비(ROI) 분석</strong>
+          <span style="font-weight:800;font-size:11px;padding:2px 8px;border-radius:6px;background:#edf2ff;color:${tierColor};">${tierLabel}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;">
+          <span>목표 달성 기대 비용:</span>
+          <strong>${expCost > 0 ? fmt(expCost) + ' 메소' : '비용 미입력'}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;">
+          <span>후보 옵션 딜 상승:</span>
+          <strong style="color:#0b7a58;">${delta >= 0 ? '+' : ''}${fmt(delta)} DPS (${rate >= 0 ? '+' : ''}${rate.toFixed(2)}%)</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;border-top:1px dashed var(--line);padding-top:4px;">
+          <span>💡 100만 메소당 딜 상승 효율:</span>
+          <strong style="color:var(--primary-dark);">${roiPerMillion > 0 ? '+' + roiPerMillion.toFixed(4) + '% / 100만 메소' : '—'}</strong>
+        </div>
+        <p style="margin:4px 0 0;font-size:12px;color:var(--muted);">${advice}</p>
+      </div>
+    `;
+  }
+
+  renderCubeStopGuide();
+}
+
+function renderCubeStopGuide() {
+  const guideList = $('cubeStopGuideList');
+  if (!guideList) return;
+  const equipment = $('cubeEquipment')?.value || 'weapon';
+  const slot = $('cubeSlot')?.value || 'weapon';
+
+  const isWeapon = equipment === 'weapon' || ['weapon', 'subWeapon', 'emblem'].includes(slot);
+  const isGlove = slot === 'gloves';
+  const isAccessory = equipment === 'accessory';
+
+  let items = [];
+
+  if (isWeapon) {
+    items = [
+      {
+        title: '⚔️ 무기/보조/엠블렘: 유효 1순위 (공격력% + 보스 데미지%)',
+        desc: '<strong>에픽 1줄(공6%) ➔ 유니크 2줄(공9% + 보공12%)</strong> 단계가 실전 가성비 최고점입니다.',
+        badge: '가성비 최우선',
+        badgeColor: '#0b7a58'
+      },
+      {
+        title: '⚠️ 3줄 극옵(보공 3줄, 공 3줄) 주의',
+        desc: '넥슨 나우 공시 확률상 3줄 극옵 확률은 0.001% 미만(기대비용 수억 메소)입니다. <strong>2줄 유효에서 멈추고 해당 메소로 스타포스(12~15성)를 올리는 것</strong>이 딜 상승 효율이 5~10배 높습니다.',
+        badge: '과투자 주의',
+        badgeColor: '#b42318'
+      }
+    ];
+  } else if (isGlove) {
+    items = [
+      {
+        title: '🧤 장갑: 크리티컬 데미지% (방어구 중 딜 상승 압도적 1위)',
+        desc: '장갑 잠재능력에서 등장하는 <strong>크리티컬 데미지(유니크 4% / 레전 8%)</strong>는 캐릭터 크확 100% 기준 무기 공격력%와 맞먹는 딜 상승을 보입니다. 방어구 중 가장 먼저 큐브를 투자하세요.',
+        badge: '필수 추천',
+        badgeColor: '#0b7a58'
+      },
+      {
+        title: '🎯 장갑 스톱 라인: 크뎀 1줄 + 주스탯/공격력 1줄',
+        desc: '크뎀 1줄만 확보해도 충분히 종결급 가성비를 누릴 수 있습니다. 크뎀 2줄은 초고자본 영역이므로 1줄에서 멈추는 것을 강력 권장합니다.',
+        badge: '가성비 종결',
+        badgeColor: '#4f46d9'
+      }
+    ];
+  } else if (isAccessory) {
+    items = [
+      {
+        title: '💍 장신구류: 주스탯% (에픽 6% 스톱 권장)',
+        desc: '반지/목걸이/귀고리는 주스탯% 위주로 옵션을 맞추며, <strong>에픽 1줄(주스탯 6%) 또는 유니크 1줄(주스탯 9%)</strong>에서 스톱하고 무기/스타포스에 자원을 집중하세요.',
+        badge: '가성비 스톱',
+        badgeColor: '#4f46d9'
+      }
+    ];
+  } else {
+    items = [
+      {
+        title: '🛡️ 일반 방어구(투구/상의/신발): 주스탯% (에픽 6% 만족 후 스톱)',
+        desc: '방어구는 큐브보다 <strong>스타포스 공격력 증가 및 주문서 완작</strong>의 딜 기여도가 훨씬 높습니다. 큐브는 에픽 6% 수준에서 멈추는 것이 가장 경제적입니다.',
+        badge: '절약 권장',
+        badgeColor: '#d97706'
+      }
+    ];
+  }
+
+  guideList.innerHTML = items.map(item => `
+    <div class="guide-item" style="display:grid;gap:4px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong style="color:var(--ink);font-size:13px;">${item.title}</strong>
+        <span style="font-size:11px;font-weight:800;background:#edf2ff;color:${item.badgeColor};padding:2px 7px;border-radius:6px;">${item.badge}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);">${item.desc}</div>
+    </div>
+  `).join('');
 }
 
 function renderCube() {
@@ -2860,6 +2993,8 @@ function renderCube() {
   if ($('cubeCandidateDps')) $('cubeCandidateDps').textContent = fmt(candidate.dps);
   const delta = candidate.dps - current.dps;
   const rate = current.dps ? delta / current.dps * 100 : 0;
+  window._lastCubeDelta = delta;
+  window._lastCubeRate = rate;
   if ($('cubeDelta')) $('cubeDelta').textContent = `${delta >= 0 ? '+' : ''}${fmt(delta)} (${rate >= 0 ? '+' : ''}${rate.toFixed(2)}%)`;
   if ($('cubeCurrentPower')) $('cubeCurrentPower').textContent = fmt(currentPower.power);
   if ($('cubeCandidatePower')) $('cubeCandidatePower').textContent = fmt(candidatePower.power);
