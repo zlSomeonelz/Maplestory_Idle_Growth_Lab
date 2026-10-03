@@ -2444,7 +2444,9 @@ function initOcrModal() {
     debuffResist: '디버프 내성',
     extraTargets: '기본 공격 대상 수 증가',
     cooldownReductionPct: '쿨타임 감소%',
-    statBased: '스탯 비례 데미지 (자동 산출)'
+    statBased: '스탯 비례 데미지 (자동 산출)',
+    totalAttack: '총 합산 공격력 (인게임 표시)',
+    totalMainStat: '총 합산 주스탯 (인게임 표시)'
   };
 
   const STAT_CONFIG = [
@@ -2461,15 +2463,15 @@ function initOcrModal() {
     { target: 'maxDamage', keywords: ['최대 데미지 배율', '최대데미지 배율', '최대 데미지', '최대 데미'] },
     { target: 'attackSpeed', keywords: ['공격 속도', '공격속도'] },
     { target: 'playerDefense', keywords: ['방어력'] },
-    { target: 'maxHp', keywords: ['최대 HP', '최대HP', '최대16', '최대 16', '최대1P', '최대 1P', 'Hh HP', 'ZC HP', '치대 HP'] },
-    { target: 'maxMp', keywords: ['최대 MP', '최대MP', '최대 mp', '최대”', '최대"', '최대 M', 'At MP', 'AL MP'] },
+    { target: 'maxHp', keywords: ['최대 HP', '최대HP', '최대16', '최대 16', '최대1P', '최대 1P', 'Hh HP', 'ZC HP', 'ZICH HP', 'ZIC HP', 'ICH HP', '치대 HP', 'HP'] },
+    { target: 'maxMp', keywords: ['최대 MP', '최대MP', '최대 mp', '최대”', '최대"', '최대 M', 'At MP', 'AL MP', 'MP'] },
     { target: 'accuracy', keywords: ['명중', '명중률'] },
     { target: 'evasion', keywords: ['회피', '회피율'] },
     { target: 'statBased', keywords: ['스탯 비례 데미지', '스탯비례데미지', 'AEH 비례 데미지', 'AEH 비례', '스 비례 데미지', '스 비례', '비례 데미지', '스탯 비례', '스탯비례'] },
     { target: 'damage', keywords: ['데미지'] },
     { target: 'attack', keywords: ['공격력'] },
     { target: 'statSTR', keywords: ['STR', '518', 'S1R', 'SIR'] },
-    { target: 'statDEX', keywords: ['DEX'] },
+    { target: 'statDEX', keywords: ['DEX', 'D EX'] },
     { target: 'statINT', keywords: ['INT', 'I NT'] },
     { target: 'statLUK', keywords: ['LUK', 'L UK', 'ㄴ G', 'ㄴ (i)', 'ㄴ(i)', 'ㄴ i', 'ㄴ (|', 'ㄴ('] },
     { target: 'debuffResist', keywords: ['디버프 내성', '디버프내성'] },
@@ -2505,6 +2507,7 @@ function initOcrModal() {
     const isDetailPopup = hasPlus && hasPct && hasDetailIndicator;
 
     if (isDetailPopup) {
+      detected._isDetail = true;
       let detailHeader = null;
       if (
         fullText.includes('Luk 1') ||
@@ -2590,17 +2593,14 @@ function initOcrModal() {
           item.keywords.forEach(kw => { cleanLine = cleanLine.replace(kw, ''); });
           cleanLine = cleanLine.replace(/[ⓘi|()\[\]G!a_]/g, ' ').trim();
 
-          const allNums = Array.from(cleanLine.matchAll(/([0-9만억조,\.]+%?)/g)).map(m => m[1]);
+          const allNums = Array.from(cleanLine.matchAll(/(?:[0-9,.]+\s*(?:조|억|만)\s*)*[0-9,.]+(?:\s*(?:조|억|만))?\s*%?/g)).map(m => m[0].trim());
           if (allNums.length > 0) {
             let bestNumStr = allNums.find(n => n.includes('%')) || allNums[allNums.length - 1];
             const val = parseKoreanNumber(bestNumStr);
             if (val !== null && val > 0) {
               if (item.target === 'attack') {
-                if (line.includes('%')) {
-                  if (!detected['attackPct']) detected['attackPct'] = val;
-                } else {
-                  if (!detected['attackFlat']) detected['attackFlat'] = val;
-                }
+                detected['totalAttack'] = val;
+                if (!detected['attackFlat']) detected['attackFlat'] = val;
               } else if (['statSTR', 'statDEX', 'statINT', 'statLUK'].includes(item.target)) {
                 detected[item.target] = val;
               } else {
@@ -2753,6 +2753,8 @@ function initOcrModal() {
     try {
       const worker = await window.Tesseract.createWorker('kor+eng');
       let processedCount = 0;
+      let detailAttackParsed = false;
+      let detailMainStatParsed = false;
 
       for (const file of fileArray) {
         processedCount++;
@@ -2773,9 +2775,25 @@ function initOcrModal() {
           parsed = parseSingleOcrText(resFull.data.text);
         }
 
-        Object.assign(pendingOcrStats, parsed);
+        if (parsed._isDetail) {
+          if (parsed.attackFlat !== undefined || parsed.attackPct !== undefined) detailAttackParsed = true;
+          if (parsed.mainStat !== undefined || parsed.mainStatPct !== undefined) detailMainStatParsed = true;
+        }
+
+        for (const [k, v] of Object.entries(parsed)) {
+          if (k.startsWith('_')) continue;
+          if (k === 'attackFlat' && detailAttackParsed && !parsed._isDetail) continue;
+          if (k === 'mainStat' && detailMainStatParsed && !parsed._isDetail) continue;
+          pendingOcrStats[k] = v;
+        }
       }
       await worker.terminate();
+
+      // If attackFlat was set only from totalAttack (main stat table), and attackPct is known
+      const currentAtkPct = pendingOcrStats.attackPct !== undefined ? pendingOcrStats.attackPct : (Number($('attackPct')?.value) || 0);
+      if (!detailAttackParsed && pendingOcrStats.totalAttack && currentAtkPct > 0) {
+        pendingOcrStats.attackFlat = Math.round(pendingOcrStats.totalAttack / (1 + currentAtkPct / 100));
+      }
 
       const maxRawStat = Math.max(
         pendingOcrStats.statSTR || 0,
@@ -2783,17 +2801,25 @@ function initOcrModal() {
         pendingOcrStats.statINT || 0,
         pendingOcrStats.statLUK || 0
       );
-      if (maxRawStat > 0 && (!pendingOcrStats.mainStat || pendingOcrStats.mainStat < maxRawStat)) {
+      if (!detailMainStatParsed && maxRawStat > 0 && (!pendingOcrStats.mainStat || pendingOcrStats.mainStat < maxRawStat)) {
         pendingOcrStats.mainStat = maxRawStat;
       }
 
-      const foundCount = Object.keys(pendingOcrStats).length;
+      const displayStats = Object.entries(pendingOcrStats).filter(([k]) => !k.startsWith('_'));
+      const foundCount = displayStats.length;
       if (foundCount === 0) {
         if (statusEl) statusEl.textContent = `총 ${fileArray.length}개 이미지에서 스탯 수치를 감지하지 못했습니다. 글자가 선명한 스탯 팝업 스크린샷을 사용하세요.`;
       } else {
         if (statusEl) statusEl.textContent = `총 ${fileArray.length}개 이미지 분석 완료! ${foundCount}개 스탯 항목을 수집했습니다. 확인 후 적용을 누르세요.`;
         if (resultsEl) {
-          resultsEl.innerHTML = Object.entries(pendingOcrStats).map(([field, val]) => {
+          const guideHtml = `
+            <div style="grid-column: 1 / -1; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--ink); line-height: 1.6; margin-bottom: 6px;">
+              💡 <strong>스탯 효율 계산 및 다중 스크린샷 안내</strong><br>
+              • 메인 스탯 창의 공격력/스탯은 <strong>총 합산치</strong>입니다. 스탯 효율 계산을 위해서는 <strong>공격력/주스탯 상세 팝업 (+ 및 % 분리)</strong> 스크린샷을 함께 등록하세요.<br>
+              • 스탯 목록 창은 스크롤 방식입니다. <strong>목록을 아래로 스크롤한 하단 스크린샷</strong>을 추가 업로드하시면 보공, 방관, 최종뎀 등 전체 스탯이 일괄 등록됩니다.
+            </div>
+          `;
+          resultsEl.innerHTML = guideHtml + displayStats.map(([field, val]) => {
             const label = STAT_LABELS[field] || field;
             return `<div class="stat-row" style="border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fff;display:flex;justify-content:space-between;align-items:center;">
               <span style="font-size:12px;font-weight:700;color:var(--ink);">${label}</span>
