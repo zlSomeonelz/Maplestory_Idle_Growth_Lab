@@ -2,7 +2,7 @@
 
 > 이 문서는 Antigravity 또는 다른 개발 에이전트가 저장소를 바로 이어받을 수 있도록 현재 구현된 계산 알고리즘, 데이터 구조, 검증 상태, 남은 작업을 정리한 문서다.
 >
-> 기준 커밋: `f6c6e3b` (브랜치 `feat/resource-specup-optimizer`)
+> 기준 커밋: `9d27337` (브랜치 `feat/resource-specup-optimizer`)
 > 저장소: <https://github.com/zlSomeonelz/Maplestory_Idle_Growth_Lab>  
 > 공개 사이트: <https://zlsomeonelz.github.io/Maplestory_Idle_Growth_Lab/>
 
@@ -580,10 +580,10 @@ OCR 관련 페이지와 캐시는 존재한다.
 - iPad Safari 카메라·클립보드 입력 검증
 
 ### P2. UI·배포 품질
-
-- iPad Safari 실제 입력 테스트
-- 가로·세로 화면 테스트
-- 작은 화면에서 보조 입력 영역 접기·스크롤 개선
+- [x] iPad / 태블릿 가로·세로 모드 반응형 최적화 완료 (모든 탭 가로 오버플로우 0px 검증)
+- [x] 터치 환경 친화적 최소 42px 탭 타겟 및 부드러운 가로 스크롤링 지원
+- [x] 장비 스펙업 테이블 반응형 컨테이너(`.table-responsive`) 및 터치 최적화 인풋
+- iPad Safari 실제 입력 테스트 및 PWA 홈 화면 추가 지원
 - 데이터 로딩 실패 시 파일별 오류 표시
 - 공식 데이터 업데이트 시 갱신일 자동 표시
 - GitHub Pages 배포 smoke test 자동화
