@@ -507,12 +507,20 @@ button, input, select, textarea {
 
 .result-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
+}
+
+.two-col .result-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .result-grid.three {
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.two-col .result-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .metric {
@@ -530,17 +538,18 @@ button, input, select, textarea {
   display: block;
   color: var(--muted);
   font-size: 11.5px;
+  line-height: 1.35;
 }
 
 .metric strong {
   display: block;
   margin: 5px 0;
-  font-size: 21px;
+  font-size: clamp(16px, 1.8vw, 21px);
   font-weight: 900;
-  letter-spacing: -0.04em;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  letter-spacing: -0.03em;
   color: var(--ink);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .metric.primary-metric {
@@ -1568,7 +1577,7 @@ dialog::backdrop {
 
 .efficiency-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 8px;
   margin-top: 10px;
 }
@@ -1577,12 +1586,14 @@ dialog::backdrop {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: 10px;
+  padding: 9px 12px;
   background: #f8fafc;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   font-size: 13px;
+  min-height: 40px;
+  box-sizing: border-box;
 }
 
 .eff-rank {
@@ -1590,19 +1601,28 @@ dialog::backdrop {
   color: var(--primary);
   background: var(--primary-light);
   border-radius: 6px;
-  padding: 2px 7px;
+  padding: 3px 8px;
   font-size: 11px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .eff-label {
   flex: 1;
   font-weight: 700;
   color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .eff-delta {
   color: var(--muted);
   font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .eff-badge {
@@ -1612,6 +1632,9 @@ dialog::backdrop {
   padding: 3px 8px;
   border-radius: 6px;
   font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 /* OCR Modal */
