@@ -2,7 +2,7 @@
 
 > 이 문서는 Antigravity 또는 다른 개발 에이전트가 저장소를 바로 이어받을 수 있도록 현재 구현된 계산 알고리즘, 데이터 구조, 검증 상태, 남은 작업을 정리한 문서다.
 >
-> 기준 커밋: `cbfb14d` (브랜치 `feat/resource-specup-optimizer`)
+> 기준 커밋: `f858b24` (브랜치 `feat/resource-specup-optimizer`)
 > 저장소: <https://github.com/zlSomeonelz/Maplestory_Idle_Growth_Lab>  
 > 공개 사이트: <https://zlsomeonelz.github.io/Maplestory_Idle_Growth_Lab/>
 
@@ -79,7 +79,10 @@ node tests/engine.test.mjs
   - 순수 수학/확률 계산 엔진 (MekiCalc & 스탯효율 v4 계승)
   - `calculateStarforcePath`: 0~30성 흡수 마르코프 연쇄(Absorbing Markov Chain) 동적계획법 기반 기대비용·파괴/하락/시도 횟수 계산
   - `calculateScrollEnhancement`: 음이항 분포 기반 주문서 완작 및 순백의 주문서(10%) 실패 복구 기대치
-  - `applyStatGains`: 강화별 획득 스탯을 캐릭터 스탯 버킷에 순수 함수로 적용
+  - `getEquipmentCubeStats`: 장비의 3개 슬롯 잠재옵션(공%, 보공%, 크뎀%, 주스탯% 등) 또는 기본 프로필에서 순수 스탯 집계
+  - `recommendCubeAction`: 단일 장비 부위의 현재 3줄 옵션을 평가하여 상위 옵션 달성 기대비용, 실시간 DPS 상승량, 100만 메소당 ROI 및 MekiCalc 스톱 판정(🛑 STOP, 🔄 REROLL, ⬆️ TIER UP, ⏸️ KEEP) 산출
+  - `rankAllEquipmentCubes`: 8개 주요 장비 부위를 분석하여 큐브 우선순위 랭킹(Leaderboard) 정렬
+  - `applyStatGains` / `subtractStatGains`: 강화별 획득/제거 스탯을 캐릭터 스탯 버킷에 순수 함수로 적용
   - `optimizeSpecUpPath`: 보유 재화(Budget) 한계 내에서 매 단계마다 `calculateDamage`로 실시간 스탯 버킷 포화도(보공/크뎀/공%/주스탯)를 재계산하여 ROI(1만 메소당 DPS 상승률)가 가장 높은 강화 순서를 산출하는 탐욕 프론티어 최적화기
 - `tests/engine.test.mjs`
   - PvE 피해·DPS
