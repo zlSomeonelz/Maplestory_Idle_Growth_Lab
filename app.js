@@ -2558,24 +2558,34 @@ function initOcrModal() {
       }
 
       for (const line of lines) {
-        const plusMatch = line.match(/\+\s*[:;\-1]?\s*([0-9만억조,\.]+)/);
+        const plusMatch = line.match(/\+\s*[:;\-1]?\s*((?:[0-9,.]+\s*(?:조|억|만)\s*)*[0-9,.]+)/);
         if (plusMatch) {
           const val = parseKoreanNumber(plusMatch[1]);
           if (val !== null && val > 0) {
             if (detailHeader === 'attack') detected['attackFlat'] = val;
             else if (['statLUK', 'statSTR', 'statDEX', 'statINT'].includes(detailHeader)) {
               detected['mainStat'] = val;
-              detected[detailHeader] = val;
             }
           }
         }
-        const pctMatch = line.match(/%\s*[:;\-]?\s*([0-9만억조,\.]+)/);
+        const pctMatch = line.match(/%\s*[:;\-]?\s*([0-9,\.]+)/) || line.match(/([0-9,\.]+)\s*%/);
         if (pctMatch) {
           const val = parseKoreanNumber(pctMatch[1]);
           if (val !== null && val > 0) {
             if (detailHeader === 'attack') detected['attackPct'] = val;
             else if (['statLUK', 'statSTR', 'statDEX', 'statINT'].includes(detailHeader)) {
               detected['mainStatPct'] = val;
+            }
+          }
+        }
+        const totalMatch = line.match(/(?:합\s*산|함\s*산|합\s*상|합\s*계|총\s*합)\s*[:;\-1]?\s*((?:[0-9,.]+\s*(?:조|억|만)\s*)*[0-9,.]+)/);
+        if (totalMatch) {
+          const val = parseKoreanNumber(totalMatch[1]);
+          if (val !== null && val > 0) {
+            if (detailHeader === 'attack') {
+              detected['totalAttack'] = val;
+            } else if (['statLUK', 'statSTR', 'statDEX', 'statINT'].includes(detailHeader)) {
+              detected[detailHeader] = val;
             }
           }
         }
