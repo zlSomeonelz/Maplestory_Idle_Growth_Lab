@@ -2387,127 +2387,74 @@ function runCombatSimulation() {
   if (!jobKey || !DATA.jobSkills?.[jobKey]) return;
 
   const duration = Number($('simDuration')?.value || 30);
-  const inputs = readInputs();
-  const job = DATA.jobSkills[jobKey];
+  const state = loadSkillLoadoutState(jobKey);
+  const level = skillLoadoutLevel();
+  const models = buildSkillModels(DATA.jobSkills[jobKey], level, state.overrides);
 
-  const activeSkills = [];
-  job.stages.forEach(st => {
-    (st.active || []).forEach(sk => {
-      const metrics = parseSkillDamageMetrics(sk.effect);
-      const baseCd = parseCooldownSeconds(sk.cooldown);
-      activeSkills.push({
-        id: sk.id,
-        name: sk.name,
-        effect: sk.effect,
-        stage: st.id,
-        metrics,
-        baseCooldown: baseCd,
-        isBasic: sk.effect.includes('기본 공격') || baseCd === 0,
-        isBuff: sk.effect.includes('증가') && !sk.effect.includes('피해')
-      });
-    });
-  });
+  let basic = models.find(m => m.unlocked && m.isBasic && state.equipped.includes(m.name));
+  if (!basic) basic = models.find(m => m.unlocked && m.isBasic) || null;
 
-  const basicSkills = activeSkills.filter(s => s.isBasic && !s.isBuff);
-  const primaryBasic = basicSkills[basicSkills.length - 1] || activeSkills[0];
-  const cooldownSkills = activeSkills.filter(s => s.baseCooldown > 0 && !s.isBuff);
-
-  const effectiveInterval = Math.max(0.1, (inputs.attackInterval || 1) / (1 + (inputs.attackSpeed || 0) / 100));
-  const cdrPct = clamp(inputs.cooldownReductionPercent || 0, 0, 80);
-  const cdrSec = inputs.fixedCooldownReductionSeconds || 0;
-
-  cooldownSkills.forEach(s => {
-    let cd = s.baseCooldown * (1 - cdrPct / 100) - cdrSec;
-    s.effectiveCooldown = Math.max(4, cd);
-  });
-
-  let t = 0;
-  const skillUsage = {
-    [primaryBasic.name]: { count: 0, hits: 0, totalPctDamage: 0 }
-  };
-  cooldownSkills.forEach(s => {
-    skillUsage[s.name] = { count: 0, hits: 0, totalPctDamage: 0 };
-  });
-
-  const lastCastTime = {};
-
-  while (t < duration) {
-    let castSkill = null;
-    for (const s of cooldownSkills) {
-      const last = lastCastTime[s.id] ?? -999;
-      if (t - last >= s.effectiveCooldown) {
-        castSkill = s;
-        break;
-      }
-    }
-
-    if (castSkill) {
-      lastCastTime[castSkill.id] = t;
-      skillUsage[castSkill.name].count++;
-      skillUsage[castSkill.name].hits += castSkill.metrics.hits;
-      skillUsage[castSkill.name].totalPctDamage += castSkill.metrics.totalPct;
-      t += effectiveInterval;
-    } else {
-      skillUsage[primaryBasic.name].count++;
-      skillUsage[primaryBasic.name].hits += primaryBasic.metrics.hits;
-      skillUsage[primaryBasic.name].totalPctDamage += primaryBasic.metrics.totalPct;
-      t += effectiveInterval;
-    }
+  let activeSkills = models.filter(m => m.unlocked && !m.isBasic && state.equipped.includes(m.name));
+  if (!activeSkills.length) {
+    activeSkills = models.filter(m => m.unlocked && !m.isBasic).slice(-LOADOUT_SKILL_SLOTS);
   }
 
-  let totalPctAll = 0;
-  let totalHitsAll = 0;
-  for (const info of Object.values(skillUsage)) {
-    totalPctAll += info.totalPctDamage;
-    totalHitsAll += info.hits;
+  const { ctx, relative } = skillOptimizerContext(duration);
+  const sim = simulateLoadout(basic, activeSkills, ctx);
+
+  let warningBanner = '';
+  if (sim.provisional) {
+    const warningsText = sim.provisionalWarnings.length ? sim.provisionalWarnings.join(' · ') : '일부 스킬 쿨타임/계수 미확인';
+    warningBanner = `<div style="font-size:11px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:6px 8px;margin-bottom:8px;">⚠️ 미확인 스킬 포함 경고: ${escapeHtml(warningsText)} (상단 스킬 설정에서 실제 수치를 입력할 수 있습니다.)</div>`;
   }
 
-  const damagePer100Pct = calculateDamage({ ...inputs, skillCoefficient: 100 }).average;
-  const totalSimDamage = (totalPctAll / 100) * damagePer100Pct;
-  const simDps = totalSimDamage / duration;
-
-  let resHtml = `
-    <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:10px;">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:8px;margin-bottom:12px;">
-        <div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:1px solid var(--line);">
-          <span style="font-size:11px;color:var(--muted);font-weight:700;">전투 시간</span>
-          <div style="font-size:16px;font-weight:900;color:var(--ink);">${duration}초</div>
-        </div>
-        <div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:1px solid var(--line);">
-          <span style="font-size:11px;color:var(--muted);font-weight:700;">총 타격 횟수</span>
-          <div style="font-size:16px;font-weight:900;color:var(--primary);">${fmt(totalHitsAll)}회</div>
-        </div>
-        <div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:1px solid var(--line);">
-          <span style="font-size:11px;color:var(--muted);font-weight:700;">누적 총 피해량</span>
-          <div style="font-size:16px;font-weight:900;color:var(--primary-dark);">${fmt(totalSimDamage)}</div>
-        </div>
-        <div style="background:#eff6ff;padding:8px 10px;border-radius:6px;border:1px solid #bfdbfe;">
-          <span style="font-size:11px;color:#1e40af;font-weight:700;">실전 시뮬레이션 DPS</span>
-          <div style="font-size:16px;font-weight:900;color:#1d4ed8;">${fmt(simDps)}</div>
-        </div>
-      </div>
-
-      <div style="font-size:12px;font-weight:800;color:var(--ink);margin-bottom:6px;">📊 스킬별 딜 지분율 & 발동 횟수</div>
-      <div style="display:grid;gap:6px;">
-  `;
-
-  for (const [sName, info] of Object.entries(skillUsage)) {
-    if (info.count === 0) continue;
-    const share = totalPctAll > 0 ? (info.totalPctDamage / totalPctAll * 100).toFixed(1) : 0;
-    resHtml += `
+  const totalHits = sim.usage.reduce((sum, u) => sum + u.hits, 0);
+  const shareRows = sim.usage.map(u => {
+    const share = sim.total > 0 ? (u.damage / sim.total * 100).toFixed(1) : 0;
+    return `
       <div>
         <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;">
-          <span><b>${escapeHtml(sName)}</b> (시전 ${info.count}회 · ${info.hits}타)</span>
-          <span style="font-weight:800;color:var(--primary);">${share}% (${fmt(info.totalPctDamage)}%)</span>
+          <span><b>${escapeHtml(u.name)}</b> (${u.casts ? `시전 ${u.casts}회` : '패시브/추가타'} · ${u.hits}타)</span>
+          <span style="font-weight:800;color:var(--primary);">${share}% (${fmt(u.damage)})</span>
         </div>
         <div style="background:#e2e8f0;height:6px;border-radius:3px;overflow:hidden;">
           <div style="background:var(--primary);width:${share}%;height:100%;"></div>
         </div>
       </div>
     `;
-  }
+  }).join('');
 
-  resHtml += `</div></div>`;
+  let resHtml = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:10px;">
+      ${warningBanner}
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">
+        장착 스킬: <b>${escapeHtml(basic?.name || '기본 공격')}</b> + ${activeSkills.map(s => escapeHtml(s.name)).join(', ')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:8px;margin-bottom:12px;">
+        <div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:1px solid var(--line);">
+          <span style="font-size:11px;color:var(--muted);font-weight:700;">전투 시간</span>
+          <div style="font-size:16px;font-weight:900;color:var(--ink);">${duration}초</div>
+        </div>
+        <div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:1px solid var(--line);">
+          <span style="font-size:11px;color:var(--muted);font-weight:700;">총 전투 행동/타수</span>
+          <div style="font-size:16px;font-weight:900;color:var(--primary);">${sim.actions}행동 / ${fmt(totalHits)}타</div>
+        </div>
+        <div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:1px solid var(--line);">
+          <span style="font-size:11px;color:var(--muted);font-weight:700;">누적 총 피해량</span>
+          <div style="font-size:16px;font-weight:900;color:var(--primary-dark);">${fmt(sim.total)}</div>
+        </div>
+        <div style="background:#eff6ff;padding:8px 10px;border-radius:6px;border:1px solid #bfdbfe;">
+          <span style="font-size:11px;color:#1e40af;font-weight:700;">${relative ? '상대 시뮬레이션 DPS' : '실전 시뮬레이션 DPS'}</span>
+          <div style="font-size:16px;font-weight:900;color:#1d4ed8;">${fmt(sim.dps)}</div>
+        </div>
+      </div>
+
+      <div style="font-size:12px;font-weight:800;color:var(--ink);margin-bottom:6px;">📊 스킬별 딜 지분율 & 발동 횟수</div>
+      <div style="display:grid;gap:6px;">
+        ${shareRows}
+      </div>
+    </div>
+  `;
   resultBox.innerHTML = resHtml;
 }
 

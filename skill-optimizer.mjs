@@ -160,13 +160,25 @@ export function parseSkillModel(skill) {
   // ---- cooldown ----
   if (model.isBasic) {
     model.baseCooldown = 0;
+    model.cooldownSec = 0;
+    model.cooldownKnown = true;
+    model.cooldownStatus = 'official';
+    model.cooldownSource = 'basic';
   } else if (cd) {
     model.baseCooldown = cd;
+    model.cooldownSec = cd;
+    model.cooldownKnown = true;
+    model.cooldownStatus = 'official';
+    model.cooldownSource = skill.cooldownSource || 'patch_notes';
   } else {
     model.baseCooldown = DEFAULT_UNKNOWN_COOLDOWN;
+    model.cooldownSec = DEFAULT_UNKNOWN_COOLDOWN;
     model.cooldownKnown = false;
+    model.cooldownStatus = 'provisional';
+    model.cooldownSource = 'fallback';
     notes.push(`쿨타임 미확인 → ${DEFAULT_UNKNOWN_COOLDOWN}초 가정`);
   }
+  model.provisional = model.cooldownStatus === 'provisional' || Boolean(model.damageUnknown);
   const init = effect.match(/최초\s*전투\s*시작\s*시\s*([0-9.]+)\s*초/);
   if (init) model.initialCooldown = num(init[1]);
 
@@ -189,6 +201,7 @@ export function parseSkillModel(skill) {
   if (!model.isBasic && !model.directPct && !model.periodic && !model.buff && !model.cdResetPct) {
     model.damageUnknown = /소환|피해|공격/.test(effect);
     if (model.damageUnknown) notes.push('피해 계수 미확인 → 직접 입력 필요');
+    model.provisional = true;
   }
   return model;
 }
@@ -243,7 +256,8 @@ export function simulateLoadout(basic, skills, ctx) {
     ? calculateEffectiveCooldown(s.baseCooldown, ctx.cooldownReductionPercent, ctx.fixedCooldownReductionSeconds)
     : 0;
 
-  const readyAt = new Map(skills.map(s => [s.id, s.initialCooldown || 0]));
+  const roundTime = v => Math.round((Number(v) || 0) * 20) / 20; // 0.05-second time quantization
+  const readyAt = new Map(skills.map(s => [s.id, roundTime(s.initialCooldown || 0)]));
   const buffs = [];
   const usage = new Map();
   const track = (name, dmg, hits, casts = 0) => {
@@ -257,43 +271,49 @@ export function simulateLoadout(basic, skills, ctx) {
     return bb - ab || expected(b) - expected(a);
   });
 
+  const allSelected = [basic, ...skills].filter(Boolean);
+  const hasProvisional = allSelected.some(s => s.provisional);
+  const provisionalWarnings = hasProvisional ? [...new Set(allSelected.filter(s => s.provisional).flatMap(s => s.notes || []))] : [];
+
   let t = 0, total = 0, actions = 0;
   const timeline = [];
   while (t < duration - 1e-9) {
-    const live = buffs.filter(b => b.until > t + 1e-9);
+    const curTime = roundTime(t);
+    const live = buffs.filter(b => b.until > curTime + 1e-9);
     const stats = sumStats(live.map(b => b.stats));
     const servant = live.reduce((sum, b) => sum + (b.servantPct || 0), 0);
     const speed = diminishingSum(ctx.attackSpeed, live.map(b => b.stats.attackSpeed || 0).filter(Boolean), speedCap);
-    const interval = baseInterval / (1 + speed / 100);
+    const interval = roundTime(baseInterval / (1 + speed / 100));
     const { attackSpeed, ...dmgStats } = stats;
 
-    const cast = priority.find(s => readyAt.get(s.id) <= t + 1e-9);
+    const cast = priority.find(s => readyAt.get(s.id) <= curTime + 1e-9);
     if (cast) {
-      const cd = effCd(cast);
-      readyAt.set(cast.id, t + (cd || duration * 10));
+      const cd = roundTime(effCd(cast));
+      readyAt.set(cast.id, roundTime(curTime + (cd || duration * 10)));
       if (cast.cdResetPct) {
         for (const s of skills) if (s !== cast) {
-          const left = readyAt.get(s.id) - t;
-          if (left > 0) readyAt.set(s.id, t + left * (1 - cast.cdResetPct / 100));
+          const left = readyAt.get(s.id) - curTime;
+          if (left > 0) readyAt.set(s.id, roundTime(curTime + left * (1 - cast.cdResetPct / 100)));
         }
       }
       if (cast.buff && cast.buff.duration > 0) {
-        buffs.push({ id: cast.id, until: t + cast.buff.duration, stats: cast.buff.stats, servantPct: cast.servantPct });
+        buffs.push({ id: cast.id, until: roundTime(curTime + cast.buff.duration), stats: cast.buff.stats, servantPct: cast.servantPct });
       }
       const nowStats = cast.buff ? sumStats([dmgStats, Object.fromEntries(Object.entries(cast.buff.stats).filter(([k]) => k !== 'attackSpeed'))]) : dmgStats;
       const mult = 1 + (cast.passiveBoost || 0) / 100;
-      const hitsTotal = cast.hits + (ctx.boss ? cast.bossExtraHits : 0);
-      const pct = (cast.directPct + (ctx.boss && cast.hits ? cast.directPct / cast.hits * cast.bossExtraHits : 0)) * mult + (cast.passiveExtraPct || 0);
+      const bossExtra = Number(cast.bossExtraHits) || 0;
+      const hitsTotal = cast.hits + (ctx.boss ? bossExtra : 0);
+      const pct = (cast.directPct + (ctx.boss && cast.hits ? cast.directPct / cast.hits * bossExtra : 0)) * mult + (cast.passiveExtraPct || 0);
       let dmg = pct / 100 * per100(nowStats, 'skill');
       let hits = hitsTotal;
       if (cast.periodic) {
-        const ticks = Math.min(cast.periodic.ticks, Math.floor((duration - t) / cast.periodic.interval + 1e-9));
+        const ticks = Math.min(cast.periodic.ticks, Math.floor((duration - curTime) / cast.periodic.interval + 1e-9));
         dmg += ticks * cast.periodic.pct * mult / 100 * per100(nowStats, 'skill');
         hits += ticks;
       }
       total += dmg;
       track(cast.name, dmg, hits, 1);
-      timeline.push({ t, name: cast.name });
+      timeline.push({ t: curTime, name: cast.name });
     } else if (basic) {
       const d = basic.directPct / 100 * per100(dmgStats, 'basic') * (1 + (basic.passiveBoost || 0) / 100);
       total += d;
@@ -305,7 +325,7 @@ export function simulateLoadout(basic, skills, ctx) {
       }
     }
     actions++;
-    t += interval;
+    t = roundTime(t + Math.max(0.05, interval));
   }
   return {
     total,
@@ -314,7 +334,9 @@ export function simulateLoadout(basic, skills, ctx) {
     actions,
     usage: [...usage.values()].sort((a, b) => b.damage - a.damage),
     timeline,
-    castOrder: priority.map(s => s.name)
+    castOrder: priority.map(s => s.name),
+    provisional: hasProvisional,
+    provisionalWarnings
   };
 }
 
@@ -344,7 +366,11 @@ export function buildSkillModels(jobData, level = Infinity, overrides = {}) {
     m.passiveExtraPct = extras[m.name] || 0;
     const o = overrides[m.name] || {};
     if (Number(o.cooldown) > 0 && !m.isBasic) {
-      m.baseCooldown = Number(o.cooldown); m.cooldownKnown = true;
+      m.baseCooldown = Number(o.cooldown);
+      m.cooldownSec = Number(o.cooldown);
+      m.cooldownKnown = true;
+      m.cooldownStatus = 'overridden';
+      m.cooldownSource = 'user_override';
       m.notes = m.notes.filter(n => !n.startsWith('쿨타임 미확인'));
       m.overridden = true;
     }
@@ -354,6 +380,7 @@ export function buildSkillModels(jobData, level = Infinity, overrides = {}) {
       m.notes = m.notes.filter(n => !n.startsWith('피해 계수 미확인'));
       m.overridden = true;
     }
+    m.provisional = m.cooldownStatus === 'provisional' || Boolean(m.damageUnknown);
     models.push(m);
   }
   return models;

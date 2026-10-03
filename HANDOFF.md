@@ -2,7 +2,7 @@
 
 > 이 문서는 Antigravity 또는 다른 개발 에이전트가 저장소를 바로 이어받을 수 있도록 현재 구현된 계산 알고리즘, 데이터 구조, 검증 상태, 남은 작업을 정리한 문서다.
 >
-> 기준 커밋: `d18e6d46768f5a841c07721d29e14dfa5c042f13`  
+> 기준 커밋: `20d6d80d79ada1db9d93490c82ba9867f6d9e978` (브랜치 `fix/skill-simulator-unification`)
 > 저장소: <https://github.com/zlSomeonelz/Maplestory_Idle_Growth_Lab>  
 > 공개 사이트: <https://zlsomeonelz.github.io/Maplestory_Idle_Growth_Lab/>
 
@@ -507,6 +507,16 @@ GitHub Pages는 정적 배포이며, 공개 페이지가 커밋 직후 바로 �
 
 - `calculatePower(extra)`를 구현하여 큐브 옵션 적용 전후의 공식 전투력(Combat Power) 변화량 및 변화율을 계산
 - UI 결과 카드에 **DPS 비교**와 **전투력 비교**를 나란히 표시하여, 최대 HP/방어력/MP/쿨감 등 DPS에 직접 반영되지 않는 유틸·생존 옵션의 가치도 전투력 변화로 명확히 파악 가능하도록 개선 완료
+
+### P0. 스킬 전투 시뮬레이터 단일 엔진 통합 [완료]
+
+`skill-optimizer.mjs`를 메이플 키우기 스킬 전투 계산의 단일 전역 엔진으로 통일하고, `app.js` 내 중복 계산 로직을 완전히 제거했습니다.
+
+- **단일 계산 엔트리포인트**: UI 시뮬레이터(`runCombatSimulation`)와 스킬 최적화기(`runSkillLoadoutOptimizer`)가 모두 `skill-optimizer.mjs`의 `simulateLoadout()` 및 `buildSkillModels()`를 단일 엔트리포인트로 호출합니다.
+- **공식 쿨타임 점감 수식 단일화**: 쿨타임 감소 계산을 `engine.mjs`의 `calculateEffectiveCooldown()`으로 일원화하여, 비율 쿨감 선적용 + 7초 미만 구간 고정 쿨감 0.5배 적용 + 최소 4초 하한선이 모든 전투 버튼에서 100% 동일하게 반영됩니다.
+- **0.05초 시간 양자화 (Time Quantization)**: 전투 행동 및 스킬 준비 타이머(`readyAt`)를 0.05초 단위(`Math.round(t * 20) / 20`)로 양자화하여 누적 소수점 오차(floating-point drift)를 완전 방지했습니다.
+- **표준화된 쿨타임 메타데이터 수집**: 모든 스킬 모델에 `{ cooldownSec, cooldownStatus, cooldownSource, provisional }` 메타데이터를 추가하고, 쿨타임 미확인 스킬 포함 시 UI에 경고 배너를 출력합니다 (`cooldownStatus: 'provisional'`).
+- **독립 타이머 & 14개 전 직업 검증**: 스킬별 독립 타이머 동작, 0.05초 단위 프레임 정렬, 7초 쿨감 규칙, 미확인 상태 경고, 14개 전 직업 최적화, 0.0001% 이내 동질성 패리티 검증 테스트(8.1 ~ 8.6)를 `tests/skill-optimizer.test.mjs`에 구축 완료했습니다.
 
 ### P1. 공식 DPS 행동 모델 [1차 반영 완료]
 
