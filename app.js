@@ -2470,8 +2470,8 @@ function initOcrModal() {
     { target: 'attack', keywords: ['공격력'] },
     { target: 'statSTR', keywords: ['STR', '518', 'S1R', 'SIR'] },
     { target: 'statDEX', keywords: ['DEX'] },
-    { target: 'statINT', keywords: ['INT'] },
-    { target: 'statLUK', keywords: ['LUK'] },
+    { target: 'statINT', keywords: ['INT', 'I NT'] },
+    { target: 'statLUK', keywords: ['LUK', 'L UK', 'ㄴ G', 'ㄴ (i)', 'ㄴ(i)', 'ㄴ i', 'ㄴ (|', 'ㄴ('] },
     { target: 'debuffResist', keywords: ['디버프 내성', '디버프내성'] },
     { target: 'extraTargets', keywords: ['기본 공격 대상 수 증가', '기본 공격 대상 수', '대상 수 증가'] },
     { target: 'cooldownReductionPct', keywords: ['스킬 재사용 대기시간 감소', '재사용 대기시간 감소'] },
@@ -2719,7 +2719,12 @@ function initOcrModal() {
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, finalCanvas.width, finalCanvas.height);
 
-        resolve({ canvas: finalCanvas, isCropped: isModalFound });
+        let processedData = finalCanvas;
+        try {
+          processedData = finalCanvas.toDataURL('image/png');
+        } catch (e) {}
+
+        resolve({ canvas: processedData, isCropped: isModalFound });
       };
       img.onerror = () => {
         URL.revokeObjectURL(url);
