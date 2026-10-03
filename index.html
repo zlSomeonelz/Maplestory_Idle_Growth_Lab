@@ -6,23 +6,59 @@
   <meta name="theme-color" content="#172033">
   <title>Maple Growth Lab · 메이플 키우기 종합 계산기</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <div>
-        <div class="eyebrow">MAPLE GROWTH LAB <span class="version">MVP 1.1</span></div>
+        <div class="eyebrow">MAPLE GROWTH LAB <span class="version">v2.0 PRO</span></div>
         <h1>메이플 키우기 종합 계산기</h1>
-        <p class="subtitle">캐릭터 프리셋과 정밀 전투 수식으로 전투·큐브·성장 효율을 비교분석합니다.</p>
+        <p class="subtitle">공식 전투 수식 · 동료 7인 라인업 · 챕터 몬스터 진단 · 클라우드 동기화</p>
       </div>
       <div class="top-actions">
+        <button class="button secondary" id="cloudOpenBtn">☁️ 계정 로그인</button>
         <button class="button secondary" id="openOcrModalBtn">📸 스크린샷 OCR 입력</button>
         <button class="button secondary" id="saveQuick">저장</button>
         <button class="button ghost" id="resetAll">초기화</button>
       </div>
     </header>
 
+    <!-- Cloud Account Bar -->
+    <section class="card cloud-account-bar" id="cloudAccountBar">
+      <div>
+        <strong id="cloudAccountLabel">브라우저 저장 모드</strong>
+        <div id="cloudStatus" class="small">로그인하지 않으면 이 브라우저에만 저장됩니다.</div>
+      </div>
+      <div class="cloud-actions">
+        <button id="cloudLoadBtn" class="button ghost" hidden>클라우드 불러오기</button>
+        <button id="cloudSaveBtn" class="button secondary" hidden>클라우드 저장</button>
+        <button id="cloudLogoutBtn" class="button ghost" hidden>로그아웃</button>
+      </div>
+    </section>
+
+    <!-- Cloud Login Modal -->
+    <div id="cloudLoginModal" class="cloud-modal" hidden role="dialog" aria-modal="true" aria-labelledby="cloudLoginTitle">
+      <div class="cloud-dialog">
+        <div class="cloud-dialog-head">
+          <h2 id="cloudLoginTitle">계정 로그인 & 클라우드 동기화</h2>
+          <button id="cloudCloseBtn" class="button ghost" type="button">닫기</button>
+        </div>
+        <p class="hint">로그인하면 캐릭터 스탯, 동료 인벤토리, 프리셋 설정을 계정별로 안전하게 보관하고 다른 기기에서 자동 복원합니다.</p>
+        <div class="field" style="margin:16px 0;">
+          <label for="cloudEmail" style="font-weight:700;font-size:13px;display:block;margin-bottom:6px;">이메일 주소</label>
+          <input id="cloudEmail" type="email" placeholder="이메일 로그인 링크를 받을 주소">
+        </div>
+        <div class="cloud-login-actions">
+          <button class="button secondary" id="cloudLoginBtn" type="button">로그인 링크 보내기</button>
+          <button class="button secondary" id="cloudGoogleBtn" type="button">Google로 로그인</button>
+        </div>
+        <p class="small" style="margin-top:12px;color:var(--muted);">Google 로그인은 Google 인증 완료 후 이 페이지로 자동 복귀하여 동기화됩니다.</p>
+      </div>
+    </div>
+
+    <!-- Official Links Bar -->
     <div class="official-links-bar card">
       <span>📌 공식 기준 출처:</span>
       <a href="https://maplestoryidle.nexon.com/ko/guide" target="_blank" rel="noopener" class="official-link-tag">📖 메이플 키우기 공식 전투 가이드</a>
@@ -31,34 +67,43 @@
 
     <section class="status-strip" id="dataStatus" aria-live="polite">공식 규칙 데이터를 불러오는 중…</section>
 
+    <!-- Workspace & Preset Bar -->
     <section class="workspace-bar card">
-      <div class="workspace-title"><strong>현재 프리셋</strong><span id="activePresetLabel">현재 입력</span></div>
+      <div class="workspace-title"><strong>현재 작업 프리셋</strong><span id="activePresetLabel">현재 입력</span></div>
       <div class="preset-actions">
         <input id="presetName" placeholder="프리셋 이름" aria-label="프리셋 이름">
         <button class="button secondary" id="savePreset">새로 저장</button>
         <select id="presetSelect" aria-label="저장된 프리셋"><option value="">저장된 프리셋 없음</option></select>
         <button class="button ghost" id="loadPreset">불러오기</button>
         <button class="button danger ghost" id="deletePreset">삭제</button>
+        <button class="button ghost" id="exportPresetBtn">JSON 내보내기</button>
+        <button class="button ghost" id="importPresetBtn">JSON 가져오기</button>
+        <input id="presetFileInput" type="file" accept="application/json,.json" hidden>
       </div>
     </section>
 
+    <!-- Content Target Preset Binding -->
     <section class="card content-preset-card" id="contentPresetRoot" aria-labelledby="contentPresetHeading"></section>
 
+    <!-- Navigation Tabs -->
     <nav class="tabs" aria-label="기능 선택">
       <button class="tab active" data-tab="combat">⚔️ 전투 계산 & 효율</button>
-      <button class="tab" data-tab="cube">🧊 큐브 비교</button>
-      <button class="tab" data-tab="probability">🎲 확률·기댓값</button>
+      <button class="tab" data-tab="companion">👥 동료 & 프리셋 최적화</button>
+      <button class="tab" data-tab="content">🗺️ 콘텐츠 & 챕터 진단</button>
+      <button class="tab" data-tab="cube">🧊 큐브 & 확률 분석</button>
+      <button class="tab" data-tab="inventory">📸 OCR 도구 서랍</button>
     </nav>
 
     <main>
+      <!-- TAB 1: Combat Calculation & Stat Efficiencies -->
       <section class="tab-panel active" data-panel="combat">
         <div class="grid two-col">
           <form class="card" id="characterForm">
             <div class="section-heading">
-              <div><span class="step">01</span><h2>캐릭터 프리셋</h2></div>
+              <div><span class="step">01</span><h2>캐릭터 스탯 설정</h2></div>
               <button type="button" class="button secondary" id="openOcrInFormBtn" style="padding:4px 9px;font-size:12px;">📸 OCR 입력</button>
             </div>
-            <p class="hint">게임 스탯 창의 값을 입력하거나 스크린샷 OCR로 자동으로 불러올 수 있습니다.</p>
+            <p class="hint">게임 스탯 창의 수치를 직접 입력하거나 스크린샷 OCR로 자동 분석합니다.</p>
             <div class="fields compact">
               <label>직업<select id="job"><option value="">직업 선택</option></select></label>
               <label>레벨<input id="level" type="number" min="1" value="100"></label>
@@ -98,176 +143,297 @@
             </details>
             <details class="companion-box" open>
               <summary class="companion-heading"><strong>전투력 보조 능력치</strong><span class="badge official">공식 전투력 식</span></summary>
-              <p class="hint">전투력에만 사용하는 선택 입력입니다. 모르는 값은 0으로 두어도 되지만, 실제 게임 전투력과의 비교에는 입력 범위를 맞춰야 합니다.</p>
               <div class="fields compact">
+                <label>명중<input id="accuracy" type="number" min="0" step="0.01" value="100"></label>
+                <label>방어 관통력%<input id="defPen" type="number" min="0" max="100" step="0.01" value="0"></label>
+                <label>보스 몬스터 데미지%<input id="bossDamage" type="number" step="0.01" value="0"></label>
+                <label>일반 몬스터 데미지%<input id="normalDamage" type="number" step="0.01" value="0"></label>
+                <label>기본 공격 데미지%<input id="basicDamage" type="number" step="0.01" value="0"></label>
+                <label>스킬 데미지%<input id="skillDamage" type="number" step="0.01" value="0"></label>
                 <label>상태이상 데미지%<input id="statusDamage" type="number" step="0.01" value="0"></label>
+                <label>받는 피해 감소%<input id="dmgReduction" type="number" step="0.01" value="0"></label>
+                <label>동료 소환 지속시간 증가%<input id="companionDuration" type="number" step="0.01" value="0"></label>
                 <label>버프 지속시간 증가%<input id="buffDuration" type="number" step="0.01" value="0"></label>
-                <label>동료 소환 지속시간 증가%<input id="companionSummonDuration" type="number" step="0.01" value="0"></label>
-                <label>고정 쿨타임 감소(초)<input id="fixedCooldownReductionSeconds" type="number" min="0" step="0.01" value="0"></label>
-                <label>쿨타임 감소%<input id="cooldownReductionPercent" type="number" min="0" step="0.01" value="0"></label>
-                <label>기본 공격 대상 수 증가<input id="basicAttackTargetCountIncrease" type="number" min="0" step="1" value="0"></label>
-                <label>받는 피해 감소%<input id="receivedDamageReduction" type="number" min="0" step="0.01" value="0"></label>
-                <label>1차 스킬 레벨<input id="firstSkillLevel" type="number" min="0" step="1" value="0"></label>
-                <label>2차 스킬 레벨<input id="secondSkillLevel" type="number" min="0" step="1" value="0"></label>
-                <label>3차 스킬 레벨<input id="thirdSkillLevel" type="number" min="0" step="1" value="0"></label>
-                <label>4차 스킬 레벨<input id="fourthSkillLevel" type="number" min="0" step="1" value="0"></label>
-                <label>모든 스킬 레벨<input id="allSkillLevel" type="number" min="0" step="1" value="0"></label>
-                <label>주스탯 마스터리 개수<input id="mainMasteryCount" type="number" min="0" step="1" value="0"></label>
-                <label>부스탯 마스터리 개수<input id="subMasteryCount" type="number" min="0" step="1" value="0"></label>
+                <label>디버프 내성%<input id="debuffResist" type="number" step="0.01" value="0"></label>
+                <label>기본 공격 대상 수 증가<input id="extraTargets" type="number" min="0" step="1" value="0"></label>
+                <label>스킬 쿨타임 감소%<input id="cooldownReductionPct" type="number" min="0" max="80" step="0.01" value="0"></label>
+                <label>스킬 쿨타임 감소(초)<input id="cooldownReductionSec" type="number" min="0" step="0.01" value="0"></label>
               </div>
             </details>
+          </form>
 
-            <div class="companion-box">
-              <div class="companion-heading"><strong>메인 동료 장착 효과</strong><span class="badge provisional">외부 클라이언트 데이터</span></div>
+          <div>
+            <form class="card" id="targetForm">
+              <div class="section-heading"><div><span class="step">02</span><h2>목표 대상 설정</h2></div></div>
               <div class="fields compact">
-                <label>등급<select id="companionGrade"><option value="">사용 안 함</option><option value="normal">노말</option><option value="rare">레어</option><option value="epic">에픽</option><option value="unique">유니크</option><option value="legendary">레전더리</option></select></label>
-                <label>레벨<input id="companionLevel" type="number" min="1" value="1"></label>
+                <label>목표 유형<select id="targetType"><option value="normal">일반 몬스터 (사냥/던전)</option><option value="boss">보스 몬스터 (레이드/월드보스)</option><option value="pvp">PvP 대항전 (아레나/콜로세움)</option></select></label>
+                <label>PvP 콘텐츠 분류<select id="pvpContent"><option value="arena">아레나</option><option value="worldArena">월드 아레나</option><option value="colosseum">콜로세움</option></select></label>
+                <label>대상 레벨<input id="targetLevel" type="number" min="1" value="100"></label>
+                <label>대상 방어력<input id="targetDefense" type="number" min="0" step="0.01" value="0"></label>
+                <label>대상 최대 HP (PvP/보스)<input id="targetMaxHp" type="number" min="0" step="1" value="0"></label>
+                <label>대상 받는 피해 감소%<input id="targetTaken" type="number" min="0" step="0.01" value="0"></label>
+                <label>대상 크리티컬 저항%<input id="targetCritResist" type="number" min="0" step="0.01" value="0"></label>
               </div>
-              <div class="companion-effect" id="companionEffect">직업과 등급을 선택하면 장착 효과를 표시합니다.</div>
-            </div>
-          </form>
+              <button class="button primary full" type="button" id="calculateCombat">전투 계산 실행</button>
+            </form>
 
-          <form class="card" id="targetForm">
-            <div class="section-heading"><div><span class="step">02</span><h2>목표 콘텐츠</h2></div><span class="badge official">공식 규칙 기반</span></div>
-            <p class="hint">보스/일반 데미지는 대상에 따라 하나만 적용됩니다.</p>
-            <div class="fields compact">
-              <label>계산 대상<select id="stageMode"><option value="hunt">챕터 사냥</option><option value="trial">챕터 도전</option><option value="boss_raid">파티 보스 레이드</option><option value="world_boss">월드 보스</option><option value="growth_dungeon">성장 던전</option><option value="guild_content">길드 컨텐츠</option><option value="manual">직접 입력</option></select></label>
-              <label>챕터<select id="stageChapter"><option value="">스테이지 선택</option></select></label>
-              <label>스테이지<select id="stageSelect"><option value="">스테이지 선택</option></select></label>
-              <label>대상 유형<select id="targetType"><option value="normal">일반 몬스터</option><option value="boss">보스</option><option value="pvp">PvP</option></select></label>
-              <label>PvP 콘텐츠<select id="pvpContent"><option value="arena">아레나</option><option value="worldArena">월드 아레나</option><option value="colosseum">콜로세움</option></select></label>
-              <label>적 방어력<input id="targetDefense" type="number" min="0" step="0.01" value="0"></label>
-              <label>적 최대 HP<input id="targetHp" type="number" min="0" step="0.01" value="0"></label>
-              <label>대상 받는 피해 감소%(PvP)<input id="targetReceivedDamageReduction" type="number" min="0" max="95" step="0.01" value="0"></label>
-              <label>목표 제한 시간(초)<input id="stageTimeLimit" type="number" min="1" step="1" value="60"></label>
-              <label>방어 관통력%<input id="defPen" type="number" min="0" max="100" step="0.01" value="0"></label>
-              <label>보스 데미지%<input id="bossDamage" type="number" step="0.01" value="0"></label>
-              <label>일반 몬스터 데미지%<input id="normalDamage" type="number" step="0.01" value="0"></label>
-              <label>대상 받는 피해 증가%<input id="targetTaken" type="number" step="0.01" value="0"></label>
-              <label>기본 공격 데미지%<input id="basicDamage" type="number" step="0.01" value="0"></label>
-              <label>스킬 데미지%<input id="skillDamage" type="number" step="0.01" value="0"></label>
-              <label>명중률 보정%<input id="accuracy" type="number" step="0.01" value="100"></label>
-            </div>
-            <div class="formula-note"><strong>계산 순서</strong><br>공격력 → 점감(방어 관통·공격 속도) → 방어력 → 대상 보정 → 일반 데미지 → 치명타·최소/최대 → 최종 데미지 → 스킬 계수<br><span class="badge official">PvP 선택 시 공식 콘텐츠 보정·레벨 보정·방어 보정을 적용합니다.</span></div>
-            <button class="button primary full" type="button" id="calculateCombat">전투 계산</button>
-          </form>
+            <section class="card result-card">
+              <div class="section-heading"><h2>전투 분석 결과</h2><span class="badge official">공식 수식 적용</span></div>
+              <div class="result-grid">
+                <div class="metric"><span>평균 타격 피해</span><strong id="avgDamage">0</strong><small id="damageRange">최소 0 · 최대 0</small></div>
+                <div class="metric primary-metric"><span>초당 공격 피해(DPS)</span><strong id="dps">0</strong><small id="dpsNote">간격 1초 기준</small></div>
+                <div class="metric"><span>종합 전투력</span><strong id="combatPower">0</strong><small id="combatPowerNote">공식 산출식</small></div>
+                <div class="metric"><span>방어 감쇄율</span><strong id="defenseFactor">100.00%</strong><small id="defenseNote">관통 점감 적용</small></div>
+              </div>
+              <div class="breakdown" id="combatBreakdown"></div>
+              <div class="stage-verdict" id="stageVerdict"></div>
+            </section>
+
+            <section class="card efficiency-card">
+              <div class="section-heading"><div><h2>한계 스탯 성장 효율 랭킹</h2></div><span class="badge official">DPS 기여도</span></div>
+              <p class="hint">현재 스펙에서 어떤 능력치를 1단위/1% 올렸을 때 DPS 증가율이 가장 높은지 순위화합니다.</p>
+              <div class="efficiency-grid" id="statEfficienciesRoot"></div>
+            </section>
+
+            <section class="card">
+              <div class="section-heading"><h2>🔥 추천 성장 가이드 (Spec-Up Report)</h2><span class="badge official">콘텐츠 최적화</span></div>
+              <div id="specUpGuideContent"></div>
+            </section>
+          </div>
         </div>
-
-        <section class="card result-card">
-          <div class="section-heading"><div><span class="step">03</span><h2>계산 결과</h2></div><span class="source-link">근거: <a href="https://maplestoryidle.nexon.com/ko/guide#gnbAllLayer" target="_blank" rel="noopener">공식 전투 시스템 안내</a></span></div>
-          <div class="result-grid">
-            <div class="metric primary-metric"><span>평균 1회 피해</span><strong id="avgDamage">—</strong><small id="damageRange">최소 — · 최대 —</small></div>
-            <div class="metric"><span>예상 DPS</span><strong id="dps">—</strong><small id="dpsNote">기본 공격 간격·공격 속도 기준</small></div>
-            <div class="metric"><span>방어 적용 배율</span><strong id="defenseFactor">—</strong><small id="defenseNote">방어력 입력 전</small></div>
-            <div class="metric"><span>스탯 비례 데미지</span><strong id="statDamage">—</strong><small>주스탯 100당 1%, 부스탯 400당 1%</small></div>
-            <div class="metric power-metric"><span>전투력</span><strong id="combatPower">—</strong><small id="combatPowerNote">DPS와 별도로 공식식 계산</small></div>
-          </div>
-          <div class="breakdown" id="combatBreakdown">입력을 바꾸면 계산 결과가 여기에 표시됩니다.</div>
-          <div class="stage-verdict" id="stageVerdict">목표 스테이지를 선택하면 클리어 가능성과 병목을 진단합니다.</div>
-          <div class="efficiency-card" id="statEfficiencyBox"></div>
-          <div class="card specup-guide-card" id="specUpGuideBox" style="margin-top:14px;">
-            <div class="section-heading">
-              <div><h2>🚀 콘텐츠 맞춤 스펙업 & 동료/유물 최적화 리포트</h2></div>
-              <span class="badge official">최고 DPS 가이드</span>
-            </div>
-            <p class="hint">현재 선택한 콘텐츠에서 DPS를 최대로 높이기 위한 동료·유물 우선순위 및 가이드입니다.</p>
-            <div id="specUpGuideContent"></div>
-          </div>
-          <div class="disclaimer"><span class="badge official">공식 호환</span> 넥슨 공식 가이드 및 넥슨 나우 공시 확률 기반으로 정밀 계산됩니다.</div>
-        </section>
       </section>
 
-      <section class="tab-panel" data-panel="cube">
-        <div class="card">
-          <div class="section-heading"><div><span class="step">01</span><h2>큐브 옵션 전후 비교</h2></div><span class="badge official">현재 프리셋 재사용</span></div>
-          <p class="hint">공식 설정 확률표에서 등급·장비·슬롯을 선택할 수 있습니다. 선택 옵션을 후보 1번에 적용하면 같은 전투 엔진으로 전후 DPS를 비교합니다.</p>
-          <div class="fields compact cube-meta">
-            <label>장비 등급<select id="cubeGrade"><option value="epic">에픽</option></select></label>
-            <label>장비<select id="cubeEquipment"><option value="">장비 선택</option></select></label>
-            <label>옵션 슬롯<select id="cubeSlot"><option value="1">1번 슬롯</option></select></label>
-            <label>공식 후보 옵션<select id="cubeOptionSelect"><option value="">확률 데이터 로드 중…</option></select></label>
-            <label>목표 조건<select id="cubeGoalMode"><option value="any">선택 옵션 중 하나 이상</option><option value="all">선택 옵션 모두</option></select></label>
-            <label>목표 옵션 1<select id="cubeGoal1"><option value="">목표 없음</option></select></label>
-            <label>목표 옵션 2<select id="cubeGoal2"><option value="">목표 없음</option></select></label>
-            <label>목표 옵션 3<select id="cubeGoal3"><option value="">목표 없음</option></select></label>
-          </div>
-          <div class="formula-note" id="cubeProbabilitySource">공식 설정 확률표를 불러오는 중…</div>
-          <button class="button secondary" type="button" id="applyCubeOption">선택 옵션을 후보 1번에 적용</button>
-          <div class="cube-economics" id="cubeTargetSummary">3개 슬롯 기준 목표 옵션 기대값을 계산하는 중…</div>
-          <div class="cube-columns">
-            <div><h3>현재 옵션</h3><div id="currentOptions"></div></div>
-            <div class="compare-arrow">→</div>
-            <div><h3>후보 옵션</h3><div id="candidateOptions"></div></div>
-          </div>
-          <div class="fields compact cube-meta">
-            <label>큐브 1회 비용(메소)<input id="cubeCost" type="number" min="0" step="1" value="0"></label>
-            <label>후보 옵션 등장 확률%<input id="cubeProbability" type="number" min="0" max="100" step="0.0001" value="0"></label>
-          </div>
-          <button class="button primary" type="button" id="calculateCube">옵션 비교</button>
-        </div>
-        <section class="card result-card">
-          <div class="section-heading"><h2>비교 결과</h2><span class="source-link">같은 전투 엔진 사용</span></div>
-          <div class="result-grid three">
-            <div class="metric"><span>현재 예상 DPS</span><strong id="cubeCurrentDps">—</strong></div>
-            <div class="metric positive"><span>후보 예상 DPS</span><strong id="cubeCandidateDps">—</strong></div>
-            <div class="metric"><span>DPS 변화량</span><strong id="cubeDelta">—</strong></div>
-          </div>
-          <div class="result-grid three" style="margin-top: 10px;">
-            <div class="metric"><span>현재 전투력</span><strong id="cubeCurrentPower">—</strong></div>
-            <div class="metric positive"><span>후보 전투력</span><strong id="cubeCandidatePower">—</strong></div>
-            <div class="metric"><span>전투력 변화량</span><strong id="cubePowerDelta">—</strong></div>
-          </div>
-          <div class="cube-economics" id="cubeEconomics">옵션 값을 입력하면 기대 비용을 계산합니다.</div>
-        </section>
-      </section>
-
-      <section class="tab-panel" data-panel="probability">
+      <!-- TAB 2: Companion & Build Presets Optimization -->
+      <section class="tab-panel" data-panel="companion">
         <div class="grid two-col">
-          <div class="card">
-            <div class="section-heading"><div><span class="step">01</span><h2>목표 달성 확률</h2></div><span class="badge official">설정 확률만 사용</span></div>
-            <p class="hint">공시 확률의 ‘실제 결과’ 표본은 제외하고 설정 확률만 사용합니다.</p>
-            <div class="fields compact">
-              <label>1회 성공 확률%<input id="successRate" type="number" min="0" max="100" step="0.0001" value="1"></label>
-              <label>시도 횟수<input id="attempts" type="number" min="0" step="1" value="100"></label>
-              <label>1회 비용<input id="attemptCost" type="number" min="0" step="1" value="0"></label>
-            </div>
-            <button class="button primary full" type="button" id="calculateProbability">확률 계산</button>
+          <div>
+            <section class="card">
+              <h2>0. 빌드 프리셋 세트</h2>
+              <p class="hint">캐릭터 스탯, 목표, 큐브, 동료 구성을 세트별로 저장하고 클라우드에 백업합니다.</p>
+              <div class="fields">
+                <div class="field"><label for="buildPresetSelect">작업 프리셋 선택</label><select id="buildPresetSelect"><option value="">현재 입력 (저장 안 됨)</option></select></div>
+                <div class="field"><label for="buildPresetName">새 프리셋 이름</label><input id="buildPresetName" placeholder="예: 챕터 보스 세팅"></div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                <button class="button secondary" id="saveBuildPresetBtn">새 프리셋으로 저장</button>
+                <button class="button secondary" id="updateBuildPresetBtn">선택 프리셋 업데이트</button>
+                <button class="button ghost" id="loadBuildPresetBtn">선택 프리셋 불러오기</button>
+                <button class="button danger ghost" id="deleteBuildPresetBtn">선택 프리셋 삭제</button>
+              </div>
+              <div id="buildPresetStatus" class="small" style="margin-top:8px;">프리셋 이름을 입력하여 저장하세요.</div>
+            </section>
+
+            <section class="card">
+              <h2>1. 내 보유 동료 인벤토리 <span class="badge official">실제 데이터</span></h2>
+              <p class="hint">에픽·유니크·레전더리 14개 직업 전체 목록입니다. 레벨을 입력한 동료만 보유로 인식합니다.</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+                <button class="button secondary" id="loadOcrCompanionsBtn">📥 저장된 OCR 보유 목록 가져오기</button>
+                <button class="button ghost" id="clearInventoryBtn">보유 레벨 전체 지우기</button>
+              </div>
+              <div id="companionInventoryStatus" class="small" style="margin-bottom:10px;">아래에서 레벨을 직접 입력하거나 OCR 목록을 불러오세요.</div>
+              <div id="ownedCompanionList" class="inventory-roster">
+                <div class="small">동료 데이터를 불러오는 중입니다…</div>
+              </div>
+            </section>
           </div>
-          <div class="card result-card">
-            <div class="section-heading"><h2>기댓값</h2><span class="source-link">공식 확률 데이터 기반</span></div>
-            <div class="probability-result" id="probabilityResult">값을 입력하면 목표 달성 확률과 기대 시도 횟수를 보여줍니다.</div>
+
+          <div>
+            <section class="card">
+              <h2>2. 계산에 적용할 7인 라인업 <span class="badge">1.15.0</span></h2>
+              <p class="hint">최적화 버튼을 누르면 보유 목록 중 최고 효율의 메인 1 + 서브 6명이 자동 장착됩니다.</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+                <button class="button primary" id="recommendFromInventoryBtn" disabled>🚀 보유 목록으로 7인 라인업 최적화</button>
+                <button class="button secondary" id="companionOptimizeBtn">현재 세팅 계산</button>
+                <button class="button ghost" id="companionResetBtn">동료 슬롯 초기화</button>
+              </div>
+              <div id="companionSlots" class="options"></div>
+              <div class="verdict" id="companionVerdict" style="margin-top:12px;">동료 데이터를 불러오면 메인·서브 세팅을 비교합니다.</div>
+              <div class="summary" id="companionSummary" style="margin-top:12px;min-height:160px;">아직 동료 세팅을 비교하지 않았습니다.</div>
+            </section>
+
+            <section class="card">
+              <h2>콘텐츠별 동료 세팅 가이드 & 커뮤니티 프리셋</h2>
+              <div class="fields">
+                <div class="field"><label for="compScenario">세부 콘텐츠</label><select id="compScenario"><option value="chapterBoss">챕터 보스</option><option value="chapterHunt">챕터 사냥</option><option value="worldBoss">월드 보스</option><option value="guildRaid">길드 토벌전</option><option value="weaponDungeon">무기·강화 던전</option><option value="growthDungeon">경험치·장비 던전</option><option value="chapterChallenge">챕터 도전</option><option value="arena">아레나</option><option value="survival">생존·해금</option></select></div>
+                <div class="field"><label for="compGoal">계산 유형</label><select id="compGoal"><option value="boss">보스·길드 레이드</option><option value="farm">일반 사냥</option><option value="chapter">챕터 돌파</option><option value="pvp">PvP</option><option value="survival">생존·해금</option></select></div>
+                <div class="field"><label for="compChapterFocus">챕터 병목</label><select id="compChapterFocus"><option value="boss">보스 구간</option><option value="farm">일반 웨이브</option><option value="balanced">둘 다 균형</option></select></div>
+                <div class="field"><label for="compPreset">커뮤니티 가이드 프리셋</label><select id="compPreset"><option value="chapterBoss">챕터 보스</option></select></div>
+                <div class="field"><label>&nbsp;</label><button class="button secondary" id="applyCommunityPresetBtn">직업 배치 불러오기</button></div>
+              </div>
+              <div id="companionGuide" class="guide-list" style="margin-top:12px;"></div>
+              <div id="communityPreset" class="guide-item" style="margin-top:10px;">커뮤니티 가이드 데이터를 불러오는 중입니다.</div>
+            </section>
           </div>
         </div>
-        <div class="card source-card"><strong>데이터 상태</strong><p id="probabilitySource">probabilities.json을 확인하는 중…</p><a href="https://now.nexon.com/service/maplestoryidle?page=bd75db0f-1352-4401-9457-be38041bfeac" target="_blank" rel="noopener">넥슨 나우 공시 확률 보기 →</a></div>
+      </section>
+
+      <!-- TAB 3: Content Target, Chapter Stages & Diagnostic Analysis -->
+      <section class="tab-panel" data-panel="content">
+        <div class="grid two-col">
+          <section class="card">
+            <div class="section-heading"><div><span class="step">01</span><h2>콘텐츠 & 스테이지 선택</h2></div></div>
+            <p class="hint">챕터 몬스터, 보스 레이드, 성장 던전, 길드 보스의 공식 데이터를 기준으로 진단합니다.</p>
+            <div class="fields">
+              <div class="field"><label for="contentType">목표 콘텐츠</label><select id="contentType"><option value="boss">보스·레이드</option><option value="farm">일반 사냥</option><option value="chapter">챕터 돌파</option><option value="pvp">PvP 대항전</option></select></div>
+              <div class="field"><label for="contentTarget">현재 목표/스테이지</label><input id="contentTarget" placeholder="예: 챕터 180, 보스 이름"></div>
+              <div class="field"><label for="stageMode">콘텐츠 데이터 선택</label>
+                <select id="stageMode">
+                  <option value="hunt">챕터 사냥</option>
+                  <option value="trial">챕터 도전·보스</option>
+                  <option value="boss_raid">보스 레이드</option>
+                  <option value="world_boss">월드 보스</option>
+                  <option value="growth_dungeon">성장 던전 (무기/경험치/장비)</option>
+                  <option value="guild_content">길드 콘텐츠 (토벌/대항전/수련장)</option>
+                </select>
+              </div>
+              <div class="field"><label for="stageChapter">챕터 / 카테고리</label><select id="stageChapter"><option value="">데이터 로딩 중</option></select></div>
+              <div class="field full"><label for="stageSelect">상세 스테이지 / 난이도</label><select id="stageSelect"><option value="">챕터를 선택하세요</option></select></div>
+            </div>
+            <div class="small" id="stageDataStatus" style="margin-top:8px;">스테이지 데이터를 불러오는 중입니다.</div>
+            
+            <!-- Restored Stage Monster Information Box -->
+            <div class="guide-item" id="stageInfo" style="margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;">
+              스테이지를 선택하면 몬스터 HP·방어력·명중·회피 정보가 여기에 표시됩니다.
+            </div>
+
+            <!-- Restored Stage Diagnostic & Clear Time Advisor -->
+            <div class="guide-list" id="contentGuide" style="margin-top:14px;"></div>
+          </section>
+
+          <section class="card">
+            <div class="section-heading"><h2>콘텐츠 최적화 진단 결과</h2></div>
+            <div class="verdict" id="contentVerdict">콘텐츠를 선택하고 실제 스탯을 입력하면 추천을 계산합니다.</div>
+            <div class="summary content-summary" id="contentSummary" style="margin-top:12px;">아직 개인화 분석을 실행하지 않았습니다.</div>
+            <div class="content-benchmark" style="margin-top:10px;">※ 공식 기본 피해 모델과 몬스터 실측 데이터를 교차 검증하여 클리어 타임과 DPS 병목을 제시합니다.</div>
+          </section>
+        </div>
+      </section>
+
+      <!-- TAB 4: Cube & Probability Analysis -->
+      <section class="tab-panel" data-panel="cube">
+        <div class="grid two-col">
+          <div>
+            <form class="card" id="cubeForm">
+              <div class="section-heading"><div><h2>큐브 잠재 옵션 비교</h2></div></div>
+              <div class="fields compact">
+                <label>장비 분류<select id="cubeEquipment"><option value="weapon">무기류 (무기/보조/엠블렘)</option><option value="armor">방어구류 (투구/한벌옷/장갑/신발)</option><option value="accessory">장신구류 (반지/목걸이/귀고리)</option></select></label>
+                <label>장비 부위<select id="cubeSlot"><option value="weapon">무기</option><option value="subWeapon">보조무기</option><option value="emblem">엠블렘</option><option value="hat">투구</option><option value="top">상의/한벌옷</option><option value="gloves">장갑</option><option value="shoes">신발</option></select></label>
+                <label>큐브 등급<select id="cubeGrade"><option value="legendary">레전더리</option><option value="unique">유니크</option><option value="epic">에픽</option><option value="rare">레어</option></select></label>
+                <label>1회 큐브 비용(메소)<input id="cubeCost" type="number" min="0" step="1000" value="500000"></label>
+              </div>
+              <div class="cube-columns" style="margin-top:14px;">
+                <div>
+                  <h3>현재 3슬롯 옵션</h3>
+                  <div id="currentOptions"></div>
+                </div>
+                <div class="compare-arrow">→</div>
+                <div>
+                  <h3>후보 3슬롯 옵션</h3>
+                  <div id="candidateOptions"></div>
+                </div>
+              </div>
+              <button class="button primary full" type="button" id="calculateCube">큐브 효율 비교</button>
+            </form>
+
+            <section class="card">
+              <div class="section-heading"><div><h2>공식 설정 확률 3슬롯 정밀 목표 분석</h2></div><span class="badge official">정밀 리롤 상태 모델</span></div>
+              <div class="fields compact">
+                <label>목표 판정 모드<select id="cubeGoalMode"><option value="any">목표 중 1개 이상 등장 (Any)</option><option value="all">선택 목표 모두 등장 (All)</option></select></label>
+                <label>목표 1<select id="cubeGoal1"><option value="">선택 안 함</option></select></label>
+                <label>목표 2<select id="cubeGoal2"><option value="">선택 안 함</option></select></label>
+                <label>목표 3<select id="cubeGoal3"><option value="">선택 안 함</option></select></label>
+              </div>
+              <div class="formula-note" id="cubeTargetSummary" style="margin-top:12px;">공식 설정 확률표에서 목표 옵션을 선택하면 독립 확률 및 리롤 배제 보정 확률을 자동 계산합니다.</div>
+            </section>
+          </div>
+
+          <div>
+            <section class="card result-card">
+              <div class="section-heading"><h2>큐브 변경 기대 효과</h2></div>
+              <div class="result-grid">
+                <div class="metric primary-metric"><span>초당 공격 피해(DPS) 변화</span><strong id="cubeDelta">0.00 (0.00%)</strong><small>현재 <span id="cubeCurrentDps">0</span> → 변경 <span id="cubeCandidateDps">0</span></small></div>
+                <div class="metric"><span>종합 전투력 변화</span><strong id="cubePowerDelta">0 (0.00%)</strong><small>현재 <span id="cubeCurrentPower">0</span> → 변경 <span id="cubeCandidatePower">0</span></small></div>
+              </div>
+              <div class="cube-economics" id="cubeEconomics">등장 확률을 입력하면 목표 달성 기대 횟수와 비용을 계산합니다.</div>
+            </section>
+
+            <section class="card">
+              <div class="section-heading"><h2>확률·기댓값 시뮬레이터</h2><span class="badge official">베르누이 시행</span></div>
+              <div class="fields compact">
+                <label>성공 확률(%)<input id="successRate" type="number" min="0" max="100" step="0.0001" value="1"></label>
+                <label>시도 횟수<input id="attempts" type="number" min="1" step="1" value="100"></label>
+                <label>1회 비용<input id="attemptCost" type="number" min="0" step="1" value="0"></label>
+              </div>
+              <button class="button primary full" type="button" id="calculateProbability">확률 계산</button>
+              <div class="probability-result" id="probabilityResult" style="margin-top:14px;">값을 입력하면 목표 달성 확률과 기대 시도 횟수를 보여줍니다.</div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: OCR Tool Drawers -->
+      <section class="tab-panel" data-panel="inventory">
+        <section class="card">
+          <div class="section-heading">
+            <div><h2>입력 도구 서랍</h2></div>
+            <button class="button primary" id="openOcrFromDrawerBtn">📸 다중 스크린샷 직접 분석기 열기</button>
+          </div>
+          <p class="hint">상세 스탯, 동료 보유 현황, 프리셋 화면을 각각 읽어 계산기에 안전하게 연동합니다.</p>
+
+          <details class="tool-drawer" id="statToolDrawer" open>
+            <summary>캐릭터 상세 스탯 OCR</summary>
+            <div class="tool-body">
+              <p class="hint">예상 능력치 화면과 공격력·주스탯 상세 팝업을 읽어 40여 개 스탯을 자동 수집합니다.</p>
+              <iframe class="tool-frame" style="height:1180px;" loading="lazy" src="stat-ocr.html" title="캐릭터 상세 스탯 OCR"></iframe>
+            </div>
+          </details>
+
+          <details class="tool-drawer" id="companionToolDrawer">
+            <summary>동료 보유 현황 OCR</summary>
+            <div class="tool-body">
+              <p class="hint">스크린샷에서 후보를 읽고 에픽/유니크/레전더리 보유 여부와 레벨을 확인합니다.</p>
+              <iframe class="tool-frame" style="height:1120px;" loading="lazy" src="companion-ocr.html" title="동료 보유 현황 입력"></iframe>
+            </div>
+          </details>
+
+          <details class="tool-drawer" id="presetToolDrawer">
+            <summary>프리셋 OCR</summary>
+            <div class="tool-body">
+              <p class="hint">프리셋의 자동 사용 설정과 능력치 후보를 검토용 데이터로 저장합니다.</p>
+              <iframe class="tool-frame" style="height:1000px;" loading="lazy" src="preset-ocr.html" title="프리셋 OCR"></iframe>
+            </div>
+          </details>
+        </section>
       </section>
     </main>
 
-    <!-- Modal for direct OCR image parsing -->
-    <dialog id="ocrModal" class="ocr-modal">
-      <div class="ocr-modal-content card">
+    <!-- Upgraded Direct Screenshot OCR Modal -->
+    <dialog class="ocr-modal card" id="ocrModal">
+      <div class="ocr-modal-content">
         <div class="section-heading">
-          <div><h2>📸 스크린샷 OCR 스탯 자동 입력</h2></div>
-          <button type="button" class="button ghost" id="closeOcrModalBtn">✕ 닫기</button>
+          <div><span class="step">📸</span><h3>스크린샷 스탯 자동 분석 (Canvas 전처리 + 다중 배치)</h3></div>
+          <button type="button" class="button ghost" id="closeOcrModalBtn" style="padding:4px 8px;font-size:12px;">닫기</button>
         </div>
-        <p class="hint">게임 스탯 창 스크린샷 이미지를 선택하거나 파일 드롭/클립보드(Ctrl+V)로 붙여넣으세요.</p>
-        <div class="drop" id="ocrModalDrop" tabindex="0">
-          <strong>스탯 스크린샷 이미지를 여기에 드롭하거나 붙여넣으세요.</strong>
-          <input type="file" id="ocrModalFile" accept="image/*" multiple style="margin-top:10px;">
+        <p class="hint">게임 스탯 창 / 팝업 스크린샷 여러 장을 동시에 끌어다 놓거나 클립보드(Ctrl+V)로 붙여넣으면 한 번에 인식합니다.</p>
+        <div class="drop" id="ocrModalDrop" style="border:2px dashed var(--line);border-radius:12px;padding:24px;text-align:center;background:#f8fafc;cursor:pointer;" tabindex="0">
+          <p style="margin:0;font-weight:700;color:var(--ink);">📷 이미지들을 여기에 드래그하거나 클릭하여 파일 선택</p>
+          <span style="font-size:12px;color:var(--muted);display:block;margin-top:4px;">어디서든 Ctrl+V 키로 클립보드 스크린샷 즉시 붙여넣기 지원</span>
+          <input type="file" id="ocrModalFile" accept="image/*" multiple style="display:none;">
         </div>
-        <div id="ocrModalStatus" class="status-strip" style="margin-top:10px;">이미지를 선택하거나 클립보드에서 붙여넣으세요.</div>
-        <div id="ocrModalResults" class="stat-grid" style="margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;"></div>
-        <div class="modal-actions" style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
-          <button type="button" class="button secondary" id="ocrPasteClipboardBtn">📋 클립보드 붙여넣기 (Ctrl+V)</button>
-          <button type="button" class="button secondary" id="runOcrModalBtn">OCR 분석 실행</button>
-          <button type="button" class="button primary" id="applyOcrModalBtn">검토된 수치 캐릭터 폼에 반영</button>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+          <button type="button" class="button secondary" id="ocrPasteClipboardBtn">📋 클립보드에서 붙여넣기</button>
+          <button type="button" class="button primary" id="runOcrModalBtn">🔍 일괄 OCR 분석 실행</button>
+        </div>
+        <div class="status-strip" id="ocrModalStatus" style="margin-top:12px;font-size:12px;">스크린샷 이미지 파일을 추가하거나 Ctrl+V를 누르세요.</div>
+        <div id="ocrModalResults" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px;max-height:360px;overflow-y:auto;"></div>
+        <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px;">
+          <button type="button" class="button primary" id="applyOcrModalBtn">✅ 추출된 스탯 캐릭터 폼에 적용</button>
         </div>
       </div>
     </dialog>
 
-    <footer>Maple Growth Lab · 메이플 키우기 공식 전투 가이드 및 넥슨 나우 데이터를 기준으로 작동합니다.</footer>
+    <footer>Maple Growth Lab · 공식 원문에 없는 값은 provisional / unverified로 투명하게 표시합니다.</footer>
   </div>
   <script type="module" src="app.js"></script>
-  <script type="module" src="content-presets.js"></script>
 </body>
 </html>
-
