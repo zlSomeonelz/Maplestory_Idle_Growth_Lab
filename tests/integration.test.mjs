@@ -20,6 +20,7 @@ const requiredIds = [
   'accuracy', 'defPen', 'bossDamage', 'normalDamage', 'basicDamage', 'skillDamage',
   'statusDamage', 'dmgReduction', 'companionDuration', 'buffDuration', 'debuffResist',
   'extraTargets', 'cooldownReductionPct', 'cooldownReductionSec',
+  'skillLevel1', 'skillLevel2', 'skillLevel3', 'skillLevel4', 'mainStatPerLevel1',
   'targetType', 'pvpContent', 'targetLevel', 'targetDefense', 'targetMaxHp', 'targetTaken', 'targetCritResist',
   'calculateCombat', 'avgDamage', 'damageRange', 'dps', 'dpsNote', 'combatPower', 'combatPowerNote',
   'defenseFactor', 'defenseNote', 'combatBreakdown', 'stageVerdict', 'statEfficienciesRoot', 'specUpGuideContent',

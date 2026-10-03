@@ -1965,7 +1965,14 @@ function readInputs(extra = {}) {
     basicDamage: n('basicDamage'),
     skillDamage: n('skillDamage'),
     accuracy: n('accuracy'),
-    skillLevels: { first: 1, second: 1, third: 1, fourth: 1, all: 0 },
+    skillLevels: {
+      first: n('skillLevel1') || 1,
+      second: n('skillLevel2') || 1,
+      third: n('skillLevel3') || 1,
+      fourth: n('skillLevel4') || 0,
+      all: 0
+    },
+    mainStatPerLevel1: n('mainStatPerLevel1') || 10,
     masteries: { main80k: 0, sub25k: 0 },
     target,
     job,
@@ -2444,6 +2451,11 @@ function initOcrModal() {
     debuffResist: '디버프 내성',
     extraTargets: '기본 공격 대상 수 증가',
     cooldownReductionPct: '쿨타임 감소%',
+    cooldownReductionSec: '쿨타임 감소(초)',
+    skillLevel1: '1차 스킬 레벨',
+    skillLevel2: '2차 스킬 레벨',
+    skillLevel3: '3차 스킬 레벨',
+    skillLevel4: '4차 스킬 레벨',
     statBased: '스탯 비례 데미지 (자동 산출)',
     totalAttack: '총 합산 공격력 (인게임 표시)',
     totalMainStat: '총 합산 주스탯 (인게임 표시)',
@@ -2478,7 +2490,12 @@ function initOcrModal() {
     { target: 'debuffResist', keywords: ['디버프 내성', '디버프내성'] },
     { target: 'extraTargets', keywords: ['기본 공격 대상 수 증가', '기본 공격 대상 수', '기본 공격 대상', '대상 수 증가', '대상 수'] },
     { target: 'cooldownReductionPct', keywords: ['스킬 재사용 대기시간 감소', '재사용 대기시간 감소'] },
-    { target: 'mainStatPerLevel1', keywords: ['1레벨당 주 스탯', '1레벨당 주스탯', '1HES FAH', '12ES FAH', '12ES', 'FAH', '1레벨당 FAR', '1레벨당'] }
+    { target: 'cooldownReductionSec', keywords: ['스킬 재사용 대기시간 감소', '재사용 대기시간 감소'] },
+    { target: 'skillLevel1', keywords: ['1차 스킬 레벨', '1차 스킬레벨', '1차 스킬', '1차스킬'] },
+    { target: 'skillLevel2', keywords: ['2차 스킬 레벨', '2차 스킬레벨', '2차 스킬', '2차스킬'] },
+    { target: 'skillLevel3', keywords: ['3차 스킬 레벨', '3차 스킬레벨', '3차 스킬', '3차스킬'] },
+    { target: 'skillLevel4', keywords: ['4차 스킬 레벨', '4차 스킬레벨', '4차 스킬', '4차스킬'] },
+    { target: 'mainStatPerLevel1', keywords: ['1레벨당 주 스탯', '1레벨당 주스탯', '1HES FAH', '12ES FAH', '12ES', 'FAH', '1레벨당 FAR', '1레벨당', 'ERECEEY', 'RECEEY'] }
   ];
 
   function parseSingleOcrText(text) {
@@ -2630,6 +2647,13 @@ function initOcrModal() {
           continue;
         }
 
+        if (item.target === 'cooldownReductionPct' && (line.includes('초') || !line.includes('%'))) {
+          continue;
+        }
+        if (item.target === 'cooldownReductionSec' && line.includes('%')) {
+          continue;
+        }
+
         const isCritDamageMatch = item.target === 'critDamage' && (
           (line.includes('크리') || line.includes('리티컬') || line.includes('티컬') || line.includes('치명') || line.includes('크뎀') || line.includes('크리6걸')) &&
           (line.includes('데미') || line.includes('뎀'))
@@ -2638,13 +2662,14 @@ function initOcrModal() {
         if (isCritDamageMatch || item.keywords.some(kw => line.startsWith(kw) || line.includes(kw))) {
           let cleanLine = line;
           item.keywords.forEach(kw => { cleanLine = cleanLine.replace(kw, ''); });
-          cleanLine = cleanLine.replace(/[ⓘi|()\[\]G!a_·•—]/g, ' ').trim();
+          cleanLine = cleanLine.replace(/[ⓘi|()\[\]G!a_·•—~태IB]/g, ' ').trim();
 
           const allNums = Array.from(cleanLine.matchAll(/(?:[0-9,.]+\s*(?:조|억|만)\s*)*[0-9,.]+(?:\s*(?:조|억|만))?\s*%?/g)).map(m => m[0].trim());
           if (allNums.length > 0) {
             let bestNumStr = allNums.find(n => n.includes('%')) || allNums[allNums.length - 1];
             const val = parseKoreanNumber(bestNumStr);
-            if (val !== null && val > 0) {
+            const allowZero = ['cooldownReductionPct', 'cooldownReductionSec'].includes(item.target);
+            if (val !== null && (val > 0 || (allowZero && val === 0))) {
               if (item.target === 'attack') {
                 detected['totalAttack'] = val;
               } else if (['statSTR', 'statDEX', 'statINT', 'statLUK'].includes(item.target)) {
