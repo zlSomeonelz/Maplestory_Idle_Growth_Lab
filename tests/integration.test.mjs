@@ -79,4 +79,12 @@ const companionData = JSON.parse(fs.readFileSync('data/companion-runtime-data.js
 assert.ok(companionData.supporters.length >= 42, 'companion runtime must cover 14 jobs x 3+ grades');
 assert.ok(Object.keys(companionData.equippedStats).length >= 42, 'equipped stats table must cover all job/grade pairs');
 
+// 5. Skill loadout optimizer wiring
+assert.ok(fs.existsSync('skill-optimizer.mjs'), 'skill-optimizer.mjs must exist');
+assert.ok(js.includes("from './skill-optimizer.mjs'"), 'app.js must import the skill optimizer');
+assert.ok(js.includes('skillLoadoutPanel') && js.includes('runSkillLoadoutOptimizer'), 'app.js must render the loadout optimizer panel');
+const jobSkills = JSON.parse(fs.readFileSync('data/job-skills.json', 'utf8'));
+const nwActives = jobSkills.nightWalker.stages.flatMap(s => s.active.map(a => a.name));
+assert.ok(nwActives.includes('럭키 세븐') && nwActives.includes('쉐도우 스티치'), 'Night Walker must include 1st-job and 4th-job actives');
+
 console.log('All integration assertions passed cleanly!');

@@ -6744,6 +6744,7 @@
     ]
   },
   "windBreaker": {
+    "source": "공식 패치노트 (thread 3506485)",
     "stages": [
       {
         "id": "first",
@@ -6754,7 +6755,7 @@
             "effect": "[기본 공격 효과] 바람의 힘을 실은 화살을 날려 전방의 적 3명에게 26% 피해를 2회 입힙니다.",
             "requiredLevel": 10,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           },
           {
             "id": "first-엘리멘탈-하모니",
@@ -6762,7 +6763,7 @@
             "effect": "15초간 공격 속도가 15% 이동 속도가 10% 증가합니다.",
             "requiredLevel": 10,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           },
           {
             "id": "first-엘리멘트-:-스톰",
@@ -6770,7 +6771,7 @@
             "effect": "12초간 공격력이 12% 데미지가 4% 증가합니다.",
             "requiredLevel": 10,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           }
         ],
         "passive": [
@@ -6793,7 +6794,7 @@
             "effect": "[기본 공격 효과] 빠른 속도로 화살을 난사하여 전방의 적 5명에게 40% 피해를 3회 입힙니다.",
             "requiredLevel": 30,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           },
           {
             "id": "second-스파이럴-볼텍스",
@@ -6801,7 +6802,7 @@
             "effect": "바람의 결을 따라 회전하는 화살을 날려 전방의 적 9명에게 250% 피해를 2회 입힙니다.",
             "requiredLevel": 30,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           }
         ],
         "passive": [
@@ -6852,7 +6853,7 @@
             "effect": "[기본 공격 효과] 바람의 힘이 응축된 에메랄드를 매개로 거센 돌풍을 일으켜 주변 적 6명에게 80% 피해를 5회 입힙니다.",
             "requiredLevel": 60,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           },
           {
             "id": "third-핀포인트-피어스",
@@ -6860,7 +6861,7 @@
             "effect": "한 명의 적에게 두 대의 화살을 연달아 날려 각각 330% 740% 피해를 입힙니다.",
             "requiredLevel": 60,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           },
           {
             "id": "third-에메랄드-플라워",
@@ -6868,7 +6869,7 @@
             "effect": "자신의 위치에 녹색 수정 꽃을 20초간 소환하여 범위 내 적들의 이동 속도를 10% 감소시킵니다. 대상이 보스라면 이동 속도가 감소하지 않지만 받는 피해가 15% 증가합니다.",
             "requiredLevel": 60,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           }
         ],
         "passive": [
@@ -6919,7 +6920,7 @@
             "effect": "[기본 공격 효과] 바람과 함께 춤을 추듯 가볍게 제자리에서 활을 휘둘러 전방의 적 6명에게 290% 피해를 5회 입힙니다.",
             "requiredLevel": 100,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           },
           {
             "id": "fourth-천공의-노래",
@@ -6927,7 +6928,7 @@
             "effect": "빠른 속도로 화살을 13회 발사합니다. 화살은 전방의 적 9명에게 780% 피해를 입히며 공격 속도가 빠를수록 더 빠르게 발사합니다. 화살을 발사할 때마다 정령의 기운을 2개 생성합니다. 스킬 사용 시 범위 내에 적이 없다면 가까운 적을 향해 이동합니다.",
             "requiredLevel": 100,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           },
           {
             "id": "fourth-샤프-아이즈",
@@ -6935,7 +6936,7 @@
             "effect": "18초간 크리티컬 데미지의 20%만큼 아군 플레이어의 크리티컬 데미지를 증가시킵니다. 자신은 크리티컬 데미지가 40% 추가로 증가합니다.",
             "requiredLevel": 100,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           }
         ],
         "passive": [
@@ -6989,101 +6990,46 @@
             "icon": "/skills/icon-aura.svg"
           }
         ],
-        "masteries": [
-          {
-            "id": "wb-mastery-럭키-세븐",
-            "name": "럭키 세븐",
-            "effect": "[기본 공격 효과] 전방에 표창을 던져 적 3명에게 26% 피해를 2회 입힙니다.",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
-          },
-          {
-            "id": "wb-mastery-엘리멘탈-하모니",
-            "name": "엘리멘탈 하모니",
-            "effect": "15초간 공격 속도가 15% 이동 속도가 10% 증가합니다.",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
-          },
-          {
-            "id": "wb-mastery-엘리멘트-:-다크니스",
-            "name": "엘리멘트 : 다크니스",
-            "effect": "12초간 어둠의 엘리멘트의 힘을 받아 공격력이 10% 증가하고 지속시간 동안 공격 시 20% 확률로 대상에게 5초간 어둠의 표식을 남겨 1초마다 38% 지속 피해를 입힙니다.",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
-          },
-          {
-            "id": "wb-mastery-쉐도우-배트",
-            "name": "쉐도우 배트",
-            "effect": "공격 시 20% 확률로 쉐도우 배트를 소환합니다. 쉐도우 배트는 주변 임의의 적에게 날아가 36% 추가 피해를 입히고 다른 적에게 다시 날아갑니다. 최대 3회 공격하며 공격할 때마다 피해량이 25%씩 최대 25%까지 감소합니다.",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
-          }
-        ]
+        "masteries": []
       }
     ]
   },
   "nightWalker": {
+    "source": "공식 패치노트 (thread 3506485)",
     "stages": [
       {
         "id": "first",
         "active": [
           {
-            "id": "first-트리플-스로우",
-            "name": "트리플 스로우",
-            "effect": "[기본 공격 효과] 전방의 적 5명에게 표창을 던져 40% 피해를 3회 입힙니다.",
+            "id": "first-럭키-세븐",
+            "name": "럭키 세븐",
+            "effect": "[기본 공격 효과] 전방에 표창을 던져 적 3명에게 26% 피해를 2회 입힙니다.",
             "requiredLevel": 10,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           },
           {
-            "id": "first-스타더스트",
-            "name": "스타더스트",
-            "effect": "적을 관통하는 강력한 표창을 던져 전방의 적 7명에게 220% 피해를 입힙니다. 잠시 후 표창이 지나간 자리에 폭발이 발생하여 주변 적 7명에게 330% 피해를 입힙니다.",
+            "id": "first-엘리멘탈-하모니",
+            "name": "엘리멘탈 하모니",
+            "effect": "15초간 공격 속도가 15% 이동 속도가 10% 증가합니다.",
             "requiredLevel": 10,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
+          },
+          {
+            "id": "first-엘리멘트-:-다크니스",
+            "name": "엘리멘트 : 다크니스",
+            "effect": "12초간 어둠의 엘리멘트의 힘을 받아 공격력이 10% 증가하고 지속시간 동안 공격 시 20% 확률로 대상에게 5초간 어둠의 표식을 남겨 1초마다 38% 지속 피해를 입힙니다.",
+            "requiredLevel": 10,
+            "icon": "/skills/icon-sword.svg",
+            "cooldown": "미확인"
           }
         ],
         "passive": [
           {
-            "id": "first-배트-커뮤니온",
-            "name": "배트 커뮤니온",
-            "effect": "쉐도우 배트의 최대 공격 횟수가 1회 증가하고 피해량이 90%로 변경됩니다. (배트 커뮤니온 스킬 레벨에 비례하여 피해량 증가)",
-            "requiredLevel": 10,
-            "icon": "/skills/icon-aura.svg"
-          },
-          {
-            "id": "first-스로잉-액셀레이션",
-            "name": "스로잉 액셀레이션",
-            "effect": "공격 속도가 5% 증가합니다.",
-            "requiredLevel": 10,
-            "icon": "/skills/icon-aura.svg"
-          },
-          {
-            "id": "first-다크니스-어뎁팅",
-            "name": "다크니스 어뎁팅",
-            "effect": "엘리멘트 : 다크니스의 어둠의 표식이 최대 2회 중첩되고 피해량이 어둠의 표식 중첩 당 75%로 변경됩니다. 어둠의 표식 지속시간은 개별 적용됩니다. (다크니스 어뎁팅 스킬 레벨에 비례하여 피해량 증가)",
-            "requiredLevel": 10,
-            "icon": "/skills/icon-aura.svg"
-          },
-          {
-            "id": "first-스로잉-마스터리",
-            "name": "스로잉 마스터리",
-            "effect": "최소 데미지 배율이 15% 증가합니다.",
-            "requiredLevel": 10,
-            "icon": "/skills/icon-aura.svg"
-          },
-          {
-            "id": "first-크리티컬-스로우",
-            "name": "크리티컬 스로우",
-            "effect": "크리티컬 확률이 6% 크리티컬 데미지가 10% 증가합니다.",
-            "requiredLevel": 10,
-            "icon": "/skills/icon-aura.svg"
-          },
-          {
-            "id": "first-피지컬-트레이닝",
-            "name": "피지컬 트레이닝",
-            "effect": "기본 공격 데미지가 10% 증가합니다.",
+            "id": "first-쉐도우-배트",
+            "name": "쉐도우 배트",
+            "effect": "공격 시 20% 확률로 쉐도우 배트를 소환합니다. 쉐도우 배트는 주변 임의의 적에게 날아가 36% 추가 피해를 입히고 다른 적에게 다시 날아갑니다. 최대 3회 공격하며 공격할 때마다 피해량이 25%씩 최대 25%까지 감소합니다.",
             "requiredLevel": 10,
             "icon": "/skills/icon-aura.svg"
           }
@@ -7094,63 +7040,62 @@
         "id": "second",
         "active": [
           {
-            "id": "second-쿼드러플-스로우",
-            "name": "쿼드러플 스로우",
-            "effect": "[기본 공격 효과] 전방의 적 6명에게 표창을 던져 80% 피해를 5회 입힙니다.",
+            "id": "second-트리플-스로우",
+            "name": "트리플 스로우",
+            "effect": "[기본 공격 효과] 전방의 적 5명에게 표창을 던져 40% 피해를 3회 입힙니다.",
             "requiredLevel": 30,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           },
           {
-            "id": "second-쉐도우-서번트",
-            "name": "쉐도우 서번트",
-            "effect": "15초간 기본 공격 효과 스킬을 시간차로 따라하는 그림자를 소환하여 원본 스킬 피해량의 20%만큼 추가 피해를 입힙니다.",
+            "id": "second-스타더스트",
+            "name": "스타더스트",
+            "effect": "적을 관통하는 강력한 표창을 던져 전방의 적 7명에게 220% 피해를 입힙니다. 잠시 후 표창이 지나간 자리에 폭발이 발생하여 주변 적 7명에게 330% 피해를 입힙니다.",
             "requiredLevel": 30,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
-          },
-          {
-            "id": "second-다크니스-어센션",
-            "name": "다크니스 어센션",
-            "effect": "15초간 공격력이 25% 증가하고 5초마다 최대 HP의 4%를 회복합니다.",
-            "requiredLevel": 30,
-            "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           }
         ],
         "passive": [
           {
-            "id": "second-쉐도우-모멘텀",
-            "name": "쉐도우 모멘텀",
-            "effect": "스킬 발동 시 2초간 공격 속도가 4% 증가합니다. 최대 5회 중첩됩니다.",
+            "id": "second-배트-커뮤니온",
+            "name": "배트 커뮤니온",
+            "effect": "쉐도우 배트의 최대 공격 횟수가 1회 증가하고 피해량이 90%로 변경됩니다. (배트 커뮤니온 스킬 레벨에 비례하여 피해량 증가)",
             "requiredLevel": 30,
             "icon": "/skills/icon-aura.svg"
           },
           {
-            "id": "second-배트-커뮤니온-ii",
-            "name": "배트 커뮤니온 II",
-            "effect": "쉐도우 배트가 처음 공격 시 폭발이 발생하여 대상 주변 적 3명에게 300% 추가 피해를 입힙니다.",
+            "id": "second-스로잉-액셀레이션",
+            "name": "스로잉 액셀레이션",
+            "effect": "공격 속도가 5% 증가합니다.",
             "requiredLevel": 30,
             "icon": "/skills/icon-aura.svg"
           },
           {
-            "id": "second-다크니스-어뎁팅-ii",
-            "name": "다크니스 어뎁팅 II",
-            "effect": "엘리멘트 : 다크니스의 어둠의 표식 최대 중첩 수가 1회 증가하고 피해량이 중첩 당 145%로 변경됩니다. 대상이 보스 몬스터가 아니라면 어둠의 표식 발동 확률이 2배로 적용됩니다. (다크니스 어뎁팅 II 스킬 레벨에 비례하여 피해량 증가)",
+            "id": "second-다크니스-어뎁팅",
+            "name": "다크니스 어뎁팅",
+            "effect": "엘리멘트 : 다크니스의 어둠의 표식이 최대 2회 중첩되고 피해량이 어둠의 표식 중첩 당 75%로 변경됩니다. 어둠의 표식 지속시간은 개별 적용됩니다. (다크니스 어뎁팅 스킬 레벨에 비례하여 피해량 증가)",
             "requiredLevel": 30,
             "icon": "/skills/icon-aura.svg"
           },
           {
-            "id": "second-스피릿-스로잉",
-            "name": "스피릿 스로잉",
-            "effect": "공격력이 15% 증가합니다.",
+            "id": "second-스로잉-마스터리",
+            "name": "스로잉 마스터리",
+            "effect": "최소 데미지 배율이 15% 증가합니다.",
             "requiredLevel": 30,
             "icon": "/skills/icon-aura.svg"
           },
           {
-            "id": "second-래디컬-다크니스",
-            "name": "래디컬 다크니스",
-            "effect": "최대 HP가 10% 증가하고 보스 몬스터 데미지가 18% 증가합니다.",
+            "id": "second-크리티컬-스로우",
+            "name": "크리티컬 스로우",
+            "effect": "크리티컬 확률이 6% 크리티컬 데미지가 10% 증가합니다.",
+            "requiredLevel": 30,
+            "icon": "/skills/icon-aura.svg"
+          },
+          {
+            "id": "second-피지컬-트레이닝",
+            "name": "피지컬 트레이닝",
+            "effect": "기본 공격 데미지가 10% 증가합니다.",
             "requiredLevel": 30,
             "icon": "/skills/icon-aura.svg"
           }
@@ -7161,78 +7106,63 @@
         "id": "third",
         "active": [
           {
-            "id": "third-퀸터플-스로우",
-            "name": "퀸터플 스로우",
-            "effect": "[기본 공격 효과] 전방의 적 6명에게 표창을 던져 290% 피해를 5회 입힙니다.",
+            "id": "third-쿼드러플-스로우",
+            "name": "쿼드러플 스로우",
+            "effect": "[기본 공격 효과] 전방의 적 6명에게 표창을 던져 80% 피해를 5회 입힙니다.",
             "requiredLevel": 60,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           },
           {
-            "id": "third-다크니스-오멘",
-            "name": "다크니스 오멘",
-            "effect": "자신의 위치에 5초간 지속되는 배트 무리를 소환하여 0.7초마다 쉐도우 배트를 소환합니다.",
+            "id": "third-쉐도우-서번트",
+            "name": "쉐도우 서번트",
+            "effect": "15초간 기본 공격 효과 스킬을 시간차로 따라하는 그림자를 소환하여 원본 스킬 피해량의 20%만큼 추가 피해를 입힙니다.",
             "requiredLevel": 60,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           },
           {
-            "id": "third-다크니스-이베이젼",
-            "name": "다크니스 이베이젼",
-            "effect": "15초간 최종 데미지가 20% 증가합니다. 지속시간 중 한 번 자신이 상태이상에 걸리면 5초간 받는 피해가 20% 감소합니다.",
+            "id": "third-다크니스-어센션",
+            "name": "다크니스 어센션",
+            "effect": "15초간 공격력이 25% 증가하고 5초마다 최대 HP의 4%를 회복합니다.",
             "requiredLevel": 60,
             "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
-          },
-          {
-            "id": "third-쉐도우-스티치",
-            "name": "쉐도우 스티치",
-            "effect": "잠시동안 힘을 모아 응집된 그림자를 폭발시켜 주변 적 15명에게 2850% 피해를 4회 입힙니다.",
-            "requiredLevel": 60,
-            "icon": "/skills/icon-sword.svg",
-            "cooldown": "즉시"
+            "cooldown": "미확인"
           }
         ],
         "passive": [
           {
-            "id": "third-배트-커뮤니온-iii",
-            "name": "배트 커뮤니온 III",
-            "effect": "배트 커뮤니온 II의 최종 데미지가 150% 증가합니다.",
+            "id": "third-쉐도우-모멘텀",
+            "name": "쉐도우 모멘텀",
+            "effect": "스킬 발동 시 2초간 공격 속도가 4% 증가합니다. 최대 5회 중첩됩니다.",
             "requiredLevel": 60,
             "icon": "/skills/icon-aura.svg"
           },
           {
-            "id": "third-다크니스-어뎁팅-iii",
-            "name": "다크니스 어뎁팅 III",
-            "effect": "엘리멘트 : 다크니스의 최종 데미지가 150% 증가합니다.",
+            "id": "third-배트-커뮤니온-ii",
+            "name": "배트 커뮤니온 II",
+            "effect": "쉐도우 배트가 처음 공격 시 폭발이 발생하여 대상 주변 적 3명에게 300% 추가 피해를 입힙니다.",
             "requiredLevel": 60,
             "icon": "/skills/icon-aura.svg"
           },
           {
-            "id": "third-스로잉-엑스퍼트",
-            "name": "스로잉 엑스퍼트",
-            "effect": "스킬 데미지가 15% 최대 데미지 배율이 20% 증가합니다.",
+            "id": "third-다크니스-어뎁팅-ii",
+            "name": "다크니스 어뎁팅 II",
+            "effect": "엘리멘트 : 다크니스의 어둠의 표식 최대 중첩 수가 1회 증가하고 피해량이 중첩 당 145%로 변경됩니다. 대상이 보스 몬스터가 아니라면 어둠의 표식 발동 확률이 2배로 적용됩니다. (다크니스 어뎁팅 II 스킬 레벨에 비례하여 피해량 증가)",
             "requiredLevel": 60,
             "icon": "/skills/icon-aura.svg"
           },
           {
-            "id": "third-사이펀-바이탈리티",
-            "name": "사이펀 바이탈리티",
-            "effect": "공격력이 15% 증가하고 엘리멘트 : 다크니스 발동 시 5초간 지속되는 보호막을 생성하여 최대 HP의 10%만큼 피해를 방어합니다.",
+            "id": "third-스피릿-스로잉",
+            "name": "스피릿 스로잉",
+            "effect": "공격력이 15% 증가합니다.",
             "requiredLevel": 60,
             "icon": "/skills/icon-aura.svg"
           },
           {
-            "id": "third-다크니스-블레싱",
-            "name": "다크니스 블레싱",
-            "effect": "최종 데미지가 12% 방어 관통력이 5% 증가합니다.",
-            "requiredLevel": 60,
-            "icon": "/skills/icon-aura.svg"
-          },
-          {
-            "id": "third-시그너스-나이츠",
-            "name": "시그너스 나이츠",
-            "effect": "다음 스킬들의 최종 데미지가 증가합니다. 쉐도우 배트 120%, 스타더스트 150%",
+            "id": "third-래디컬-다크니스",
+            "name": "래디컬 다크니스",
+            "effect": "최대 HP가 10% 증가하고 보스 몬스터 데미지가 18% 증가합니다.",
             "requiredLevel": 60,
             "icon": "/skills/icon-aura.svg"
           }
@@ -7241,130 +7171,85 @@
       },
       {
         "id": "fourth",
-        "active": [],
-        "passive": [
+        "active": [
           {
-            "id": "fourth-장착-효과---윈드브레이커",
-            "name": "장착 효과 - 윈드브레이커",
-            "effect": "장착 효과 - 나이트워커",
+            "id": "fourth-퀸터플-스로우",
+            "name": "퀸터플 스로우",
+            "effect": "[기본 공격 효과] 전방의 적 6명에게 표창을 던져 290% 피해를 5회 입힙니다.",
             "requiredLevel": 100,
-            "icon": "/skills/icon-sword.svg"
+            "icon": "/skills/icon-sword.svg",
+            "cooldown": "미확인"
           },
           {
-            "id": "fourth-보스-몬스터-데미지-+5%",
-            "name": "보스 몬스터 데미지 +5%",
-            "effect": "명중 +6",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-sword.svg"
+            "id": "fourth-다크니스-오멘",
+            "name": "다크니스 오멘",
+            "effect": "자신의 위치에 5초간 지속되는 배트 무리를 소환하여 0.7초마다 쉐도우 배트를 소환합니다.",
+            "requiredLevel": 103,
+            "icon": "/skills/icon-sword.svg",
+            "cooldown": "미확인"
           },
           {
-            "id": "fourth-보스-몬스터-데미지-+10%",
-            "name": "보스 몬스터 데미지 +10%",
-            "effect": "명중 +12",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-sword.svg"
+            "id": "fourth-다크니스-이베이젼",
+            "name": "다크니스 이베이젼",
+            "effect": "15초간 최종 데미지가 20% 증가합니다. 지속시간 중 한 번 자신이 상태이상에 걸리면 5초간 받는 피해가 20% 감소합니다.",
+            "requiredLevel": 105,
+            "icon": "/skills/icon-sword.svg",
+            "cooldown": "미확인"
           },
           {
-            "id": "fourth-보스-몬스터-데미지-+20%",
-            "name": "보스 몬스터 데미지 +20%",
-            "effect": "명중 +24",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-sword.svg"
+            "id": "fourth-쉐도우-스티치",
+            "name": "쉐도우 스티치",
+            "effect": "잠시동안 힘을 모아 응집된 그림자를 폭발시켜 주변 적 15명에게 2850% 피해를 4회 입힙니다.",
+            "requiredLevel": 115,
+            "icon": "/skills/icon-sword.svg",
+            "cooldown": "미확인"
           }
         ],
-        "masteries": [
+        "passive": [
           {
-            "id": "nw-mastery-동료-레벨",
-            "name": "동료 레벨",
-            "effect": "스킬 설명",
+            "id": "fourth-배트-커뮤니온-iii",
+            "name": "배트 커뮤니온 III",
+            "effect": "배트 커뮤니온 II의 최종 데미지가 150% 증가합니다.",
             "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
+            "icon": "/skills/icon-aura.svg"
           },
           {
-            "id": "nw-mastery-1",
-            "name": "1",
-            "effect": "주변 임의의 적에게 310% 추가 피해를 입히는 [정령의 기운]을 15개 생성합니다. [정령의 기운]은 50% 확률로 강화되어 2배의 피해를 입힙니다.",
+            "id": "fourth-다크니스-어뎁팅-iii",
+            "name": "다크니스 어뎁팅 III",
+            "effect": "엘리멘트 : 다크니스의 최종 데미지가 150% 증가합니다.",
             "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
+            "icon": "/skills/icon-aura.svg"
           },
           {
-            "id": "nw-mastery-1",
-            "name": "1",
-            "effect": "바람과 함께 춤을 추듯 가볍게 제자리에서 활을 휘둘러 전방의 적 6명에게 290% 피해를 5회 입힙니다.",
+            "id": "fourth-스로잉-엑스퍼트",
+            "name": "스로잉 엑스퍼트",
+            "effect": "스킬 데미지가 15% 최대 데미지 배율이 20% 증가합니다.",
             "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
+            "icon": "/skills/icon-aura.svg"
           },
           {
-            "id": "nw-mastery-1",
-            "name": "1",
-            "effect": "바람의 결을 따라 회전하는 화살을 날려 전방의 적 8명에게 2300% 피해를 2회 입히고 1.2초간 기절시킵니다.",
+            "id": "fourth-사이펀-바이탈리티",
+            "name": "사이펀 바이탈리티",
+            "effect": "공격력이 15% 증가하고 엘리멘트 : 다크니스 발동 시 5초간 지속되는 보호막을 생성하여 최대 HP의 10%만큼 피해를 방어합니다.",
             "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
+            "icon": "/skills/icon-aura.svg"
           },
           {
-            "id": "nw-mastery-1",
-            "name": "1",
-            "effect": "한 명의 적에게 두 대의 화살을 연달아 날려 각각 1550% 3450% 피해를 입히고 두 번째 화살에 피해입은 적의 받는 피해를 8초간 25% 증가시킵니다.",
+            "id": "fourth-다크니스-블레싱",
+            "name": "다크니스 블레싱",
+            "effect": "최종 데미지가 12% 방어 관통력이 5% 증가합니다.",
             "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
+            "icon": "/skills/icon-aura.svg"
           },
           {
-            "id": "nw-mastery-4",
-            "name": "4",
-            "effect": "빠른 속도로 화살을 13회 발사합니다. 화살은 전방의 적 4명에게 780% 피해를 입히고 공격 속도가 빠를수록 더 빠르게 발사하며 스킬 사용 시 범위 내에 적이 없다면 가까운 적을 향해 이동합니다. [챕터 보스] 전투 시 화살을 발사할 때마다 [정령의 기운]을 2개 생성합니다.",
+            "id": "fourth-시그너스-나이츠",
+            "name": "시그너스 나이츠",
+            "effect": "다음 스킬들의 최종 데미지가 증가합니다. 쉐도우 배트 120%, 스타더스트 150%",
             "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
-          },
-          {
-            "id": "nw-mastery-1",
-            "name": "1",
-            "effect": "동료 자신과 플레이어의 공격력을 15% 증가시킵니다.",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
-          },
-          {
-            "id": "nw-mastery-1",
-            "name": "1",
-            "effect": "스킬 발동 시 [정령의 기운]을 3개 생성합니다.",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
-          },
-          {
-            "id": "nw-mastery-2",
-            "name": "2",
-            "effect": "동료 자신의 최종 데미지가 15% 증가합니다. [챕터 보스] 전투 시 플레이어의 최종 데미지가 5% 증가합니다.",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
-          },
-          {
-            "id": "nw-mastery-3",
-            "name": "3",
-            "effect": "공격 시 35% 확률로 거대한 화살을 발사하여 전방의 적 5명에게 750% 피해를 입힙니다. [챕터 보스] 전투 시 거대한 화살을 발사할 때마다 [정령의 기운]을 2개 생성합니다.",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
-          },
-          {
-            "id": "nw-mastery-5",
-            "name": "5",
-            "effect": "동료 자신의 최종 데미지가 25% 증가합니다.",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
-          },
-          {
-            "id": "nw-mastery-8",
-            "name": "8",
-            "effect": "동료 자신의 최종 데미지가 25% 증가합니다.",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
-          },
-          {
-            "id": "nw-mastery-10",
-            "name": "10",
-            "effect": "동료 자신의 최종 데미지가 25% 증가합니다.",
-            "requiredLevel": 100,
-            "icon": "/skills/icon-mastery.svg"
+            "icon": "/skills/icon-aura.svg"
           }
-        ]
+        ],
+        "masteries": []
       }
     ]
   },

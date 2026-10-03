@@ -1,4 +1,5 @@
 import { calculateCombatPower, calculateDamage, calculatePvpDamage, calculateStatEfficiencies, cubeTargetSummary, probabilitySummary } from './engine.mjs';
+import { buildSkillModels, optimizeLoadout, simulateLoadout, DEFAULT_UNKNOWN_COOLDOWN, LOADOUT_SKILL_SLOTS } from './skill-optimizer.mjs';
 'use strict';
 
 const STORE = 'maple-growth-lab-mvp-v1';
@@ -2297,6 +2298,8 @@ function renderJobSkills() {
     </div>
   `;
 
+  html += `<div id="skillLoadoutPanel"></div>`;
+
   jobData.stages.forEach(st => {
     const stageTitle = STAGE_NAMES[st.id] || st.id;
     const reqLv = st.id === 'first' ? 10 : st.id === 'second' ? 30 : st.id === 'third' ? 60 : 100;
@@ -2374,6 +2377,7 @@ function renderJobSkills() {
   container.innerHTML = html;
 
   $('runSimulationBtn')?.addEventListener('click', runCombatSimulation);
+  renderSkillLoadoutPanel();
 }
 
 function runCombatSimulation() {
@@ -2505,6 +2509,263 @@ function runCombatSimulation() {
 
   resHtml += `</div></div>`;
   resultBox.innerHTML = resHtml;
+}
+
+/* ==========================================================================
+   Skill Loadout Optimizer (평타 1 + 스킬 5)
+   ========================================================================== */
+
+const SKILL_LOADOUT_KEY = 'maple-growth-lab-skill-loadout-v1';
+
+function loadSkillLoadoutState(jobKey) {
+  try {
+    const all = JSON.parse(localStorage.getItem(SKILL_LOADOUT_KEY) || '{}');
+    return { overrides: {}, equipped: [], ...(all[jobKey] || {}) };
+  } catch {
+    return { overrides: {}, equipped: [] };
+  }
+}
+
+function saveSkillLoadoutState(jobKey, state) {
+  try {
+    const all = JSON.parse(localStorage.getItem(SKILL_LOADOUT_KEY) || '{}');
+    all[jobKey] = state;
+    localStorage.setItem(SKILL_LOADOUT_KEY, JSON.stringify(all));
+  } catch {}
+}
+
+function skillLoadoutLevel() {
+  const lv = n('level');
+  return lv > 0 ? lv : 200;
+}
+
+function skillModelKind(m) {
+  if (m.isBasic) return ['평타', 'success'];
+  if (m.servantPct) return ['그림자', 'official'];
+  if (m.buff && !m.directPct && !m.periodic) return ['버프', 'official'];
+  if (m.periodic) return ['소환/지속', 'danger'];
+  if (m.directPct) return ['공격', 'danger'];
+  return ['유틸', ''];
+}
+
+function skillModelSummary(m) {
+  const parts = [];
+  if (m.directPct) parts.push(`${fmt(m.directPct * (1 + (m.passiveBoost || 0) / 100))}%`);
+  if (m.periodic) parts.push(`${fmt(m.periodic.pct)}%×${m.periodic.ticks}틱`);
+  if (m.passiveBoost) parts.push(`패시브 최종 +${m.passiveBoost}%`);
+  if (m.buff) {
+    const names = { attackPct: '공%', finalDamage: '최종뎀', damage: '데미지', attackSpeed: '공속', critDamage: '크뎀', critRate: '크확', defPen: '방관', targetTaken: '받피증' };
+    const b = Object.entries(m.buff.stats || {}).map(([k, v]) => `${names[k] || k}+${v}%`);
+    if (m.servantPct) b.push(`평타 그림자 ${m.servantPct}%`);
+    if (b.length) parts.push(`${m.buff.duration}초 ${b.join(' ')}`);
+  }
+  if (m.cdResetPct) parts.push(`쿨타임 ${m.cdResetPct}% 즉시 감소`);
+  return parts.join(' · ') || '피해/버프 없음';
+}
+
+function skillOptimizerContext(duration) {
+  const inputs = readInputs();
+  const isPvp = inputs.target === 'pvp';
+  const engine = isPvp ? calculatePvpDamage : calculateDamage;
+  const make = (base, s, kind) => ({
+    ...base,
+    skillCoefficient: 100,
+    attackPct: (base.attackPct || 0) + (s.attackPct || 0),
+    finalDamage: (base.finalDamage || 0) + (s.finalDamage || 0),
+    damage: (base.damage || 0) + (s.damage || 0),
+    critRate: (base.critRate || 0) + (s.critRate || 0),
+    critDamage: (base.critDamage || 0) + (s.critDamage || 0),
+    defPen: (base.defPen || 0) + (s.defPen || 0),
+    targetTaken: (base.targetTaken || 0) + (s.targetTaken || 0),
+    basicDamage: kind === 'basic' ? base.basicDamage : 0,
+    skillDamage: kind === 'skill' ? base.skillDamage : 0
+  });
+  let base = inputs;
+  let relative = false;
+  if (!(engine(make(base, {}, 'skill'), DATA.combat || {}).average > 0)) {
+    // 스탯 미입력(공격력 0 / 명중 0) 시에도 조합 간 상대 비교는 가능하도록 기준값을 채운다.
+    base = { ...inputs, attackFlat: inputs.attackFlat || 1000, accuracy: inputs.accuracy || 100 };
+    relative = true;
+  }
+  return {
+    relative,
+    ctx: {
+      duration,
+      attackInterval: inputs.attackInterval || 1,
+      attackSpeed: inputs.attackSpeed || 0,
+      attackSpeedCap: Number(DATA.combat?.caps?.attackSpeed || 1500) / 10,
+      cooldownReductionPercent: inputs.cooldownReductionPercent || 0,
+      fixedCooldownReductionSeconds: inputs.fixedCooldownReductionSeconds || 0,
+      boss: inputs.target === 'boss',
+      damageFor: (s, kind) => engine(make(base, s, kind), DATA.combat || {}).average
+    }
+  };
+}
+
+function renderSkillLoadoutPanel() {
+  const panel = $('skillLoadoutPanel');
+  const jobKey = $('job')?.value;
+  if (!panel || !jobKey || !DATA.jobSkills?.[jobKey]) return;
+  const level = skillLoadoutLevel();
+  const state = loadSkillLoadoutState(jobKey);
+  const models = buildSkillModels(DATA.jobSkills[jobKey], level, state.overrides);
+  const sorted = [...models].sort((a, b) => (b.unlocked - a.unlocked) || (b.isBasic - a.isBasic) || a.requiredLevel - b.requiredLevel);
+  const unknownCd = models.filter(m => m.unlocked && !m.isBasic && !m.cooldownKnown).length;
+
+  const rows = sorted.map(m => {
+    const [kind, tone] = skillModelKind(m);
+    const ov = state.overrides[m.name] || {};
+    const equipped = state.equipped.includes(m.name);
+    const cdCell = m.isBasic
+      ? '<span class="small" style="color:var(--muted);">—</span>'
+      : `<input type="number" min="1" step="0.5" class="skill-cd-input" data-skill="${escapeHtml(m.name)}" value="${ov.cooldown ?? ''}" placeholder="${m.cooldownKnown ? m.baseCooldown : `${DEFAULT_UNKNOWN_COOLDOWN}?`}" style="width:62px;padding:3px 5px;font-size:11px;border:1px solid ${m.cooldownKnown ? 'var(--line)' : '#f59e0b'};border-radius:5px;${m.cooldownKnown ? '' : 'background:#fffbeb;'}" title="${m.cooldownKnown ? 'DB 쿨타임 (덮어쓰기 가능)' : '쿨타임 미확인: 게임 내 값을 입력하세요'}">`;
+    const coefCell = m.isBasic
+      ? '<span class="small" style="color:var(--muted);">—</span>'
+      : `<input type="number" min="0" step="10" class="skill-coef-input" data-skill="${escapeHtml(m.name)}" value="${ov.coef ?? ''}" placeholder="${m.damageUnknown ? '필요' : '자동'}" style="width:70px;padding:3px 5px;font-size:11px;border:1px solid ${m.damageUnknown ? '#f59e0b' : 'var(--line)'};border-radius:5px;${m.damageUnknown ? 'background:#fffbeb;' : ''}" title="1회 시전 총 계수(%) 직접 입력">`;
+    return `
+      <tr style="${m.unlocked ? '' : 'opacity:.45;'}border-top:1px solid var(--line);">
+        <td style="padding:5px 4px;text-align:center;"><input type="checkbox" class="skill-equip-input" data-skill="${escapeHtml(m.name)}" data-basic="${m.isBasic ? 1 : 0}" ${equipped ? 'checked' : ''} ${m.unlocked ? '' : 'disabled'}></td>
+        <td style="padding:5px 4px;">
+          <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;"><b style="font-size:12px;">${escapeHtml(m.name)}</b><span class="badge ${tone}" style="font-size:10px;padding:1px 5px;">${kind}</span>${m.unlocked ? '' : `<span class="small" style="color:var(--muted);">Lv.${m.requiredLevel} 해금</span>`}</div>
+          <div style="font-size:10.5px;color:#475467;">${escapeHtml(skillModelSummary(m))}${m.notes.length ? ` <span style="color:#b45309;">· ${escapeHtml(m.notes.join(' · '))}</span>` : ''}</div>
+        </td>
+        <td style="padding:5px 4px;">${cdCell}</td>
+        <td style="padding:5px 4px;">${coefCell}</td>
+      </tr>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div style="border:1px solid rgba(16,185,129,.35);background:linear-gradient(135deg,rgba(16,185,129,.05),rgba(59,130,246,.06));border-radius:10px;padding:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+        <div>
+          <strong style="font-size:13px;color:#047857;">🧠 스킬 장착 최적화 (평타 1 + 스킬 ${LOADOUT_SKILL_SLOTS})</strong>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Lv.${level} 기준 해금 스킬로 가능한 모든 조합을 자동 전투 시뮬레이션해 최고 DPS 조합을 찾습니다. 체크 = 현재 장착(비교용).</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <select id="loadoutDuration" style="padding:4px 8px;font-size:12px;border:1px solid var(--line);border-radius:6px;background:#fff;">
+            <option value="30">30초</option>
+            <option value="60" selected>60초</option>
+            <option value="120">120초</option>
+            <option value="180">180초</option>
+          </select>
+          <button type="button" class="button primary" id="runLoadoutOptimizerBtn" style="padding:4px 12px;font-size:12px;">🧠 최적 조합 찾기</button>
+        </div>
+      </div>
+      ${unknownCd ? `<div style="font-size:11px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:6px 8px;margin-bottom:8px;">⚠️ 이 직업의 공식 패치노트에는 쿨타임이 없어 <b>${unknownCd}개 스킬</b>을 ${DEFAULT_UNKNOWN_COOLDOWN}초로 가정합니다. 주황색 칸에 게임 내 쿨타임을 입력하면 결과가 정확해집니다.</div>` : ''}
+      <div style="max-height:340px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:8px;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead><tr style="background:#f8fafc;font-size:11px;color:var(--muted);"><th style="padding:5px 4px;">장착</th><th style="padding:5px 4px;text-align:left;">스킬</th><th style="padding:5px 4px;">쿨타임(초)</th><th style="padding:5px 4px;">계수(%)</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div id="loadoutResultBox" style="margin-top:10px;"></div>
+    </div>`;
+
+  const persist = () => saveSkillLoadoutState(jobKey, state);
+  panel.querySelectorAll('.skill-cd-input,.skill-coef-input').forEach(el => el.addEventListener('change', () => {
+    const name = el.dataset.skill;
+    const key = el.classList.contains('skill-cd-input') ? 'cooldown' : 'coef';
+    state.overrides[name] = { ...(state.overrides[name] || {}) };
+    if (el.value === '') delete state.overrides[name][key]; else state.overrides[name][key] = Number(el.value);
+    persist();
+    renderSkillLoadoutPanel();
+  }));
+  panel.querySelectorAll('.skill-equip-input').forEach(el => el.addEventListener('change', () => {
+    const name = el.dataset.skill;
+    if (el.checked && el.dataset.basic === '1') {
+      // 평타 슬롯은 1개: 다른 평타 체크 해제
+      const basicNames = models.filter(m => m.isBasic).map(m => m.name);
+      state.equipped = state.equipped.filter(x => !basicNames.includes(x));
+    }
+    if (el.checked && el.dataset.basic !== '1') {
+      const skillNames = models.filter(m => !m.isBasic).map(m => m.name);
+      const current = state.equipped.filter(x => skillNames.includes(x));
+      if (current.length >= LOADOUT_SKILL_SLOTS) {
+        el.checked = false;
+        setStatus(`스킬 슬롯은 최대 ${LOADOUT_SKILL_SLOTS}개입니다. 다른 스킬을 먼저 해제하세요.`, 'warn');
+        return;
+      }
+    }
+    state.equipped = el.checked ? [...new Set([...state.equipped, name])] : state.equipped.filter(x => x !== name);
+    persist();
+    renderSkillLoadoutPanel();
+  }));
+  $('runLoadoutOptimizerBtn')?.addEventListener('click', () => runSkillLoadoutOptimizer(jobKey, models, state));
+}
+
+function runSkillLoadoutOptimizer(jobKey, models, state) {
+  const box = $('loadoutResultBox');
+  if (!box) return;
+  const duration = Number($('loadoutDuration')?.value || 60);
+  const { ctx, relative } = skillOptimizerContext(duration);
+  const result = optimizeLoadout({ models, ctx, top: 5 });
+  if (!result.best) {
+    box.innerHTML = '<div class="small">해금된 스킬이 없습니다. 캐릭터 레벨을 확인하세요.</div>';
+    return;
+  }
+  const best = result.best;
+
+  // 현재 장착 비교
+  const eqBasic = models.find(m => m.unlocked && m.isBasic && state.equipped.includes(m.name)) || null;
+  const eqSkills = models.filter(m => m.unlocked && !m.isBasic && state.equipped.includes(m.name));
+  const current = (eqBasic || eqSkills.length) ? simulateLoadout(eqBasic, eqSkills, ctx) : null;
+  const gain = current && current.total > 0 ? (best.total / current.total - 1) * 100 : null;
+  const sameAsCurrent = current && eqBasic?.name === best.basic?.name
+    && eqSkills.length === best.skills.length && best.skills.every(s => eqSkills.some(e => e.name === s.name));
+
+  const chip = (name, tone = '#ecfdf5', border = '#6ee7b7') => `<span style="display:inline-block;padding:3px 8px;border-radius:999px;background:${tone};border:1px solid ${border};font-size:12px;font-weight:700;margin:2px;">${escapeHtml(name)}</span>`;
+  const shareRows = best.usage.map(u => {
+    const share = best.total > 0 ? u.damage / best.total * 100 : 0;
+    return `<div style="margin-top:4px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;"><span><b>${escapeHtml(u.name)}</b> ${u.casts ? `· 시전 ${u.casts}회` : ''}</span><span style="font-weight:800;color:var(--primary);">${share.toFixed(1)}%</span></div>
+      <div style="background:#e2e8f0;height:5px;border-radius:3px;overflow:hidden;"><div style="background:#10b981;width:${share}%;height:100%;"></div></div>
+    </div>`;
+  }).join('');
+  const altRows = result.ranking.map((r, i) => `
+    <tr style="border-top:1px solid var(--line);">
+      <td style="padding:4px;text-align:center;">${i + 1}</td>
+      <td style="padding:4px;font-size:11px;">${escapeHtml(r.basic?.name || '—')} + ${r.skills.map(s => escapeHtml(s.name)).join(', ')}</td>
+      <td style="padding:4px;text-align:right;font-weight:700;">${(r.total / best.total * 100).toFixed(1)}%</td>
+    </tr>`).join('');
+  const warnings = [...new Set([best.basic, ...best.skills].filter(Boolean).flatMap(m => m.notes.map(n => `${m.name}: ${n}`)))];
+  const marginalRows = best.skills.map(s => {
+    const without = simulateLoadout(best.basic, best.skills.filter(x => x !== s), ctx);
+    return { name: s.name, loss: best.total > 0 ? (1 - without.total / best.total) * 100 : 0 };
+  }).sort((a, b) => b.loss - a.loss).map(x => `
+    <div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0;border-bottom:1px dashed var(--line);">
+      <span>${escapeHtml(x.name)}</span><b style="color:${x.loss > 0.05 ? '#b91c1c' : 'var(--muted)'};">${x.loss > 0.005 ? `−${x.loss.toFixed(2)}%` : '영향 없음'}</b>
+    </div>`).join('');
+
+  box.innerHTML = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px;">
+      <div style="font-size:12px;font-weight:800;color:#047857;margin-bottom:6px;">🏆 최적 조합 (${result.evaluated.toLocaleString()}개 조합 전수 탐색 · ${duration}초 · ${ctx.boss ? '보스' : '일반'} 대상)</div>
+      <div>${chip(`평타: ${best.basic?.name || '없음'}`, '#eff6ff', '#93c5fd')}${best.skills.map(s => chip(s.name)).join('')}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">권장 시전 우선순위(슬롯 배치 순서): ${best.castOrder.map(escapeHtml).join(' → ')}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:10px 0;">
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:8px;"><span style="font-size:11px;color:#166534;font-weight:700;">${relative ? '상대 DPS 지수' : '시뮬레이션 DPS'}</span><div style="font-size:16px;font-weight:900;color:#15803d;">${fmt(best.dps)}</div></div>
+        <div style="background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:8px;"><span style="font-size:11px;color:var(--muted);font-weight:700;">${duration}초 누적 피해</span><div style="font-size:16px;font-weight:900;">${fmt(best.total)}</div></div>
+        <div style="background:${gain === null ? '#f8fafc' : gain > 0.05 ? '#fef2f2' : '#f0fdf4'};border:1px solid var(--line);border-radius:6px;padding:8px;"><span style="font-size:11px;color:var(--muted);font-weight:700;">현재 장착 대비</span><div style="font-size:16px;font-weight:900;">${gain === null ? '장착 체크 필요' : sameAsCurrent ? '이미 최적 ✅' : `+${gain.toFixed(2)}%`}</div></div>
+      </div>
+      <button type="button" class="button secondary" id="applyBestLoadoutBtn" style="padding:4px 10px;font-size:12px;">✅ 이 조합을 현재 장착으로 저장</button>
+      <div style="font-size:12px;font-weight:800;margin:12px 0 2px;">📊 딜 지분 (직접 피해)</div>
+      ${shareRows}
+      <div style="font-size:12px;font-weight:800;margin:12px 0 2px;">🧩 스킬별 실질 기여도 <span style="font-weight:400;color:var(--muted);font-size:11px;">(해당 스킬을 빼면 줄어드는 DPS · 버프 가치 포함)</span></div>
+      ${marginalRows}
+      <div style="font-size:12px;font-weight:800;margin:12px 0 4px;">🔁 상위 조합 비교</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;"><tbody>${altRows}</tbody></table>
+      ${warnings.length ? `<div style="margin-top:10px;font-size:11px;color:#92400e;background:#fffbeb;border-radius:6px;padding:6px 8px;">⚠️ 근사/가정: ${warnings.map(escapeHtml).join(' / ')}</div>` : ''}
+      <div style="margin-top:8px;font-size:10.5px;color:var(--muted);line-height:1.5;">
+        모델: 쿨타임이 돈 스킬은 버프 → 고계수 순으로 자동 시전, 그 외엔 평타. 시전 1회 = 공격 주기 1회 소모. 버프(공%·최종뎀·데미지·크뎀·방관·받피증·공속)는 공식 피해 엔진에 실제 스탯으로 더해 계산하며, 소환 피해는 시전 시점 스탯으로 고정(스냅샷)합니다.
+        ${relative ? '<br><b>캐릭터 공격력/명중이 비어 있어 상대 지수로 비교합니다.</b> (조합 순위에는 영향 없음)' : ''}
+      </div>
+    </div>`;
+
+  $('applyBestLoadoutBtn')?.addEventListener('click', () => {
+    state.equipped = [best.basic?.name, ...best.skills.map(s => s.name)].filter(Boolean);
+    saveSkillLoadoutState(jobKey, state);
+    renderSkillLoadoutPanel();
+    setStatus('최적 스킬 조합을 현재 장착으로 저장했습니다.', 'good');
+  });
 }
 
 function fillJobs() {
@@ -3462,6 +3723,8 @@ function bind() {
         if (el.id === 'job') {
           renderJobStatMapping();
           renderJobSkills();
+        } else if (el.id === 'level' && evt === 'change') {
+          renderSkillLoadoutPanel();
         }
         if (['stageMode', 'stageChapter'].includes(el.id)) {
           if (el.id === 'stageMode') fillStageChapters(); else fillStages();
