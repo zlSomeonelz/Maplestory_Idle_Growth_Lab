@@ -3704,34 +3704,34 @@ const SPECUP_STORE_KEY = 'maple-growth-lab-specup-equips-v01';
 
 const DEFAULT_SPECUP_EQUIPMENT_PRESETS = {
   120: [
-    { id: 'weapon', name: '앱솔랩스 무기', slotType: 'weapon', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 8, scrollSlotsUsed: 4, cubeGrade: 'unique' },
-    { id: 'hat', name: '앱솔랩스 모자', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic' },
-    { id: 'top_bottom', name: '앱솔랩스 한벌옷', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic' },
-    { id: 'glove', name: '앱솔랩스 장갑', slotType: 'glove', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic' },
-    { id: 'shoes', name: '앱솔랩스 신발', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic' },
-    { id: 'cape', name: '앱솔랩스 망토', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'rare' },
-    { id: 'accessory1', name: '마이스터링', slotType: 'accessory', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 4, scrollSlotsUsed: 2, cubeGrade: 'epic' },
-    { id: 'accessory2', name: '도미네이터 펜던트', slotType: 'accessory', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 4, scrollSlotsUsed: 2, cubeGrade: 'epic' }
+    { id: 'weapon', name: '앱솔랩스 무기', slotType: 'weapon', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 8, scrollSlotsUsed: 4, cubeGrade: 'unique', cubeValidLines: 1 },
+    { id: 'hat', name: '앱솔랩스 모자', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic', cubeValidLines: 1 },
+    { id: 'top_bottom', name: '앱솔랩스 한벌옷', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic', cubeValidLines: 1 },
+    { id: 'glove', name: '앱솔랩스 장갑', slotType: 'glove', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic', cubeValidLines: 0 },
+    { id: 'shoes', name: '앱솔랩스 신발', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic', cubeValidLines: 1 },
+    { id: 'cape', name: '앱솔랩스 망토', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'rare', cubeValidLines: 0 },
+    { id: 'accessory1', name: '마이스터링', slotType: 'accessory', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 4, scrollSlotsUsed: 2, cubeGrade: 'epic', cubeValidLines: 1 },
+    { id: 'accessory2', name: '도미네이터 펜던트', slotType: 'accessory', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 4, scrollSlotsUsed: 2, cubeGrade: 'epic', cubeValidLines: 1 }
   ],
   100: [
-    { id: 'weapon', name: '파프니르 무기', slotType: 'weapon', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 7, scrollSlotsUsed: 3, cubeGrade: 'epic' },
-    { id: 'hat', name: '파프니르 모자', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare' },
-    { id: 'top_bottom', name: '파프니르 상/하의', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare' },
-    { id: 'glove', name: '여제 장갑', slotType: 'glove', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare' },
-    { id: 'shoes', name: '여제 신발', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare' },
-    { id: 'cape', name: '여제 망토', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare' },
-    { id: 'accessory1', name: '골든 클로버 벨트', slotType: 'accessory', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 3, scrollSlotsUsed: 1, cubeGrade: 'rare' },
-    { id: 'accessory2', name: '아쿠아틱 레터 눈장식', slotType: 'accessory', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 3, scrollSlotsUsed: 1, cubeGrade: 'rare' }
+    { id: 'weapon', name: '파프니르 무기', slotType: 'weapon', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 7, scrollSlotsUsed: 3, cubeGrade: 'epic', cubeValidLines: 1 },
+    { id: 'hat', name: '파프니르 모자', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0 },
+    { id: 'top_bottom', name: '파프니르 상/하의', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0 },
+    { id: 'glove', name: '여제 장갑', slotType: 'glove', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0 },
+    { id: 'shoes', name: '여제 신발', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0 },
+    { id: 'cape', name: '여제 망토', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0 },
+    { id: 'accessory1', name: '골든 클로버 벨트', slotType: 'accessory', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 3, scrollSlotsUsed: 1, cubeGrade: 'rare', cubeValidLines: 0 },
+    { id: 'accessory2', name: '아쿠아틱 레터 눈장식', slotType: 'accessory', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 3, scrollSlotsUsed: 1, cubeGrade: 'rare', cubeValidLines: 0 }
   ],
   140: [
-    { id: 'weapon', name: '아케인셰이드 무기', slotType: 'weapon', itemLevel: 140, currentStar: 15, maxStar: 20, scrollSlotsTotal: 9, scrollSlotsUsed: 6, cubeGrade: 'legendary' },
-    { id: 'hat', name: '아케인셰이드 모자', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique' },
-    { id: 'top_bottom', name: '아케인셰이드 한벌옷', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique' },
-    { id: 'glove', name: '아케인셰이드 장갑', slotType: 'glove', itemLevel: 140, currentStar: 15, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 6, cubeGrade: 'unique' },
-    { id: 'shoes', name: '아케인셰이드 신발', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique' },
-    { id: 'cape', name: '아케인셰이드 망토', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique' },
-    { id: 'accessory1', name: '거대한 공포', slotType: 'accessory', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 5, scrollSlotsUsed: 3, cubeGrade: 'unique' },
-    { id: 'accessory2', name: '커맨더 포스 이어링', slotType: 'accessory', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 5, scrollSlotsUsed: 3, cubeGrade: 'unique' }
+    { id: 'weapon', name: '아케인셰이드 무기', slotType: 'weapon', itemLevel: 140, currentStar: 15, maxStar: 20, scrollSlotsTotal: 9, scrollSlotsUsed: 6, cubeGrade: 'legendary', cubeValidLines: 2 },
+    { id: 'hat', name: '아케인셰이드 모자', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique', cubeValidLines: 1 },
+    { id: 'top_bottom', name: '아케인셰이드 한벌옷', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique', cubeValidLines: 1 },
+    { id: 'glove', name: '아케인셰이드 장갑', slotType: 'glove', itemLevel: 140, currentStar: 15, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 6, cubeGrade: 'unique', cubeValidLines: 2 },
+    { id: 'shoes', name: '아케인셰이드 신발', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique', cubeValidLines: 1 },
+    { id: 'cape', name: '아케인셰이드 망토', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique', cubeValidLines: 1 },
+    { id: 'accessory1', name: '거대한 공포', slotType: 'accessory', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 5, scrollSlotsUsed: 3, cubeGrade: 'unique', cubeValidLines: 1 },
+    { id: 'accessory2', name: '커맨더 포스 이어링', slotType: 'accessory', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 5, scrollSlotsUsed: 3, cubeGrade: 'unique', cubeValidLines: 1 }
   ]
 };
 
@@ -3793,6 +3793,14 @@ function renderSpecupEquipTable() {
           <option value="legendary" ${eq.cubeGrade === 'legendary' ? 'selected' : ''}>레전더리</option>
         </select>
       </td>
+      <td style="padding:6px 4px;">
+        <select data-eq-id="${escapeHtml(eq.id)}" data-field="cubeValidLines" style="font-size:12px;padding:4px;width:125px;">
+          <option value="0" ${(eq.cubeValidLines ?? 1) === 0 ? 'selected' : ''}>0줄 (잡옵 3줄)</option>
+          <option value="1" ${(eq.cubeValidLines ?? 1) === 1 ? 'selected' : ''}>1줄 유효 (기본작)</option>
+          <option value="2" ${(eq.cubeValidLines ?? 1) === 2 ? 'selected' : ''}>2줄 유효 (준종결)</option>
+          <option value="3" ${(eq.cubeValidLines ?? 1) === 3 ? 'selected' : ''}>3줄 극옵 (완결)</option>
+        </select>
+      </td>
     </tr>
   `).join('');
 
@@ -3803,7 +3811,7 @@ function renderSpecupEquipTable() {
       const field = el.dataset.field;
       const targetEq = specupEquipments.find(e => e.id === eqId);
       if (targetEq) {
-        if (['itemLevel', 'currentStar', 'maxStar', 'scrollSlotsUsed', 'scrollSlotsTotal'].includes(field)) {
+        if (['itemLevel', 'currentStar', 'maxStar', 'scrollSlotsUsed', 'scrollSlotsTotal', 'cubeValidLines'].includes(field)) {
           targetEq[field] = Number(el.value) || 0;
         } else {
           targetEq[field] = el.value;

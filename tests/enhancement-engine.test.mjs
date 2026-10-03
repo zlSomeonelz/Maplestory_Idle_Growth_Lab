@@ -165,7 +165,7 @@ assert.equal(tinyBudgetRes.steps.length, 0, 'Tiny budget insufficient for any up
 
 // Case 6C: Already Maxed Equipment
 const maxedEquips = [
-  { name: '종결 무기', slotType: 'weapon', itemLevel: 140, currentStar: 15, maxStar: 15, scrollSlotsTotal: 8, scrollSlotsUsed: 8, cubeGrade: 'legendary' }
+  { name: '종결 무기', slotType: 'weapon', itemLevel: 140, currentStar: 15, maxStar: 15, scrollSlotsTotal: 8, scrollSlotsUsed: 8, cubeGrade: 'legendary', cubeValidLines: 2 }
 ];
 const maxedRes = optimizeSpecUpPath({
   budgetMeso: 100000000,

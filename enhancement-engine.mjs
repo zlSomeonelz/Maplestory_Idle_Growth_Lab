@@ -219,9 +219,58 @@ export function applyStatGains(baseInputs, statGains = {}) {
     else if (k === 'maxHp') out.maxHp = (Number(out.maxHp) || 0) + val;
     else if (k === 'playerDefense') out.playerDefense = (Number(out.playerDefense) || 0) + val;
   }
-  // Recompute statBased damage after main/sub stat modifications
   out.statBased = (Number(out.mainStat) || 0) / 100 + (Number(out.subStat) || 0) / 400;
   return out;
+}
+
+export function subtractStatGains(baseInputs, statGains = {}) {
+  const out = { ...baseInputs };
+  for (const [k, v] of Object.entries(statGains || {})) {
+    const val = Number(v) || 0;
+    if (!val) continue;
+    if (k === 'attackFlat') out.attackFlat = Math.max(0, (Number(out.attackFlat) || 0) - val);
+    else if (k === 'attackPct') out.attackPct = Math.max(0, (Number(out.attackPct) || 0) - val);
+    else if (k === 'mainStat') out.mainStat = Math.max(0, (Number(out.mainStat) || 0) - val);
+    else if (k === 'mainStatPct') out.mainStatPct = Math.max(0, (Number(out.mainStatPct) || 0) - val);
+    else if (k === 'subStat') out.subStat = Math.max(0, (Number(out.subStat) || 0) - val);
+    else if (k === 'damage') out.damage = Math.max(0, (Number(out.damage) || 0) - val);
+    else if (k === 'damageAmp') out.damageAmp = Math.max(0, (Number(out.damageAmp) || 0) - val);
+    else if (k === 'finalDamage') out.finalDamage = Math.max(0, (Number(out.finalDamage) || 0) - val);
+    else if (k === 'bossDamage') out.bossDamage = Math.max(0, (Number(out.bossDamage) || 0) - val);
+    else if (k === 'normalDamage') out.normalDamage = Math.max(0, (Number(out.normalDamage) || 0) - val);
+    else if (k === 'critRate') out.critRate = Math.max(0, (Number(out.critRate) || 0) - val);
+    else if (k === 'critDamage') out.critDamage = Math.max(0, (Number(out.critDamage) || 0) - val);
+    else if (k === 'defPen') out.defPen = Math.max(0, (Number(out.defPen) || 0) - val);
+    else if (k === 'maxHp') out.maxHp = Math.max(0, (Number(out.maxHp) || 0) - val);
+    else if (k === 'playerDefense') out.playerDefense = Math.max(0, (Number(out.playerDefense) || 0) - val);
+  }
+  out.statBased = (Number(out.mainStat) || 0) / 100 + (Number(out.subStat) || 0) / 400;
+  return out;
+}
+
+export function getCubeStatProfile(slotType = 'armor', grade = 'epic', validLines = 1) {
+  const lines = Math.max(0, Math.min(3, Number(validLines) || 0));
+  if (lines === 0) return {};
+
+  if (slotType === 'glove') {
+    if (grade === 'rare') return lines >= 2 ? { critRate: 4 } : { critRate: 2 };
+    if (grade === 'epic') return lines >= 2 ? { critDamage: 2, mainStatPct: 6 } : { critDamage: 2 };
+    if (grade === 'unique') return lines >= 2 ? { critDamage: 4, mainStatPct: 6 } : { critDamage: 4 };
+    return lines >= 2 ? { critDamage: 8, attackPct: 6 } : { critDamage: 8 };
+  }
+
+  if (slotType === 'weapon') {
+    if (grade === 'rare') return lines >= 2 ? { attackPct: 3, mainStatPct: 3 } : { attackPct: 3 };
+    if (grade === 'epic') return lines >= 2 ? { attackPct: 6, bossDamage: 6 } : { attackPct: 6 };
+    if (grade === 'unique') return lines >= 2 ? { attackPct: 9, bossDamage: 12 } : { attackPct: 9 };
+    return lines >= 2 ? { bossDamage: 24, attackPct: 9 } : { bossDamage: 12, attackPct: 9 };
+  }
+
+  // armor or accessory
+  if (grade === 'rare') return lines >= 2 ? { mainStatPct: 6 } : { mainStatPct: 3 };
+  if (grade === 'epic') return lines >= 2 ? { mainStatPct: 12 } : { mainStatPct: 6 };
+  if (grade === 'unique') return lines >= 2 ? { mainStatPct: 15 } : { mainStatPct: 9 };
+  return lines >= 2 ? { mainStatPct: 21 } : { mainStatPct: 12 };
 }
 
 /**
@@ -273,7 +322,7 @@ export function optimizeSpecUpPath({
     scrollSlotsTotal: Number(eq.scrollSlotsTotal) || 8,
     scrollSlotsUsed: Number(eq.scrollSlotsUsed) || 0,
     cubeGrade: eq.cubeGrade || 'epic', // 'rare', 'epic', 'unique', 'legendary'
-    cubeOpt: eq.cubeOpt || 'NONE'
+    cubeValidLines: Math.min(3, Math.max(0, Number(eq.cubeValidLines !== undefined ? eq.cubeValidLines : 1)))
   }));
 
   const steps = [];
@@ -285,7 +334,7 @@ export function optimizeSpecUpPath({
 
     const candidates = [];
 
-    // 1. Star Force Candidates (+1 star or +2 star step)
+    // 1. Star Force Candidates (+1 star step)
     for (const eq of equips) {
       if (eq.currentStar < eq.maxStar) {
         const nextStar = eq.currentStar + 1;
@@ -354,40 +403,82 @@ export function optimizeSpecUpPath({
       }
     }
 
-    // 3. Cube Potential Candidates (Tiering up or hunting key prime line)
+    // 3. Cube Potential Candidates (Reroll for valid lines or Tier up)
     for (const eq of equips) {
-      if (eq.cubeGrade !== 'legendary') {
-        const nextGrade = eq.cubeGrade === 'rare' ? 'epic' : eq.cubeGrade === 'epic' ? 'unique' : 'legendary';
-        const cubeCost = enhancementRules.cubeCosts?.[eq.cubeGrade] || 200000;
-        // Estimated attempts to tier up (conservative official expectation: ~20 tries for epic, ~50 for unique, ~100 for legendary)
-        const expectedTries = nextGrade === 'epic' ? 20 : nextGrade === 'unique' ? 45 : 100;
+      const currentLines = eq.cubeValidLines;
+      const currentGrade = eq.cubeGrade;
+      const currentCubeStats = getCubeStatProfile(eq.slotType, currentGrade, currentLines);
+      const cubeCost = enhancementRules.cubeCosts?.[currentGrade] || 200000;
+
+      // 3A. Reroll at current grade to gain +1 valid line (if lines < 2)
+      if (currentLines < 2) {
+        const targetLines = currentLines + 1;
+        const targetStats = getCubeStatProfile(eq.slotType, currentGrade, targetLines);
+        const expectedTries = targetLines === 1 ? 8 : 26;
         const totalCubeCost = expectedTries * cubeCost;
 
         if (totalCubeCost <= budgetRemaining) {
-          // Model stat gain of next grade
-          let statGain = {};
-          if (eq.slotType === 'glove') statGain = { critDamage: nextGrade === 'legendary' ? 8 : 4 };
-          else if (eq.slotType === 'weapon') statGain = { attackPct: nextGrade === 'legendary' ? 9 : 6, bossDamage: 12 };
-          else statGain = { mainStatPct: nextGrade === 'legendary' ? 9 : 6 };
-
-          const testInputs = applyStatGains(currentStats, statGain);
+          const statsWithoutOld = subtractStatGains(currentStats, currentCubeStats);
+          const testInputs = applyStatGains(statsWithoutOld, targetStats);
           const testDpsRes = calculateDamage(testInputs, combatRules);
           const testDpsVal = getEffectiveDPS(testDpsRes);
           const dpsDelta = Math.max(0, testDpsVal - currentDps);
           const dpsGainPct = (dpsDelta / currentDps) * 100;
           const roi = totalCubeCost > 0 ? (dpsGainPct / (totalCubeCost / 10000)) : 0;
 
-          candidates.push({
-            type: 'cube',
-            equipment: eq,
-            targetGrade: nextGrade,
-            cost: totalCubeCost,
-            statGains: statGain,
-            dpsDelta,
-            dpsGainPct,
-            roi,
-            description: `[${eq.name}] 잠재능력 큐브 등급업 (${eq.cubeGrade} → ${nextGrade})`
-          });
+          if (dpsGainPct > 0) {
+            candidates.push({
+              type: 'cube',
+              equipment: eq,
+              targetGrade: currentGrade,
+              targetValidLines: targetLines,
+              cost: totalCubeCost,
+              oldCubeStats: currentCubeStats,
+              newCubeStats: targetStats,
+              statGains: targetStats,
+              dpsDelta,
+              dpsGainPct,
+              roi,
+              description: `[${eq.name}] 큐브 재설정 (${currentGrade} ${currentLines}줄 → ${targetLines}줄 유효)`
+            });
+          }
+        }
+      }
+
+      // 3B. Tier-up to next grade
+      if (currentGrade !== 'legendary') {
+        const nextGrade = currentGrade === 'rare' ? 'epic' : currentGrade === 'epic' ? 'unique' : 'legendary';
+        const expectedTries = nextGrade === 'epic' ? 20 : nextGrade === 'unique' ? 45 : 100;
+        const totalCubeCost = expectedTries * cubeCost;
+
+        if (totalCubeCost <= budgetRemaining) {
+          const targetLines = Math.max(1, currentLines);
+          const targetStats = getCubeStatProfile(eq.slotType, nextGrade, targetLines);
+
+          const statsWithoutOld = subtractStatGains(currentStats, currentCubeStats);
+          const testInputs = applyStatGains(statsWithoutOld, targetStats);
+          const testDpsRes = calculateDamage(testInputs, combatRules);
+          const testDpsVal = getEffectiveDPS(testDpsRes);
+          const dpsDelta = Math.max(0, testDpsVal - currentDps);
+          const dpsGainPct = (dpsDelta / currentDps) * 100;
+          const roi = totalCubeCost > 0 ? (dpsGainPct / (totalCubeCost / 10000)) : 0;
+
+          if (dpsGainPct > 0) {
+            candidates.push({
+              type: 'cube',
+              equipment: eq,
+              targetGrade: nextGrade,
+              targetValidLines: targetLines,
+              cost: totalCubeCost,
+              oldCubeStats: currentCubeStats,
+              newCubeStats: targetStats,
+              statGains: targetStats,
+              dpsDelta,
+              dpsGainPct,
+              roi,
+              description: `[${eq.name}] 큐브 등급업 (${currentGrade} → ${nextGrade}, 유효 ${targetLines}줄)`
+            });
+          }
         }
       }
     }
@@ -398,16 +489,19 @@ export function optimizeSpecUpPath({
     candidates.sort((a, b) => b.roi - a.roi);
     const chosen = candidates[0];
 
-    // Apply the chosen upgrade to currentStats and mutate equipment state
-    currentStats = applyStatGains(currentStats, chosen.statGains);
     budgetRemaining -= chosen.cost;
 
     if (chosen.type === 'starforce') {
       chosen.equipment.currentStar = chosen.targetStar;
+      currentStats = applyStatGains(currentStats, chosen.statGains);
     } else if (chosen.type === 'scroll') {
       chosen.equipment.scrollSlotsUsed += 1;
+      currentStats = applyStatGains(currentStats, chosen.statGains);
     } else if (chosen.type === 'cube') {
       chosen.equipment.cubeGrade = chosen.targetGrade;
+      chosen.equipment.cubeValidLines = chosen.targetValidLines;
+      currentStats = subtractStatGains(currentStats, chosen.oldCubeStats);
+      currentStats = applyStatGains(currentStats, chosen.newCubeStats);
     }
 
     const newDpsRes = calculateDamage(currentStats, combatRules);
