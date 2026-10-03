@@ -2443,7 +2443,8 @@ function initOcrModal() {
     evasion: '회피',
     debuffResist: '디버프 내성',
     extraTargets: '기본 공격 대상 수 증가',
-    cooldownReductionPct: '쿨타임 감소%'
+    cooldownReductionPct: '쿨타임 감소%',
+    statBased: '스탯 비례 데미지 (자동 산출)'
   };
 
   const STAT_CONFIG = [
@@ -2461,10 +2462,11 @@ function initOcrModal() {
     { target: 'attackSpeed', keywords: ['공격 속도', '공격속도'] },
     { target: 'playerDefense', keywords: ['방어력'] },
     { target: 'maxHp', keywords: ['최대 HP', '최대HP', '최대16', '최대 16', '최대1P', '최대 1P', 'Hh HP', 'ZC HP', '치대 HP'] },
-    { target: 'maxMp', keywords: ['최대 MP', '최대MP', '최대 mp', '최대”', '최대"', '최대 M'] },
+    { target: 'maxMp', keywords: ['최대 MP', '최대MP', '최대 mp', '최대”', '최대"', '최대 M', 'At MP', 'AL MP'] },
     { target: 'accuracy', keywords: ['명중', '명중률'] },
     { target: 'evasion', keywords: ['회피', '회피율'] },
-    { target: 'damage', keywords: ['스탯 비례 데미지', '스탯비례데미지', 'AEH 비례 데미지', '데미지'] },
+    { target: 'statBased', keywords: ['스탯 비례 데미지', '스탯비례데미지', 'AEH 비례 데미지', 'AEH 비례', '스 비례 데미지', '스 비례', '비례 데미지', '스탯 비례', '스탯비례'] },
+    { target: 'damage', keywords: ['데미지'] },
     { target: 'attack', keywords: ['공격력'] },
     { target: 'statSTR', keywords: ['STR', '518', 'S1R', 'SIR'] },
     { target: 'statDEX', keywords: ['DEX'] },
@@ -2482,29 +2484,77 @@ function initOcrModal() {
     const detected = {};
     const fullText = lines.join(' ');
 
-    const isDetailPopup = lines.some(l =>
-      l.includes('자신이 적에게') ||
-      l.includes('주 스탯으로') ||
-      l.includes('주 ANCE') ||
-      ((l.includes('+:') || l.includes('+ :')) && (l.includes('%:') || l.includes('% :')))
-    );
+    const hasPlus = fullText.includes('+') || lines.some(l => l.includes('+'));
+    const hasPct = fullText.includes('%') || lines.some(l => l.includes('%'));
+    const hasDetailIndicator =
+      fullText.includes('합산') ||
+      fullText.includes('현재 보유') ||
+      fullText.includes('보유 중인') ||
+      fullText.includes('스킬 효과로') ||
+      fullText.includes('스킬 효과') ||
+      fullText.includes('자신이 적에게') ||
+      fullText.includes('피해의 기본') ||
+      fullText.includes('공격력이 1') ||
+      fullText.includes('증가합니다') ||
+      fullText.includes('주 스탯') ||
+      fullText.includes('주 ABIOR') ||
+      fullText.includes('주 ABHOR') ||
+      fullText.includes('주 ASO') ||
+      fullText.includes('주 ANCE');
+
+    const isDetailPopup = hasPlus && hasPct && hasDetailIndicator;
 
     if (isDetailPopup) {
       let detailHeader = null;
-      if (fullText.includes('피해의 기본') || fullText.includes('공격력 %증가')) {
-        detailHeader = 'attack';
-      } else if (fullText.includes('Luk') || fullText.includes('LUK') || fullText.includes('주 ANCE Luk')) {
+      if (
+        fullText.includes('Luk 1') ||
+        fullText.includes('Luk 15') ||
+        fullText.includes('주 ABHOR Luk') ||
+        fullText.includes('주 ABIOR Luk') ||
+        fullText.includes('주 ASO Luk') ||
+        fullText.includes('주 ANCE Luk') ||
+        lines.slice(0, 3).some(l => l.includes('LUK') || l.includes('Luk'))
+      ) {
         detailHeader = 'statLUK';
-      } else if (fullText.includes('Str') || fullText.includes('STR') || fullText.includes('주 ANCE Str')) {
+      } else if (
+        fullText.includes('Str 1') ||
+        fullText.includes('주 ABHOR Str') ||
+        fullText.includes('주 ABIOR Str') ||
+        fullText.includes('주 ASO Str') ||
+        fullText.includes('주 ANCE Str') ||
+        lines.slice(0, 3).some(l => l.includes('STR') || l.includes('Str'))
+      ) {
         detailHeader = 'statSTR';
-      } else if (fullText.includes('Dex 1당') || fullText.includes('주 스탯은 Dex') || fullText.includes('주 ANCE Dex')) {
+      } else if (
+        (fullText.includes('Dex 1') ||
+         fullText.includes('주 ABHOR Dex') ||
+         fullText.includes('주 ABIOR Dex') ||
+         fullText.includes('주 ASO Dex') ||
+         fullText.includes('주 ANCE Dex') ||
+         lines.slice(0, 3).some(l => l.includes('DEX') || l.includes('Dex'))) &&
+        !fullText.includes('Luk 1')
+      ) {
         detailHeader = 'statDEX';
-      } else if (fullText.includes('Int') || fullText.includes('INT') || fullText.includes('주 ANCE Int')) {
+      } else if (
+        fullText.includes('Int 1') ||
+        fullText.includes('주 ABHOR Int') ||
+        fullText.includes('주 ABIOR Int') ||
+        fullText.includes('주 ASO Int') ||
+        fullText.includes('주 ANCE Int') ||
+        lines.slice(0, 3).some(l => l.includes('INT') || l.includes('Int'))
+      ) {
         detailHeader = 'statINT';
+      } else if (
+        fullText.includes('피해의 기본') ||
+        fullText.includes('공격력 %증가') ||
+        fullText.includes('각종 피해') ||
+        lines.slice(0, 3).some(l => l.includes('공격력'))
+      ) {
+        detailHeader = 'attack';
       }
 
       for (const line of lines) {
-        const plusMatch = line.match(/\+[\s:]*([0-9만억조,\.]+)/);
+        const plusMatch = line.match(/\+\s*[:;\-1]?\s*([0-9만억조,\.]+)/);
         if (plusMatch) {
           const val = parseKoreanNumber(plusMatch[1]);
           if (val !== null && val > 0) {
@@ -2515,7 +2565,7 @@ function initOcrModal() {
             }
           }
         }
-        const pctMatch = line.match(/%[\s:]*([0-9만억조,\.]+)/);
+        const pctMatch = line.match(/%\s*[:;\-]?\s*([0-9만억조,\.]+)/);
         if (pctMatch) {
           const val = parseKoreanNumber(pctMatch[1]);
           if (val !== null && val > 0) {
@@ -2585,42 +2635,79 @@ function initOcrModal() {
         const tempCtx = tempCanvas.getContext('2d');
         tempCtx.drawImage(img, 0, 0);
 
-        let minX = origW, minY = origH, maxX = 0, maxY = 0;
-        let whiteCount = 0;
-
+        let imgData;
         try {
-          const imgData = tempCtx.getImageData(0, 0, origW, origH);
-          const data = imgData.data;
-
-          for (let y = 0; y < origH; y += 2) {
-            for (let x = 0; x < origW; x += 2) {
-              const idx = (y * origW + x) * 4;
-              if (data[idx] > 235 && data[idx + 1] > 235 && data[idx + 2] > 235) {
-                whiteCount++;
-                if (x < minX) minX = x;
-                if (x > maxX) maxX = x;
-                if (y < minY) minY = y;
-                if (y > maxY) maxY = y;
-              }
-            }
-          }
+          imgData = tempCtx.getImageData(0, 0, origW, origH);
         } catch (e) {
           console.warn('ImageData extraction warning:', e);
+          resolve({ canvas: img, isCropped: false });
+          return;
         }
 
-        const boxW = maxX - minX;
-        const boxH = maxY - minY;
+        const data = imgData.data;
 
-        let cropX = 0, cropY = 0, cropW = origW, cropH = origH;
+        // Exclude top 4% (title bar) and bottom 4% (taskbar/navigation)
+        const yStart = Math.floor(origH * 0.04);
+        const yEnd = Math.floor(origH * 0.96);
+        const xSearchMin = Math.floor(origW * 0.28);
+        const xSearchMax = Math.floor(origW * 0.72);
+
+        const rowBrightCounts = new Array(origH).fill(0);
+        for (let y = yStart; y < yEnd; y++) {
+          let count = 0;
+          for (let x = xSearchMin; x < xSearchMax; x++) {
+            const idx = (y * origW + x) * 4;
+            if (data[idx] >= 210 && data[idx + 1] >= 210 && data[idx + 2] >= 210) {
+              count++;
+            }
+          }
+          rowBrightCounts[y] = count;
+        }
+
+        const threshold = (xSearchMax - xSearchMin) * 0.25;
+        let modalMinY = -1, modalMaxY = -1;
+        for (let y = yStart; y < yEnd; y++) {
+          if (rowBrightCounts[y] >= threshold) {
+            if (modalMinY === -1) modalMinY = y;
+            modalMaxY = y;
+          }
+        }
+
         let isModalFound = false;
+        let cropX = 0, cropY = 0, cropW = origW, cropH = origH;
 
-        if (whiteCount > 2000 && boxW >= origW * 0.15 && boxH >= origH * 0.20) {
-          const pad = 10;
-          cropX = Math.max(0, minX - pad);
-          cropY = Math.max(0, minY - pad);
-          cropW = Math.min(origW - cropX, boxW + pad * 2);
-          cropH = Math.min(origH - cropY, boxH + pad * 2);
-          isModalFound = true;
+        if (modalMinY !== -1 && (modalMaxY - modalMinY) >= origH * 0.15) {
+          let minX = origW, maxX = 0;
+          for (let y = modalMinY; y <= modalMaxY; y++) {
+            if (rowBrightCounts[y] < threshold) continue;
+            let rowMinX = -1, rowMaxX = -1;
+            for (let x = Math.floor(origW * 0.15); x < Math.floor(origW * 0.85); x++) {
+              const idx = (y * origW + x) * 4;
+              if (data[idx] >= 210 && data[idx + 1] >= 210 && data[idx + 2] >= 210) {
+                if (rowMinX === -1) rowMinX = x;
+                rowMaxX = x;
+              }
+            }
+            if (rowMinX !== -1 && (rowMaxX - rowMinX) >= origW * 0.15) {
+              if (rowMinX < minX) minX = rowMinX;
+              if (rowMaxX > maxX) maxX = rowMaxX;
+            }
+          }
+
+          // If minX included the highlighted button on the left (x < 0.25*origW)
+          // and span is wide (> 0.45*origW), clip strictly to the detail card (x >= 0.31*origW)
+          if (minX < origW * 0.25 && (maxX - minX) > origW * 0.45) {
+            minX = Math.floor(origW * 0.31);
+          }
+
+          if (maxX > minX && (maxX - minX) >= origW * 0.15) {
+            const pad = 8;
+            cropX = Math.max(0, minX - pad);
+            cropY = Math.max(0, modalMinY - pad);
+            cropW = Math.min(origW - cropX, (maxX - minX) + pad * 2);
+            cropH = Math.min(origH - cropY, (modalMaxY - modalMinY) + pad * 2);
+            isModalFound = true;
+          }
         }
 
         const scale = 2.5;
