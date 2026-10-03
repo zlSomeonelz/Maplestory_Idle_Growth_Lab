@@ -3942,46 +3942,46 @@ function renderSpecupEquipTable() {
     const linesSummary = formatLineSummary(eq.potentialLines);
 
     return `
-      <tr style="border-bottom:1px solid var(--line);">
-        <td style="padding:6px 4px;font-weight:700;">
-          <input type="text" data-eq-id="${escapeHtml(eq.id)}" data-field="name" value="${escapeHtml(eq.name)}" style="width:105px;font-size:12px;padding:4px 6px;">
+      <tr>
+        <td style="font-weight:700;">
+          <input type="text" class="table-input" data-eq-id="${escapeHtml(eq.id)}" data-field="name" value="${escapeHtml(eq.name)}" style="width:115px;">
         </td>
-        <td style="padding:6px 4px;">
-          <select data-eq-id="${escapeHtml(eq.id)}" data-field="itemLevel" style="font-size:12px;padding:4px;">
+        <td>
+          <select class="table-select" data-eq-id="${escapeHtml(eq.id)}" data-field="itemLevel">
             <option value="100" ${eq.itemLevel === 100 ? 'selected' : ''}>100제</option>
             <option value="120" ${eq.itemLevel === 120 ? 'selected' : ''}>120제</option>
             <option value="140" ${eq.itemLevel === 140 ? 'selected' : ''}>140제</option>
             <option value="160" ${eq.itemLevel === 160 ? 'selected' : ''}>160제</option>
           </select>
         </td>
-        <td style="padding:6px 4px;">
+        <td>
           <div style="display:flex;align-items:center;gap:3px;">
-            <input type="number" min="0" max="30" data-eq-id="${escapeHtml(eq.id)}" data-field="currentStar" value="${eq.currentStar}" style="width:46px;font-size:12px;padding:4px;">
-            <span>/</span>
-            <input type="number" min="5" max="30" data-eq-id="${escapeHtml(eq.id)}" data-field="maxStar" value="${eq.maxStar}" style="width:46px;font-size:12px;padding:4px;">
+            <input type="number" class="table-input" min="0" max="30" data-eq-id="${escapeHtml(eq.id)}" data-field="currentStar" value="${eq.currentStar}" style="width:48px;">
+            <span style="color:var(--muted);font-weight:700;">/</span>
+            <input type="number" class="table-input" min="5" max="30" data-eq-id="${escapeHtml(eq.id)}" data-field="maxStar" value="${eq.maxStar}" style="width:48px;">
           </div>
         </td>
-        <td style="padding:6px 4px;">
+        <td>
           <div style="display:flex;align-items:center;gap:3px;">
-            <input type="number" min="0" max="15" data-eq-id="${escapeHtml(eq.id)}" data-field="scrollSlotsUsed" value="${eq.scrollSlotsUsed}" style="width:44px;font-size:12px;padding:4px;">
-            <span>/</span>
-            <input type="number" min="1" max="15" data-eq-id="${escapeHtml(eq.id)}" data-field="scrollSlotsTotal" value="${eq.scrollSlotsTotal}" style="width:44px;font-size:12px;padding:4px;">
+            <input type="number" class="table-input" min="0" max="15" data-eq-id="${escapeHtml(eq.id)}" data-field="scrollSlotsUsed" value="${eq.scrollSlotsUsed}" style="width:48px;">
+            <span style="color:var(--muted);font-weight:700;">/</span>
+            <input type="number" class="table-input" min="1" max="15" data-eq-id="${escapeHtml(eq.id)}" data-field="scrollSlotsTotal" value="${eq.scrollSlotsTotal}" style="width:48px;">
           </div>
         </td>
-        <td style="padding:6px 4px;">
-          <select data-eq-id="${escapeHtml(eq.id)}" data-field="cubeGrade" style="font-size:12px;padding:4px;">
+        <td>
+          <select class="table-select" data-eq-id="${escapeHtml(eq.id)}" data-field="cubeGrade">
             <option value="rare" ${eq.cubeGrade === 'rare' ? 'selected' : ''}>레어</option>
             <option value="epic" ${eq.cubeGrade === 'epic' ? 'selected' : ''}>에픽</option>
             <option value="unique" ${eq.cubeGrade === 'unique' ? 'selected' : ''}>유니크</option>
             <option value="legendary" ${eq.cubeGrade === 'legendary' ? 'selected' : ''}>레전더리</option>
           </select>
         </td>
-        <td style="padding:6px 4px;">
+        <td>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="badge" style="background:${rec.badgeColor};color:#fff;font-size:11px;padding:2px 6px;border-radius:4px;font-weight:700;">${rec.verdictLabel}</span>
-            <button type="button" class="button secondary edit-cube-line-btn" data-eq-id="${escapeHtml(eq.id)}" style="font-size:11px;padding:2px 6px;">✏️ 3줄 편집</button>
+            <span class="badge" style="background:${rec.badgeColor};color:#fff;font-size:11px;padding:3px 7px;">${rec.verdictLabel}</span>
+            <button type="button" class="button secondary edit-cube-line-btn" data-eq-id="${escapeHtml(eq.id)}" style="font-size:11.5px;padding:3px 8px;min-height:30px;">✏️ 3줄 편집</button>
           </div>
-          <div style="font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;" title="${escapeHtml(linesSummary)}">
+          <div style="font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;" title="${escapeHtml(linesSummary)}">
             ${escapeHtml(linesSummary)}
           </div>
         </td>
