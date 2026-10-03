@@ -268,7 +268,8 @@ export function getCubeStatProfile(slotType = 'armor', grade = 'epic', validLine
   const lines = Math.max(0, Math.min(3, Number(validLines) || 0));
   if (lines === 0) return {};
 
-  if (slotType === 'glove') {
+  const isGloveSlot = slotType === 'glove' || slotType === 'gloves';
+  if (isGloveSlot) {
     if (grade === 'rare') return lines >= 2 ? { critRate: 4 } : { critRate: 2 };
     if (grade === 'epic') return lines >= 2 ? { critDamage: 2, mainStatPct: 6 } : { critDamage: 2 };
     if (grade === 'unique') return lines >= 2 ? { critDamage: 4, mainStatPct: 6 } : { critDamage: 4 };
@@ -353,7 +354,8 @@ export function recommendCubeAction(equip, playerStats = {}, combatRules = {}, e
   const hasCritDamage = Number(currentCubeStats.critDamage || 0) >= 2;
   const hasHighAttack = Number(currentCubeStats.attackPct || 0) >= 9 || (Number(currentCubeStats.attackPct || 0) >= 6 && Number(currentCubeStats.bossDamage || 0) >= 6);
 
-  if (linesCount >= 2 || (slotType === 'glove' && hasCritDamage && grade !== 'rare') || (slotType === 'weapon' && hasHighAttack && grade !== 'rare')) {
+  const isGloveSlot = slotType === 'glove' || slotType === 'gloves';
+  if (linesCount >= 2 || (isGloveSlot && hasCritDamage && grade !== 'rare') || (slotType === 'weapon' && hasHighAttack && grade !== 'rare')) {
     verdict = 'STOP';
     verdictLabel = '🛑 스톱 (졸업 권장)';
     badgeColor = '#0b7a58';
@@ -379,11 +381,11 @@ export function recommendCubeAction(equip, playerStats = {}, combatRules = {}, e
       dpsGainPct: rerollGainPct,
       roiPerMillion: rerollRoi
     };
-  } else if (grade === 'rare' || (slotType === 'glove' && grade === 'epic')) {
+  } else if (grade === 'rare' || (isGloveSlot && grade === 'epic')) {
     verdict = 'TIER_UP';
     verdictLabel = '⬆️ 등급업 권장';
     badgeColor = '#7c3aed';
-    reason = slotType === 'glove'
+    reason = isGloveSlot
       ? '장갑은 유니크 등급 이상에서 크리티컬 데미지%(핵심 스탯)가 출현합니다. 에픽 1줄에 머무르지 말고 유니크 등급업을 노리세요.'
       : '레어 등급은 잠재능력 수치 상한이 낮습니다. 에픽 등급으로 승급하여 유효 퍼센트 옵션을 확보하세요.';
     chosenTarget = {
@@ -429,7 +431,137 @@ export function recommendCubeAction(equip, playerStats = {}, combatRules = {}, e
     verdictLabel,
     badgeColor,
     reason,
-    target: chosenTarget
+    target: chosenTarget,
+    preferredSettings: getInGamePreferredCubeSettings(slotType, grade, playerStats.job || 'hero')
+  };
+}
+
+/**
+ * Generates exact in-game "선호 옵션 설정" (Auto-Cube Stop Conditions: 3 Presets & Tier-up mode)
+ * matching the official Maple Idle in-game UI.
+ */
+export function getInGamePreferredCubeSettings(slotType = 'weapon', grade = 'epic', jobKey = 'hero', jobStats = null) {
+  let mainStat = 'STR';
+  if (jobStats?.jobs?.[jobKey]?.main?.[0]) {
+    mainStat = jobStats.jobs[jobKey].main[0];
+  } else {
+    if (['nightLord', 'shadower', 'nightWalker'].includes(jobKey)) mainStat = 'LUK';
+    else if (['bowmaster', 'sniper', 'captain', 'windBreaker'].includes(jobKey)) mainStat = 'DEX';
+    else if (['archMageIceLightning', 'archMageFirePoison', 'bishop'].includes(jobKey)) mainStat = 'INT';
+    else mainStat = 'STR';
+  }
+
+  const isWeapon = slotType === 'weapon' || ['weapon', 'subWeapon', 'emblem'].includes(slotType);
+  const isGlove = slotType === 'glove' || slotType === 'gloves';
+  const isHat = slotType === 'hat' || slotType === '모자' || slotType === '투구';
+  const isTierUpNeeded = grade === 'rare' || (isGlove && grade === 'epic');
+
+  const tierUpMode = isTierUpNeeded ? 'ON (권장)' : 'OFF';
+
+  let preset1 = {};
+  let preset2 = {};
+  let preset3 = {};
+
+  if (isWeapon) {
+    preset1 = {
+      index: 1,
+      title: '조건 ①: 3줄 극옵 대박 즉시 스톱',
+      minCount: '3개 이상',
+      options: ['공격력%', '보스 몬스터 데미지%', '데미지%', '방어 관통력%', `${mainStat}%`, `${mainStat}(+)`],
+      description: '3줄이 모두 유효 옵션으로 떴을 때 즉시 멈추고 보관하는 안전장치입니다.'
+    };
+    preset2 = {
+      index: 2,
+      title: '조건 ②: 2줄 유효 가성비 종결 (핵심 권장)',
+      minCount: '2개 이상',
+      options: ['공격력%', '보스 몬스터 데미지%'],
+      description: '공%+공%, 공%+보공%, 보공%+보공% 2줄 유효를 뽑아 실전 가성비를 극대화합니다.'
+    };
+    preset3 = {
+      index: 3,
+      title: '조건 ③: 1줄 타협 / 2줄 서브 킵',
+      minCount: '2개 이상',
+      options: ['공격력%', '보스 몬스터 데미지%', '데미지%', `${mainStat}%`],
+      description: '공%/보공 1줄과 데미지/주스탯이 떴을 때 임시로 멈추고 메소 소모를 방지합니다.'
+    };
+  } else if (isGlove) {
+    preset1 = {
+      index: 1,
+      title: '조건 ①: 3줄 극옵 대박 즉시 스톱',
+      minCount: '3개 이상',
+      options: ['크리티컬 데미지%', '공격력%', `${mainStat}%`, '데미지%', '크리티컬 확률%', `${mainStat}(+)`],
+      description: '크뎀을 포함한 3줄 유효가 떴을 때 즉시 자동 변환을 멈춥니다.'
+    };
+    preset2 = {
+      index: 2,
+      title: '조건 ②: 크뎀 포함 2줄 종결 (고스펙 목표)',
+      minCount: '2개 이상',
+      options: ['크리티컬 데미지%', '공격력%', `${mainStat}%`],
+      description: '크뎀 1줄 + 공%/주스탯 1줄로 장갑 잠재능력 최고 가성비를 달성합니다.'
+    };
+    preset3 = {
+      index: 3,
+      title: '조건 ③: 크뎀 단독 1줄 스톱 (초가성비 강력 권장)',
+      minCount: '1개 이상',
+      options: ['크리티컬 데미지%'],
+      description: '장갑은 크리티컬 데미지 1줄만으로도 다른 부위 2~3줄 이상의 딜 상승을 보입니다.'
+    };
+  } else if (isHat) {
+    preset1 = {
+      index: 1,
+      title: '조건 ①: 3줄 극옵 대박 즉시 스톱',
+      minCount: '3개 이상',
+      options: ['스킬 재사용 대기시간 감소', '데미지%', `${mainStat}%`, '최소 데미지 배율', '최대 데미지 배율', '크리티컬 확률%', '공격 속도%', `${mainStat}(+)`],
+      description: '쿨감 및 유효 3줄이 떴을 때 즉시 멈추는 전체 유효 옵션 설정입니다.'
+    };
+    preset2 = {
+      index: 2,
+      title: '조건 ②: 2줄 유효 실전 목표 (가성비 권장)',
+      minCount: '2개 이상',
+      options: ['스킬 재사용 대기시간 감소', '데미지%', `${mainStat}%`, '최대 데미지 배율'],
+      description: '모자 핵심 옵션인 쿨감/데미지/주스탯/최대뎀 2줄 유효에서 멈춥니다.'
+    };
+    preset3 = {
+      index: 3,
+      title: '조건 ③: 데미지/주스탯 2줄 타협 킵',
+      minCount: '2개 이상',
+      options: ['데미지%', `${mainStat}%`],
+      description: '주스탯/데미지 2줄이 떴을 때 임시로 멈추고 킵합니다.'
+    };
+  } else {
+    // 일반 방어구 및 장신구
+    preset1 = {
+      index: 1,
+      title: '조건 ①: 3줄 극옵 대박 즉시 스톱',
+      minCount: '3개 이상',
+      options: [`${mainStat}%`, '데미지%', '최소 데미지 배율', '최대 데미지 배율', `${mainStat}(+)`, '방어력%', '최대 HP%'],
+      description: '3줄 모두 유효가 떴을 때 즉시 멈추는 안전장치입니다.'
+    };
+    preset2 = {
+      index: 2,
+      title: '조건 ②: 주스탯 2줄 준종결 (가성비 권장)',
+      minCount: '2개 이상',
+      options: [`${mainStat}%`, '데미지%', '최대 데미지 배율'],
+      description: '주스탯% 2줄 또는 주스탯%+데미지% 유효 2줄에서 멈춥니다.'
+    };
+    preset3 = {
+      index: 3,
+      title: '조건 ③: 주스탯 1줄 타협 스톱 (저자본 킵)',
+      minCount: '1개 이상',
+      options: [`${mainStat}%`],
+      description: '에픽 1줄(6%) 또는 유니크 1줄(9%)을 확보하고 메소 소모를 멈춥니다.'
+    };
+  }
+
+  return {
+    slotType,
+    grade,
+    mainStat,
+    tierUpMode,
+    tierUpReason: isTierUpNeeded
+      ? (isGlove ? '장갑은 유니크 등급 이상에서 크리티컬 데미지%가 등장하므로 등급업 시 무조건 정지해야 합니다.' : '상위 등급 승급 시 옵션 수치 상한이 크게 올라가므로 등급업 모드를 켜두세요.')
+      : '이미 상위 등급이므로 목표 옵션 달성에 집중하여 등급업 모드를 끄는 것을 권장합니다.',
+    presets: [preset1, preset2, preset3]
   };
 }
 

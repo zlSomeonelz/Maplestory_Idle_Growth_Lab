@@ -1,6 +1,6 @@
 import { calculateCombatPower, calculateDamage, calculatePvpDamage, calculateStatEfficiencies, cubeTargetSummary, probabilitySummary } from './engine.mjs';
 import { buildSkillModels, optimizeLoadout, simulateLoadout, DEFAULT_UNKNOWN_COOLDOWN, LOADOUT_SKILL_SLOTS } from './skill-optimizer.mjs';
-import { calculateStarforcePath, calculateScrollEnhancement, optimizeSpecUpPath, STARFORCE_MAX, recommendCubeAction, rankAllEquipmentCubes, getEquipmentCubeStats } from './enhancement-engine.mjs';
+import { calculateStarforcePath, calculateScrollEnhancement, optimizeSpecUpPath, STARFORCE_MAX, recommendCubeAction, rankAllEquipmentCubes, getEquipmentCubeStats, getInGamePreferredCubeSettings } from './enhancement-engine.mjs';
 'use strict';
 
 const STORE = 'maple-growth-lab-mvp-v1';
@@ -2982,6 +2982,92 @@ function renderCubeStopGuide() {
       <div style="font-size:12px;color:var(--muted);">${item.desc}</div>
     </div>
   `).join('');
+
+  const mappedSlot = isWeapon ? 'weapon' : (isGlove ? 'glove' : (slot === 'hat' || slot === '투구' || slot === '모자' ? 'hat' : (isAccessory ? 'accessory' : 'armor')));
+  const currentGrade = $('cubeGrade')?.value || 'epic';
+  renderInGamePreferredSettings(mappedSlot, currentGrade, 'inGamePreferredPresetsRoot');
+}
+
+function renderInGamePreferredSettings(slotType, grade, targetRootId, jobKey = null) {
+  const root = $(targetRootId);
+  if (!root) return;
+
+  const currentJob = jobKey || $('job')?.value || 'nightWalker';
+  const settings = getInGamePreferredCubeSettings(slotType, grade, currentJob, DATA.jobs);
+
+  if (targetRootId === 'modalPreferredSettingsRoot') {
+    root.innerHTML = `
+      <div style="background:#eef2ff;border:1px solid #c7d2fe;padding:8px 10px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+        <span style="font-weight:800;color:#3730a3;font-size:12px;">● 변환 등급업 모드: <strong>${settings.tierUpMode}</strong></span>
+        <span style="color:#4b5563;font-size:11px;">${escapeHtml(settings.tierUpReason)}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:8px;">
+        ${settings.presets.map(p => `
+          <div style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:4px;">
+            <div style="font-weight:800;font-size:11.5px;color:#1e293b;display:flex;justify-content:space-between;align-items:center;">
+              <span style="color:#4f46d9;">${p.title.split(':')[0]} (${escapeHtml(p.minCount)})</span>
+              <span style="background:#f1f5f9;color:#64748b;font-size:10px;padding:1px 5px;border-radius:4px;">${p.options.length}개</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:3px;margin:2px 0;">
+              ${p.options.map(opt => `<span style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:1px 5px;font-size:10.5px;color:#334155;font-weight:600;">👍 ${escapeHtml(opt)}</span>`).join('')}
+            </div>
+            <div style="font-size:10.5px;color:#64748b;line-height:1.2;">${escapeHtml(p.description)}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    return;
+  }
+
+  root.innerHTML = settings.presets.map(p => `
+    <div style="background:#fff;border:1.5px solid #cbd5e1;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04);display:flex;flex-direction:column;">
+      <div style="background:#334155;color:#fff;padding:8px 12px;font-size:12px;font-weight:800;display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#f59e0b;color:#fff;border-radius:50%;font-size:10.5px;font-weight:900;">${p.index}</span>
+          <span>선택한 옵션 목록</span>
+        </div>
+        <span class="badge" style="background:#64748b;color:#fff;font-size:11px;padding:2px 6px;">${p.options.length}개</span>
+      </div>
+      <div style="padding:10px;display:flex;flex-direction:column;gap:5px;flex:1;background:#f8fafc;">
+        ${p.options.map(opt => `
+          <div style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:5px 8px;font-size:11.5px;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:5px;">
+            <span style="color:#0284c7;font-size:12px;">👍</span>
+            <span>${escapeHtml(opt)}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div style="padding:8px 10px;border-top:1px solid #e2e8f0;background:#fff;display:flex;flex-direction:column;gap:4px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:11px;color:#64748b;font-weight:700;">최소 등장 개수:</span>
+          <strong style="font-size:12px;color:#4f46d9;background:#eef2ff;padding:2px 6px;border-radius:4px;">${escapeHtml(p.minCount)}</strong>
+        </div>
+        <small style="font-size:10.5px;color:#64748b;line-height:1.3;">${escapeHtml(p.description)}</small>
+      </div>
+    </div>
+  `).join('');
+
+  const noteRoot = $('inGameTierUpNoteRoot');
+  if (noteRoot && targetRootId === 'inGamePreferredPresetsRoot') {
+    noteRoot.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:13px;font-weight:800;color:#1e293b;">● 변환 등급업 모드 설정:</span>
+        <strong class="badge" style="background:${settings.tierUpMode.includes('ON') ? '#0b7a58' : '#64748b'};color:#fff;font-size:11.5px;">${settings.tierUpMode}</strong>
+      </div>
+      <span style="font-size:11.5px;color:#475467;">${escapeHtml(settings.tierUpReason)}</span>
+      <button type="button" class="button ghost" id="copyInGamePreferredBtn" style="font-size:11.5px;padding:4px 10px;margin-left:auto;">📋 인게임 세팅 복사</button>
+    `;
+
+    $('copyInGamePreferredBtn')?.addEventListener('click', () => {
+      const text = [
+        `[메이플 키우기 인게임 큐브 선호 옵션 세팅 - ${settings.slotType} (${settings.mainStat})]`,
+        `● 변환 등급업 모드: ${settings.tierUpMode} (${settings.tierUpReason})`,
+        ...settings.presets.map(p => `● ${p.title} [${p.minCount}]: ${p.options.join(', ')}`)
+      ].join('\n');
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text).then(() => setStatus('인게임 큐브 선호 옵션 세팅이 클립보드에 복사되었습니다.', 'good'));
+      }
+    });
+  }
 }
 
 function renderCube() {
@@ -3946,6 +4032,8 @@ function renderMekiCubeLeaderboard() {
   container.innerHTML = ranked.map((rec, idx) => {
     const linesSummary = formatLineSummary(rec.currentLines);
     const target = rec.target || {};
+    const pref = rec.preferredSettings;
+    const prefBadge = pref ? `선호옵: [조건① ${pref.presets[0]?.minCount} / 조건② ${pref.presets[1]?.minCount}] (등급업: ${pref.tierUpMode})` : '';
     return `
       <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
@@ -3956,7 +4044,7 @@ function renderMekiCubeLeaderboard() {
             <small style="color:var(--muted);font-size:11px;">(${CUBE_GRADE_NAMES[rec.cubeGrade] || rec.cubeGrade} · ${escapeHtml(linesSummary)})</small>
           </div>
           <div style="display:flex;gap:6px;align-items:center;">
-            <button type="button" class="button secondary edit-cube-line-btn" data-eq-id="${escapeHtml(rec.equipmentId)}" style="font-size:11.5px;padding:3px 8px;">✏️ 3줄 편집</button>
+            <button type="button" class="button secondary edit-cube-line-btn" data-eq-id="${escapeHtml(rec.equipmentId)}" style="font-size:11.5px;padding:3px 8px;">✏️ 3줄 편집 & 선호옵</button>
             <button type="button" class="button ghost goto-cube-tab-btn" data-eq-id="${escapeHtml(rec.equipmentId)}" style="font-size:11.5px;padding:3px 8px;">🎲 큐브 탭에서 시뮬</button>
           </div>
         </div>
@@ -3968,6 +4056,7 @@ function renderMekiCubeLeaderboard() {
           <span>기대 비용: <strong>${target.cost > 0 ? fmt(target.cost) + ' 메소' : '0'}</strong></span>
           <span>예상 딜 상승: <strong style="color:#0b7a58;">+${(target.dpsGainPct || 0).toFixed(2)}% (+${fmt(target.dpsDelta || 0)} DPS)</strong></span>
           <span>가성비: <strong style="color:var(--primary-dark);">${(target.roiPerMillion || 0) > 0 ? '+' + (target.roiPerMillion).toFixed(4) + '% / 100만 메소' : '—'}</strong></span>
+          ${prefBadge ? `<span style="color:#4f46d9;font-weight:700;">🎮 ${escapeHtml(prefBadge)}</span>` : ''}
         </div>
       </div>
     `;
@@ -4010,6 +4099,10 @@ function openCubeEditModal(eqId) {
 
   applyLinesToModalInputs(lines);
 
+  // Render in-game preferred settings preview inside modal
+  const jobKey = $('job')?.value || 'nightWalker';
+  renderInGamePreferredSettings(eq.slotType, eq.cubeGrade || 'epic', 'modalPreferredSettingsRoot', jobKey);
+
   if (typeof modal.showModal === 'function') modal.showModal(); else modal.setAttribute('open', '');
 }
 
@@ -4030,6 +4123,13 @@ function initCubeEditModal() {
   $('closeCubeEditModalBtn')?.addEventListener('click', closeModal);
   $('cancelCubeEditBtn')?.addEventListener('click', closeModal);
   modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+  $('cubeEditGrade')?.addEventListener('change', (e) => {
+    const eq = specupEquipments.find(item => item.id === currentEditingEquipId);
+    if (!eq) return;
+    const jobKey = $('job')?.value || 'nightWalker';
+    renderInGamePreferredSettings(eq.slotType, e.target.value, 'modalPreferredSettingsRoot', jobKey);
+  });
 
   $('cubePresetGarbageBtn')?.addEventListener('click', () => {
     applyLinesToModalInputs([
@@ -4423,6 +4523,8 @@ function bind() {
         if (el.id === 'job') {
           renderJobStatMapping();
           renderJobSkills();
+          renderCubeStopGuide();
+          renderMekiCubeLeaderboard();
         } else if (el.id === 'level' && evt === 'change') {
           renderSkillLoadoutPanel();
         }

@@ -604,6 +604,31 @@
               <div class="guide-list" id="cubeStopGuideList"></div>
             </section>
 
+            <!-- In-Game Auto-Cube Preferred Option Setting Guide (Matching in-game UI) -->
+            <section class="card" id="inGamePreferredOptionCard" style="border:1.5px solid #6366f1;">
+              <div class="section-heading">
+                <div>
+                  <span class="step">🎮</span>
+                  <h3>인게임 [선호 옵션 설정] 추천 세팅 가이드</h3>
+                </div>
+                <span class="badge official" style="background:#6366f1;color:#fff;">인게임 자동 멈춤 세팅</span>
+              </div>
+              <p class="hint">
+                인게임 큐브 자동 변환 창의 <strong>[선호 옵션 설정]</strong>에서 아래 조건 3개를 그대로 등록하면,
+                불필요한 메소 낭비 없이 최고 가성비 라인에서 자동으로 변환이 멈춥니다.
+              </p>
+
+              <!-- In-Game Presets 3 Boxes (Condition 1, 2, 3) -->
+              <div id="inGamePreferredPresetsRoot" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));gap:10px;margin-top:12px;">
+                <!-- Populated dynamically -->
+              </div>
+
+              <!-- Bottom In-game Mode: Tier-up mode note -->
+              <div id="inGameTierUpNoteRoot" style="margin-top:12px;background:#f8fafc;padding:10px 14px;border-radius:8px;border:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                <!-- Populated dynamically -->
+              </div>
+            </section>
+
             <section class="card">
               <div class="section-heading"><h2>확률·기댓값 시뮬레이터</h2><span class="badge official">베르누이 시행</span></div>
               <div class="fields compact">
@@ -728,6 +753,12 @@
             <input id="cubeSlot3Value" type="number" step="0.1" style="font-size:12px;padding:4px 6px;" placeholder="수치">
           </div>
         </div>
+
+        <!-- In-game preferred options expandable -->
+        <details class="tool-drawer" style="margin-top:12px;">
+          <summary style="font-weight:700;font-size:12.5px;color:#4f46d9;">🎮 이 장비의 인게임 [선호 옵션 설정] 추천 세팅 보기</summary>
+          <div id="modalPreferredSettingsRoot" style="padding:10px;font-size:12px;display:grid;gap:8px;background:#f8fafc;border-radius:8px;margin-top:6px;"></div>
+        </details>
 
         <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px;">
           <button type="button" class="button ghost" id="cancelCubeEditBtn">취소</button>

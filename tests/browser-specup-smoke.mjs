@@ -235,6 +235,18 @@ async function main() {
     console.log(`  Cube Tab evaluation rendered: ${cubeDeltaText}`);
     assert.ok(cubeDeltaText.length > 0, 'Cube delta must be rendered');
 
+    // Step 9: Verify In-Game Auto-Cube Preferred Option Setting UI (3 presets & tier-up mode)
+    console.log('Step 9: Testing In-Game Preferred Option Setting UI...');
+    const inGamePresetCount = await evaluate(`document.querySelectorAll('#inGamePreferredPresetsRoot > div').length`);
+    assert.equal(inGamePresetCount, 3, 'Must render 3 in-game condition preset boxes');
+    const tierUpNoteText = await evaluate(`document.getElementById('inGameTierUpNoteRoot').textContent`);
+    assert.ok(tierUpNoteText.includes('변환 등급업 모드'), 'Must display tier-up mode note');
+    console.log(`  -> In-Game Preferred Option Setting UI verified with 3 presets and tier-up mode.`);
+
+    // Verify copy button presence
+    const hasCopyBtn = await evaluate(`Boolean(document.getElementById('copyInGamePreferredBtn'))`);
+    assert.ok(hasCopyBtn, 'Copy in-game preferred settings button must exist');
+
     ws.close();
     console.log('✅ ALL BROWSER E2E TESTS PASSED WITH 100% SUCCESS!');
   } finally {

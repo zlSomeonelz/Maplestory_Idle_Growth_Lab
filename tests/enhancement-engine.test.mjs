@@ -205,11 +205,11 @@ const sc70_5 = calculateScrollEnhancement(0, 5, 'scroll70', { slotType: 'weapon'
 assert.ok(sc15.expectedScrolls > sc70_5.expectedScrolls, '15% scroll expects more scrolls than 70%');
 assert.ok(sc15.expectedCleanSlates > sc70_5.expectedCleanSlates, '15% scroll expects more clean slates than 70%');
 
-// 8. MekiCalc Cube Recommendation & Slot Analysis Tests
 import {
   recommendCubeAction,
   rankAllEquipmentCubes,
-  getEquipmentCubeStats
+  getEquipmentCubeStats,
+  getInGamePreferredCubeSettings
 } from '../enhancement-engine.mjs';
 
 // 8.1 getEquipmentCubeStats with explicit lines vs fallback
@@ -298,6 +298,37 @@ const ranked = rankAllEquipmentCubes(testEquips, baseStats, combatRules, enhance
 assert.equal(ranked[0].equipmentId, 'hat', 'First recommendation must be the 0-line REROLL item');
 assert.equal(ranked[1].equipmentId, 'cape', 'Second recommendation should be TIER_UP item');
 assert.ok(ranked[ranked.length - 1].verdict === 'STOP', 'Last recommendations must be STOP items');
+assert.ok(ranked[0].preferredSettings, 'Ranked items must include preferredSettings');
+
+// 9. In-Game Preferred Cube Settings Tests (Auto-Cube Stop Condition 1, 2, 3)
+// 9.1 Weapon with Night Walker (LUK job)
+const nwWeaponPref = getInGamePreferredCubeSettings('weapon', 'epic', 'nightWalker');
+assert.equal(nwWeaponPref.mainStat, 'LUK', 'Night Walker main stat must be LUK');
+assert.equal(nwWeaponPref.tierUpMode, 'OFF', 'Weapon at epic does not require tier-up stop mode');
+assert.equal(nwWeaponPref.presets.length, 3, 'Must provide 3 in-game condition presets');
+assert.equal(nwWeaponPref.presets[0].minCount, '3개 이상');
+assert.equal(nwWeaponPref.presets[1].minCount, '2개 이상');
+assert.ok(nwWeaponPref.presets[1].options.includes('공격력%'), 'Weapon preset 2 must include 공격력%');
+assert.ok(nwWeaponPref.presets[1].options.includes('보스 몬스터 데미지%'), 'Weapon preset 2 must include 보스 몬스터 데미지%');
+
+// 9.2 Glove at Epic with Hero (STR job) - Tier-Up Mode must be ON
+const heroGlovePref = getInGamePreferredCubeSettings('glove', 'epic', 'hero');
+assert.equal(heroGlovePref.mainStat, 'STR', 'Hero main stat must be STR');
+assert.equal(heroGlovePref.tierUpMode, 'ON (권장)', 'Glove at epic MUST recommend tier-up mode ON for crit damage');
+assert.equal(heroGlovePref.presets[2].minCount, '1개 이상');
+assert.ok(heroGlovePref.presets[2].options.includes('크리티컬 데미지%'), 'Glove preset 3 must include 크리티컬 데미지%');
+
+// 9.3 Hat with Bishop (INT job) - Cooldown reduction
+const bishopHatPref = getInGamePreferredCubeSettings('hat', 'legendary', 'bishop');
+assert.equal(bishopHatPref.mainStat, 'INT', 'Bishop main stat must be INT');
+assert.ok(bishopHatPref.presets[0].options.includes('스킬 재사용 대기시간 감소'), 'Hat preset 1 must include cooldown reduction');
+assert.ok(bishopHatPref.presets[1].options.includes('스킬 재사용 대기시간 감소'), 'Hat preset 2 must include cooldown reduction');
+
+// 9.4 Armor with Bowmaster (DEX job) at Rare
+const bmArmorPref = getInGamePreferredCubeSettings('armor', 'rare', 'bowmaster');
+assert.equal(bmArmorPref.mainStat, 'DEX', 'Bowmaster main stat must be DEX');
+assert.equal(bmArmorPref.tierUpMode, 'ON (권장)', 'Rare armor must recommend tier-up mode ON');
+assert.ok(bmArmorPref.presets[1].options.includes('DEX%'), 'Armor preset 2 must include DEX% for bowmaster');
 
 console.log('enhancement-engine tests (including edge cases & invariants) passed cleanly!');
 console.log(`Initial DPS: ${roadmap.initialDps.toFixed(1)} -> Final DPS: ${roadmap.finalDps.toFixed(1)} (+${roadmap.totalDpsGainPct.toFixed(2)}%)`);
