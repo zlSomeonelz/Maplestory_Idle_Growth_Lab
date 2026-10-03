@@ -2456,20 +2456,20 @@ function initOcrModal() {
     { target: 'finalDamage', keywords: ['최종 데미지', '최종데미지', '최종 데미7', '치종 데미', '최종'] },
     { target: 'basicDamage', keywords: ['기본 공격 데미지', '기본공격데미지', '본 공격 데미지', '기본 공격'] },
     { target: 'skillDamage', keywords: ['스킬 데미지', '스킬데미지', 'AZ 데미지', 'AZ 데미', '스킬 데미^', '스킬 데미7', '스킬 데미'] },
-    { target: 'critRate', keywords: ['크리티컬 확률', '크리티컬확률', '치명타 확률', '크확', '1리티컬 확률'] },
-    { target: 'critDamage', keywords: ['크리티컬 데미지', '크리티컬데미지', '치명타 데미지', '크뎀', '크리6걸데미지', '크리6걸 데미지', '크리6걸', '크리 데미지', '크리데미지', '크리6걸데미7', '크리티컬 데미7'] },
+    { target: 'critRate', keywords: ['크리티컬 확률', '크리티컬확률', '치명타 확률', '크확', '1리티컬 확률', '(리티컬 확률', '리티컬 확률', '티컬 확률'] },
+    { target: 'critDamage', keywords: ['크리티컬 데미지', '크리티컬데미지', '치명타 데미지', '크뎀', '크리6걸데미지', '크리6걸 데미지', '크리6걸', '크리 데미지', '크리데미지', '크리6걸데미7', '크리티컬 데미7', '(리티컬 데미지', '리티컬 데미지', '리티컬데미지', '티컬 데미지', '(리티컬'] },
     { target: 'defPen', keywords: ['방어 관통력', '방어관통력', '방어력 관통', '방관'] },
     { target: 'minDamage', keywords: ['최소 데미지 배율', '최소데미지 배율', '최소 데미지', '최소 데미'] },
     { target: 'maxDamage', keywords: ['최대 데미지 배율', '최대데미지 배율', '최대 데미지', '최대 데미'] },
     { target: 'attackSpeed', keywords: ['공격 속도', '공격속도', '공속', '공격속', '공격속:'] },
     { target: 'playerDefense', keywords: ['방어력'] },
-    { target: 'maxHp', keywords: ['최대 HP', '최대HP', '최대16', '최대 16', '최대1P', '최대 1P', 'Hh HP', 'ZC HP', 'ZICH HP', 'ZIC HP', 'ICH HP', '치대 HP', '부레 치나', 'EEK'] },
+    { target: 'maxHp', keywords: ['최대 HP', '최대HP', '최대16', '최대 16', '최대1P', '최대 1P', '최대10', '최대 10', '최대1O', '최대 1O', 'Hh HP', 'ZC HP', 'ZICH HP', 'ZIC HP', 'ICH HP', '치대 HP', '부레 치나', 'EEK'] },
     { target: 'maxMp', keywords: ['최대 MP', '최대MP', '최대 mp', '최대”', '최대"', '최대 M', 'At MP', 'AL MP', '최대11『', '최대11'] },
     { target: 'accuracy', keywords: ['명중', '명중률'] },
     { target: 'evasion', keywords: ['회피', '회피율'] },
     { target: 'statBased', keywords: ['스탯 비례 데미지', '스탯비례데미지', 'AEH 비례 데미지', 'HHH 데미지', 'AEH 비례', '스 비례 데미지', '스 비례', '비례 데미지', '스탯 비례', '스탯비례', 'o 비례 데미지'] },
     { target: 'damage', keywords: ['데미지'] },
-    { target: 'attack', keywords: ['공격력'] },
+    { target: 'attack', keywords: ['공격력', '승격력', '홍격력', '증격력', '공격'] },
     { target: 'statSTR', keywords: ['STR', '518', 'S1R', 'SIR'] },
     { target: 'statDEX', keywords: ['DEX', 'D EX'] },
     { target: 'statINT', keywords: ['INT', 'I NT', '1NT', '스킨 I', '스킨'] },
@@ -2592,6 +2592,8 @@ function initOcrModal() {
         if (item.target === 'damage') {
           if (
             line.includes('크리') ||
+            line.includes('리티컬') ||
+            line.includes('티컬') ||
             line.includes('치명') ||
             line.includes('스탯') ||
             line.includes('스킬') ||
@@ -2610,7 +2612,8 @@ function initOcrModal() {
         }
 
         const isCritDamageMatch = item.target === 'critDamage' && (
-          (line.includes('크리') || line.includes('치명')) && (line.includes('데미') || line.includes('뎀'))
+          (line.includes('크리') || line.includes('리티컬') || line.includes('티컬') || line.includes('치명') || line.includes('크뎀') || line.includes('크리6걸')) &&
+          (line.includes('데미') || line.includes('뎀'))
         );
 
         if (isCritDamageMatch || item.keywords.some(kw => line.startsWith(kw) || line.includes(kw))) {
