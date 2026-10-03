@@ -2456,18 +2456,18 @@ function initOcrModal() {
     { target: 'finalDamage', keywords: ['최종 데미지', '최종데미지', '최종 데미7', '치종 데미', '최종'] },
     { target: 'basicDamage', keywords: ['기본 공격 데미지', '기본공격데미지', '본 공격 데미지', '기본 공격'] },
     { target: 'skillDamage', keywords: ['스킬 데미지', '스킬데미지', 'AZ 데미지', 'AZ 데미', '스킬 데미^', '스킬 데미7', '스킬 데미'] },
-    { target: 'critRate', keywords: ['크리티컬 확률', '크리티컬확률', '치명타 확률', '크확'] },
-    { target: 'critDamage', keywords: ['크리티컬 데미지', '크리티컬데미지', '치명타 데미지', '크뎀', '크리6걸데미지', '크리6걸 데미지', '크리6걸', '크리 데미지'] },
+    { target: 'critRate', keywords: ['크리티컬 확률', '크리티컬확률', '치명타 확률', '크확', '1리티컬 확률'] },
+    { target: 'critDamage', keywords: ['크리티컬 데미지', '크리티컬데미지', '치명타 데미지', '크뎀', '크리6걸데미지', '크리6걸 데미지', '크리6걸', '크리 데미지', '크리데미지', '크리6걸데미7', '크리티컬 데미7'] },
     { target: 'defPen', keywords: ['방어 관통력', '방어관통력', '방어력 관통', '방관'] },
     { target: 'minDamage', keywords: ['최소 데미지 배율', '최소데미지 배율', '최소 데미지', '최소 데미'] },
     { target: 'maxDamage', keywords: ['최대 데미지 배율', '최대데미지 배율', '최대 데미지', '최대 데미'] },
-    { target: 'attackSpeed', keywords: ['공격 속도', '공격속도'] },
+    { target: 'attackSpeed', keywords: ['공격 속도', '공격속도', '공속', '공격속', '공격속:'] },
     { target: 'playerDefense', keywords: ['방어력'] },
-    { target: 'maxHp', keywords: ['최대 HP', '최대HP', '최대16', '최대 16', '최대1P', '최대 1P', 'Hh HP', 'ZC HP', 'ZICH HP', 'ZIC HP', 'ICH HP', '치대 HP', '부레 치나', 'HP'] },
-    { target: 'maxMp', keywords: ['최대 MP', '최대MP', '최대 mp', '최대”', '최대"', '최대 M', 'At MP', 'AL MP', 'MP'] },
+    { target: 'maxHp', keywords: ['최대 HP', '최대HP', '최대16', '최대 16', '최대1P', '최대 1P', 'Hh HP', 'ZC HP', 'ZICH HP', 'ZIC HP', 'ICH HP', '치대 HP', '부레 치나', 'EEK'] },
+    { target: 'maxMp', keywords: ['최대 MP', '최대MP', '최대 mp', '최대”', '최대"', '최대 M', 'At MP', 'AL MP', '최대11『', '최대11'] },
     { target: 'accuracy', keywords: ['명중', '명중률'] },
     { target: 'evasion', keywords: ['회피', '회피율'] },
-    { target: 'statBased', keywords: ['스탯 비례 데미지', '스탯비례데미지', 'AEH 비례 데미지', 'HHH 데미지', 'AEH 비례', '스 비례 데미지', '스 비례', '비례 데미지', '스탯 비례', '스탯비례'] },
+    { target: 'statBased', keywords: ['스탯 비례 데미지', '스탯비례데미지', 'AEH 비례 데미지', 'HHH 데미지', 'AEH 비례', '스 비례 데미지', '스 비례', '비례 데미지', '스탯 비례', '스탯비례', 'o 비례 데미지'] },
     { target: 'damage', keywords: ['데미지'] },
     { target: 'attack', keywords: ['공격력'] },
     { target: 'statSTR', keywords: ['STR', '518', 'S1R', 'SIR'] },
@@ -2585,13 +2585,38 @@ function initOcrModal() {
     // Format B: List Table
     for (const line of lines) {
       if (line.includes('자신이 적에게') || line.includes('스킬 효과로') || line.includes('예상 능력치')) continue;
-      if (line.includes('초당') && line.includes('회복')) continue;
+      if (line.includes('초당') || line.includes('회복') || line.includes('회보') || line.includes('재생') || line.includes('ct MP')) continue;
 
       for (const item of STAT_CONFIG) {
-        if (item.keywords.some(kw => line.startsWith(kw) || line.includes(kw))) {
+        // Protect generic 'damage' from hijacking compound damages (e.g. critDamage, statBased, etc.)
+        if (item.target === 'damage') {
+          if (
+            line.includes('크리') ||
+            line.includes('치명') ||
+            line.includes('스탯') ||
+            line.includes('스킬') ||
+            line.includes('보스') ||
+            line.includes('일반') ||
+            line.includes('기본') ||
+            line.includes('최종') ||
+            line.includes('최소') ||
+            line.includes('최대') ||
+            line.includes('증폭') ||
+            line.includes('비례') ||
+            line.includes('AEH')
+          ) {
+            continue;
+          }
+        }
+
+        const isCritDamageMatch = item.target === 'critDamage' && (
+          (line.includes('크리') || line.includes('치명')) && (line.includes('데미') || line.includes('뎀'))
+        );
+
+        if (isCritDamageMatch || item.keywords.some(kw => line.startsWith(kw) || line.includes(kw))) {
           let cleanLine = line;
           item.keywords.forEach(kw => { cleanLine = cleanLine.replace(kw, ''); });
-          cleanLine = cleanLine.replace(/[ⓘi|()\[\]G!a_]/g, ' ').trim();
+          cleanLine = cleanLine.replace(/[ⓘi|()\[\]G!a_·•—]/g, ' ').trim();
 
           const allNums = Array.from(cleanLine.matchAll(/(?:[0-9,.]+\s*(?:조|억|만)\s*)*[0-9,.]+(?:\s*(?:조|억|만))?\s*%?/g)).map(m => m[0].trim());
           if (allNums.length > 0) {
