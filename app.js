@@ -2438,85 +2438,90 @@ function initOcrModal() {
     statSTR: 'STR',
     statDEX: 'DEX',
     statINT: 'INT',
-    statLUK: 'LUK'
+    statLUK: 'LUK',
+    accuracy: '명중',
+    evasion: '회피',
+    debuffResist: '디버프 내성',
+    extraTargets: '기본 공격 대상 수 증가',
+    cooldownReductionPct: '쿨타임 감소%'
   };
 
   const STAT_CONFIG = [
     { target: 'bossDamage', keywords: ['보스 몬스터 데미지', '보스 몬스터데미지', '보스 몬스터', '보스데미지', '보스 데미지', '보뎀'] },
     { target: 'normalDamage', keywords: ['일반 몬스터 데미지', '일반 몬스터데미지', '일반 몬스터', '일반데미지', '일반 데미지', '일공'] },
-    { target: 'damageAmp', keywords: ['데미지 증폭', '데미지증폭', '데미지 55', '데미지55'] },
-    { target: 'finalDamage', keywords: ['최종 데미지', '최종데미지', '최종 데미7', '최종데미7', '치종 데미', '치종데미'] },
-    { target: 'basicDamage', keywords: ['기본 공격 데미지', '기본공격데미지', '본 공격 데미지', '본공격데미지', '기본 공격 데미7'] },
-    { target: 'skillDamage', keywords: ['스킬 데미지', '스킬데미지', '스킬 데미^', '스킬 데미7'] },
+    { target: 'damageAmp', keywords: ['데미지 증폭', '데미지증폭'] },
+    { target: 'finalDamage', keywords: ['최종 데미지', '최종데미지', '최종 데미7', '치종 데미', '최종'] },
+    { target: 'basicDamage', keywords: ['기본 공격 데미지', '기본공격데미지', '본 공격 데미지', '기본 공격'] },
+    { target: 'skillDamage', keywords: ['스킬 데미지', '스킬데미지', 'AZ 데미지', 'AZ 데미', '스킬 데미^', '스킬 데미7', '스킬 데미'] },
     { target: 'critRate', keywords: ['크리티컬 확률', '크리티컬확률', '치명타 확률', '크확'] },
-    { target: 'critDamage', keywords: ['크리티컬 데미지', '크리티컬데미지', '치명타 데미지', '크뎀', '크리티컬 데미7'] },
+    { target: 'critDamage', keywords: ['크리티컬 데미지', '크리티컬데미지', '치명타 데미지', '크뎀'] },
     { target: 'defPen', keywords: ['방어 관통력', '방어관통력', '방어력 관통', '방관'] },
-    { target: 'minDamage', keywords: ['최소 데미지 배율', '최소데미지 배율', '최소 데미지', '최소 데미7', '미지 배용', '최소 배율'] },
-    { target: 'maxDamage', keywords: ['최대 데미지 배율', '최대데미지 배율', '최대 데미지', '최대 데미7', '미지 Hf', '최대 배율'] },
+    { target: 'minDamage', keywords: ['최소 데미지 배율', '최소데미지 배율', '최소 데미지', '최소 데미'] },
+    { target: 'maxDamage', keywords: ['최대 데미지 배율', '최대데미지 배율', '최대 데미지', '최대 데미'] },
     { target: 'attackSpeed', keywords: ['공격 속도', '공격속도'] },
     { target: 'playerDefense', keywords: ['방어력'] },
-    { target: 'maxHp', keywords: ['최대 HP', '최대HP', 'XC HP', '치대 HP'] },
-    { target: 'maxMp', keywords: ['최대 MP', '최대MP'] },
-    { target: 'damage', keywords: ['스탯 비례 데미지', '스탯비례데미지', 'AEH 비례 데미지', '비례 데미지', '데미지'] },
+    { target: 'maxHp', keywords: ['최대 HP', '최대HP', '최대16', '최대 16', '최대1P', '최대 1P', 'Hh HP', 'ZC HP', '치대 HP'] },
+    { target: 'maxMp', keywords: ['최대 MP', '최대MP', '최대 mp', '최대”', '최대"', '최대 M'] },
+    { target: 'accuracy', keywords: ['명중', '명중률'] },
+    { target: 'evasion', keywords: ['회피', '회피율'] },
+    { target: 'damage', keywords: ['스탯 비례 데미지', '스탯비례데미지', 'AEH 비례 데미지', '데미지'] },
     { target: 'attack', keywords: ['공격력'] },
-    { target: 'statSTR', keywords: ['STR'] },
+    { target: 'statSTR', keywords: ['STR', '518', 'S1R', 'SIR'] },
     { target: 'statDEX', keywords: ['DEX'] },
     { target: 'statINT', keywords: ['INT'] },
     { target: 'statLUK', keywords: ['LUK'] },
-    { target: 'mainStat', keywords: ['주 스탯', '주스탯', '주 스탓', '벨당 주 스탓'] },
-    { target: 'subStat', keywords: ['부 스탯', '부스탯'] }
+    { target: 'debuffResist', keywords: ['디버프 내성', '디버프내성'] },
+    { target: 'extraTargets', keywords: ['기본 공격 대상 수 증가', '기본 공격 대상 수', '대상 수 증가'] },
+    { target: 'cooldownReductionPct', keywords: ['스킬 재사용 대기시간 감소', '재사용 대기시간 감소'] },
+    { target: 'mainStatPerLevel1', keywords: ['1레벨당 주 스탯', '1레벨당 주스탯', '1HES FAH', '1레벨당 FAR', '1레벨당'] }
   ];
 
   function parseSingleOcrText(text) {
     if (!text) return {};
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
     const detected = {};
-    const cleanLines = lines.filter(l =>
-      !l.includes('증가합니다') && !l.includes('획득한') && !l.includes('기준으로') &&
-      !l.includes('피해의 기본') && !l.includes('포함되지 않은') && !l.includes('효과는 합산')
+    const fullText = lines.join(' ');
+
+    const isDetailPopup = lines.some(l =>
+      l.includes('자신이 적에게') ||
+      l.includes('주 스탯으로') ||
+      l.includes('주 ANCE') ||
+      ((l.includes('+:') || l.includes('+ :')) && (l.includes('%:') || l.includes('% :')))
     );
 
-    const isFormatA = cleanLines.some(l =>
-      l.includes('현재 보유') || l.includes('보유 중인') || /^\+\s*[:;\-]/.test(l) || /^%\s*[:;\-]/.test(l) || /합산\s*[:;\-]/.test(l)
-    );
-
-    if (isFormatA) {
+    if (isDetailPopup) {
       let detailHeader = null;
-      for (const line of cleanLines) {
-        for (const item of STAT_CONFIG) {
-          if (item.keywords.some(kw => line === kw || line.startsWith(kw))) {
-            detailHeader = item.target;
-            break;
-          }
-        }
-        if (detailHeader) break;
+      if (fullText.includes('피해의 기본') || fullText.includes('공격력 %증가')) {
+        detailHeader = 'attack';
+      } else if (fullText.includes('Luk') || fullText.includes('LUK') || fullText.includes('주 ANCE Luk')) {
+        detailHeader = 'statLUK';
+      } else if (fullText.includes('Str') || fullText.includes('STR') || fullText.includes('주 ANCE Str')) {
+        detailHeader = 'statSTR';
+      } else if (fullText.includes('Dex 1당') || fullText.includes('주 스탯은 Dex') || fullText.includes('주 ANCE Dex')) {
+        detailHeader = 'statDEX';
+      } else if (fullText.includes('Int') || fullText.includes('INT') || fullText.includes('주 ANCE Int')) {
+        detailHeader = 'statINT';
       }
 
-      if (detailHeader) {
-        for (const line of cleanLines) {
-          const plusMatch = line.match(/\+\s*[:;\-]?\s*([0-9만억조,\.]+)/);
-          if (plusMatch) {
-            const val = parseKoreanNumber(plusMatch[1]);
-            if (val !== null && val > 0) {
-              if (detailHeader === 'attack') detected['attackFlat'] = val;
-              else if (['statLUK', 'statSTR', 'statDEX', 'statINT', 'mainStat'].includes(detailHeader)) {
-                detected['mainStat'] = val;
-                if (detailHeader.startsWith('stat')) detected[detailHeader] = val;
-              } else if (detailHeader === 'subStat') detected['subStat'] = val;
-              else if (detailHeader === 'playerDefense') detected['playerDefense'] = val;
-              else if (detailHeader === 'maxHp') detected['maxHp'] = val;
+      for (const line of lines) {
+        const plusMatch = line.match(/\+[\s:]*([0-9만억조,\.]+)/);
+        if (plusMatch) {
+          const val = parseKoreanNumber(plusMatch[1]);
+          if (val !== null && val > 0) {
+            if (detailHeader === 'attack') detected['attackFlat'] = val;
+            else if (['statLUK', 'statSTR', 'statDEX', 'statINT'].includes(detailHeader)) {
+              detected['mainStat'] = val;
+              detected[detailHeader] = val;
             }
           }
-
-          const pctMatch = line.match(/%\s*[:;\-]?\s*([0-9만억조,\.]+)/);
-          if (pctMatch) {
-            const val = parseKoreanNumber(pctMatch[1]);
-            if (val !== null && val > 0) {
-              if (detailHeader === 'attack') detected['attackPct'] = val;
-              else if (['statLUK', 'statSTR', 'statDEX', 'statINT', 'mainStat'].includes(detailHeader)) {
-                detected['mainStatPct'] = val;
-              } else if (detailHeader === 'subStat') detected['subStatPct'] = val;
-              else detected[detailHeader] = val;
+        }
+        const pctMatch = line.match(/%[\s:]*([0-9만억조,\.]+)/);
+        if (pctMatch) {
+          const val = parseKoreanNumber(pctMatch[1]);
+          if (val !== null && val > 0) {
+            if (detailHeader === 'attack') detected['attackPct'] = val;
+            else if (['statLUK', 'statSTR', 'statDEX', 'statINT'].includes(detailHeader)) {
+              detected['mainStatPct'] = val;
             }
           }
         }
@@ -2524,32 +2529,39 @@ function initOcrModal() {
       return detected;
     }
 
-    cleanLines.forEach(line => {
+    // Format B: List Table
+    for (const line of lines) {
+      if (line.includes('자신이 적에게') || line.includes('스킬 효과로') || line.includes('예상 능력치')) continue;
+      if (line.includes('초당') && line.includes('회복')) continue;
+
       for (const item of STAT_CONFIG) {
-        if (item.keywords.some(kw => line.includes(kw))) {
+        if (item.keywords.some(kw => line.startsWith(kw) || line.includes(kw))) {
           let cleanLine = line;
           item.keywords.forEach(kw => { cleanLine = cleanLine.replace(kw, ''); });
-          cleanLine = cleanLine.replace(/[ⓘi|()\[\]G!a]/g, ' ').trim();
+          cleanLine = cleanLine.replace(/[ⓘi|()\[\]G!a_]/g, ' ').trim();
+
           const allNums = Array.from(cleanLine.matchAll(/([0-9만억조,\.]+%?)/g)).map(m => m[1]);
           if (allNums.length > 0) {
             let bestNumStr = allNums.find(n => n.includes('%')) || allNums[allNums.length - 1];
             const val = parseKoreanNumber(bestNumStr);
             if (val !== null && val > 0) {
-              if (item.target === 'attack' && line.includes('%')) {
-                if (!detected['attackPct']) detected['attackPct'] = val;
-              } else if (item.target === 'attack') {
-                if (!detected['attackFlat']) detected['attackFlat'] = val;
+              if (item.target === 'attack') {
+                if (line.includes('%')) {
+                  if (!detected['attackPct']) detected['attackPct'] = val;
+                } else {
+                  if (!detected['attackFlat']) detected['attackFlat'] = val;
+                }
               } else if (['statSTR', 'statDEX', 'statINT', 'statLUK'].includes(item.target)) {
                 detected[item.target] = val;
               } else {
-                if (!detected[item.target]) detected[item.target] = val;
+                detected[item.target] = val;
               }
             }
           }
           break;
         }
       }
-    });
+    }
 
     return detected;
   }
@@ -2567,34 +2579,60 @@ function initOcrModal() {
         const origW = img.naturalWidth || img.width;
         const origH = img.naturalHeight || img.height;
 
-        let cropX = 0, cropY = 0, cropW = origW, cropH = origH;
-        if (origW >= 500 && origH >= 500) {
-          cropX = Math.floor(origW * 0.25);
-          cropY = Math.floor(origH * 0.15);
-          cropW = Math.floor(origW * 0.50);
-          cropH = Math.floor(origH * 0.70);
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = origW;
+        tempCanvas.height = origH;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(img, 0, 0);
+
+        let minX = origW, minY = origH, maxX = 0, maxY = 0;
+        let whiteCount = 0;
+
+        try {
+          const imgData = tempCtx.getImageData(0, 0, origW, origH);
+          const data = imgData.data;
+
+          for (let y = 0; y < origH; y += 2) {
+            for (let x = 0; x < origW; x += 2) {
+              const idx = (y * origW + x) * 4;
+              if (data[idx] > 235 && data[idx + 1] > 235 && data[idx + 2] > 235) {
+                whiteCount++;
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('ImageData extraction warning:', e);
         }
 
-        const scale = 2;
-        const canvas = document.createElement('canvas');
-        canvas.width = cropW * scale;
-        canvas.height = cropH * scale;
+        const boxW = maxX - minX;
+        const boxH = maxY - minY;
 
-        const ctx = canvas.getContext('2d');
+        let cropX = 0, cropY = 0, cropW = origW, cropH = origH;
+        let isModalFound = false;
+
+        if (whiteCount > 2000 && boxW >= origW * 0.15 && boxH >= origH * 0.20) {
+          const pad = 10;
+          cropX = Math.max(0, minX - pad);
+          cropY = Math.max(0, minY - pad);
+          cropW = Math.min(origW - cropX, boxW + pad * 2);
+          cropH = Math.min(origH - cropY, boxH + pad * 2);
+          isModalFound = true;
+        }
+
+        const scale = 2.5;
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width = Math.round(cropW * scale);
+        finalCanvas.height = Math.round(cropH * scale);
+        const ctx = finalCanvas.getContext('2d');
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, finalCanvas.width, finalCanvas.height);
 
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const d = imgData.data;
-        for (let i = 0; i < d.length; i += 4) {
-          const gray = (d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114);
-          const c = gray > 180 ? 255 : (gray < 80 ? 0 : gray);
-          d[i] = d[i + 1] = d[i + 2] = c;
-        }
-        ctx.putImageData(imgData, 0, 0);
-
-        resolve({ canvas, isCropped: origW >= 500 && origH >= 500 });
+        resolve({ canvas: finalCanvas, isCropped: isModalFound });
       };
       img.onerror = () => {
         URL.revokeObjectURL(url);
