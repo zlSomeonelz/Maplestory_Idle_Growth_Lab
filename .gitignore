@@ -2,3 +2,4 @@ node_modules/
 *.traineddata
 test-*.mjs
 debug-*.mjs
+scratch/

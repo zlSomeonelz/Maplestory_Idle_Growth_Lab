@@ -17,6 +17,7 @@ const requiredIds = [
   'mainStat', 'mainStatPct', 'subStat', 'damage', 'damageAmp', 'finalDamage',
   'critRate', 'critDamage', 'minDamage', 'maxDamage', 'mastery', 'skillCoefficient',
   'attackInterval', 'attackSpeed', 'statInputMode', 'statSTR', 'statDEX', 'statINT', 'statLUK',
+  'jobSkillsBox', 'jobSkillContent',
   'accuracy', 'defPen', 'bossDamage', 'normalDamage', 'basicDamage', 'skillDamage',
   'statusDamage', 'dmgReduction', 'companionDuration', 'buffDuration', 'debuffResist',
   'extraTargets', 'cooldownReductionPct', 'cooldownReductionSec',
@@ -57,7 +58,9 @@ const datasets = [
   'data/boss-data.json',
   'data/growth-dungeon-data.json',
   'data/guild-data.json',
-  'data/drop-table-data.json'
+  'data/drop-table-data.json',
+  'data/job-skills.json',
+  'data/official-patch-notes.json'
 ];
 
 for (const file of datasets) {

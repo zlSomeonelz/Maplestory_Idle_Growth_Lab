@@ -2193,6 +2193,291 @@ function renderJobStatMapping() {
   box.innerHTML = `주스탯 <b>${main}</b> · 부스탯 <b>${sub}</b> · ${mode === 'job' ? '원시 스탯 입력을 계산에 사용합니다.' : '주·부 스탯 합산값을 직접 사용합니다.'}`;
 }
 
+function parseSkillDamageMetrics(effect) {
+  if (!effect) return { multiplierPct: 100, hits: 1, totalPct: 100 };
+  const m1 = effect.match(/([0-9,.]+)\s*%\s*(?:피해를|의\s*피해를)?\s*([0-9]+)\s*(?:회|타)/);
+  if (m1) {
+    const pct = parseFloat(m1[1].replace(/,/g, ''));
+    const hits = parseInt(m1[2], 10);
+    return { multiplierPct: pct, hits, totalPct: pct * hits };
+  }
+  const m2 = effect.match(/([0-9,.]+)\s*%\s*[×x*]\s*([0-9]+)\s*타?/i);
+  if (m2) {
+    const pct = parseFloat(m2[1].replace(/,/g, ''));
+    const hits = parseInt(m2[2], 10);
+    return { multiplierPct: pct, hits, totalPct: pct * hits };
+  }
+  const m3 = effect.match(/([0-9,.]+)\s*%\s*([0-9,.]+)\s*%\s*피해/);
+  if (m3) {
+    const p1 = parseFloat(m3[1].replace(/,/g, ''));
+    const p2 = parseFloat(m3[2].replace(/,/g, ''));
+    return { multiplierPct: p1 + p2, hits: 2, totalPct: p1 + p2 };
+  }
+  const mSingle = effect.match(/([0-9,.]+)\s*%\s*피해/);
+  if (mSingle) {
+    const pct = parseFloat(mSingle[1].replace(/,/g, ''));
+    return { multiplierPct: pct, hits: 1, totalPct: pct };
+  }
+  return { multiplierPct: 100, hits: 1, totalPct: 100 };
+}
+
+function parseCooldownSeconds(cdText) {
+  if (!cdText || cdText.includes('즉시') || cdText === '0' || cdText === '0초') return 0;
+  const m = cdText.match(/([0-9.]+)\s*초/);
+  return m ? parseFloat(m[1]) : 0;
+}
+
+window.applySkillCoefficient = function(val, name) {
+  if ($('skillCoefficient')) {
+    $('skillCoefficient').value = val;
+    renderCombat();
+    setStatus(`${name}의 총 계수(${val}%)가 스킬 계수 입력칸에 자동 적용되었습니다.`, 'good');
+  }
+};
+
+function renderJobSkills() {
+  const container = $('jobSkillContent');
+  if (!container) return;
+  const jobKey = $('job')?.value;
+  if (!jobKey || !DATA.jobSkills?.[jobKey]) {
+    container.innerHTML = `<div class="small text-muted" style="padding:8px 0;">직업을 선택하면 해당 직업의 1~4차 공식 스킬 계수, 타수, 쿨타임 및 추천 딜사이클을 확인하고 실전 전투 시뮬레이션을 실행할 수 있습니다.</div>`;
+    return;
+  }
+
+  const jobData = DATA.jobSkills[jobKey];
+  const jobName = JOB_NAMES[jobKey] || jobKey;
+  const cdrPct = clamp(n('cooldownReductionPct'), 0, 80);
+  const cdrSec = n('cooldownReductionSec');
+  const atkSpeed = n('attackSpeed');
+  const atkInterval = n('attackInterval') || 1;
+  const effectiveInterval = Math.max(0.1, atkInterval / (1 + atkSpeed / 100));
+
+  const STAGE_NAMES = { first: '1차 스킬', second: '2차 스킬', third: '3차 스킬', fourth: '4차 스킬' };
+
+  let html = `<div style="display:flex;flex-direction:column;gap:12px;margin-top:6px;">`;
+
+  html += `
+    <div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div>
+        <strong style="color:var(--primary-dark);font-size:13px;">⚔️ ${escapeHtml(jobName)} 스킬 DB</strong>
+        <span class="badge official" style="margin-left:6px;font-size:10px;">공식 패치 DB 연동</span>
+      </div>
+      <div style="font-size:12px;color:var(--ink);">
+        실제 타격 주기: <b>${effectiveInterval.toFixed(3)}초</b> (공속 ${atkSpeed}% 적용)
+      </div>
+    </div>
+  `;
+
+  jobData.stages.forEach(st => {
+    const stageTitle = STAGE_NAMES[st.id] || st.id;
+    const reqLv = st.id === 'first' ? 10 : st.id === 'second' ? 30 : st.id === 'third' ? 60 : 100;
+    html += `
+      <div style="border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff;">
+        <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          <span>🔹 ${stageTitle}</span>
+          <span style="font-size:11px;color:var(--muted);font-weight:normal;">(해금 Lv.${reqLv})</span>
+        </div>
+        <div style="display:grid;gap:6px;">
+    `;
+
+    (st.active || []).forEach(sk => {
+      const metrics = parseSkillDamageMetrics(sk.effect);
+      const baseCd = parseCooldownSeconds(sk.cooldown);
+      const effCd = baseCd > 0 ? Math.max(4, baseCd * (1 - cdrPct / 100) - cdrSec) : 0;
+      const isBurst = baseCd > 0;
+      const badge = isBurst
+        ? `<span class="badge danger" style="font-size:10px;padding:2px 6px;">쿨타임 (${baseCd}초 → <b>${effCd.toFixed(1)}초</b>)</span>`
+        : `<span class="badge success" style="font-size:10px;padding:2px 6px;">기본 공격</span>`;
+
+      html += `
+        <div style="background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:8px 10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;">
+              <strong style="font-size:13px;color:var(--ink);">${escapeHtml(sk.name)}</strong>
+              ${badge}
+              ${metrics.totalPct > 0 ? `<span style="font-size:11px;font-weight:700;color:var(--primary);">총 계수: ${metrics.totalPct}% (${metrics.multiplierPct}% × ${metrics.hits}타)</span>` : ''}
+            </div>
+            <p style="margin:0;font-size:11px;color:#475467;line-height:1.4;">${escapeHtml(sk.effect)}</p>
+          </div>
+          ${metrics.totalPct > 0 ? `
+            <button type="button" class="button ghost" style="padding:4px 8px;font-size:11px;white-space:nowrap;align-self:center;" onclick="applySkillCoefficient(${metrics.totalPct}, '${escapeHtml(sk.name)}')">
+              🚀 계수 적용
+            </button>
+          ` : ''}
+        </div>
+      `;
+    });
+
+    if (st.passive && st.passive.length > 0) {
+      html += `
+        <div style="margin-top:6px;font-size:11px;color:#64748b;background:rgba(241,245,249,0.7);padding:6px 10px;border-radius:6px;line-height:1.5;">
+          <strong style="color:var(--ink);">패시브:</strong> ${st.passive.map(p => `<span>${escapeHtml(p.name)} (${escapeHtml(p.effect)})</span>`).join(' · ')}
+        </div>
+      `;
+    }
+
+    html += `</div></div>`;
+  });
+
+  html += `
+    <div style="background:linear-gradient(135deg, rgba(99,102,241,0.06), rgba(79,70,229,0.1));border:1px solid rgba(99,102,241,0.25);border-radius:10px;padding:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+        <div>
+          <strong style="font-size:13px;color:var(--primary-dark);">🎯 실전 딜사이클 전투 시뮬레이터</strong>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">공속과 쿨타임 감소를 반영하여 실제 딜사이클 피해량을 측정합니다.</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <select id="simDuration" style="padding:4px 8px;font-size:12px;border:1px solid var(--line);border-radius:6px;background:#fff;">
+            <option value="10">10초 (순간 극딜)</option>
+            <option value="30" selected>30초 (던전/보스 기본)</option>
+            <option value="60">60초 (장기 지속 딜)</option>
+          </select>
+          <button type="button" class="button primary" id="runSimulationBtn" style="padding:4px 12px;font-size:12px;">
+            ⚔️ 시뮬레이션 실행
+          </button>
+        </div>
+      </div>
+      <div id="simulationResultBox"></div>
+    </div>
+  `;
+
+  html += `</div>`;
+  container.innerHTML = html;
+
+  $('runSimulationBtn')?.addEventListener('click', runCombatSimulation);
+}
+
+function runCombatSimulation() {
+  const resultBox = $('simulationResultBox');
+  if (!resultBox) return;
+  const jobKey = $('job')?.value;
+  if (!jobKey || !DATA.jobSkills?.[jobKey]) return;
+
+  const duration = Number($('simDuration')?.value || 30);
+  const inputs = readInputs();
+  const job = DATA.jobSkills[jobKey];
+
+  const activeSkills = [];
+  job.stages.forEach(st => {
+    (st.active || []).forEach(sk => {
+      const metrics = parseSkillDamageMetrics(sk.effect);
+      const baseCd = parseCooldownSeconds(sk.cooldown);
+      activeSkills.push({
+        id: sk.id,
+        name: sk.name,
+        effect: sk.effect,
+        stage: st.id,
+        metrics,
+        baseCooldown: baseCd,
+        isBasic: sk.effect.includes('기본 공격') || baseCd === 0,
+        isBuff: sk.effect.includes('증가') && !sk.effect.includes('피해')
+      });
+    });
+  });
+
+  const basicSkills = activeSkills.filter(s => s.isBasic && !s.isBuff);
+  const primaryBasic = basicSkills[basicSkills.length - 1] || activeSkills[0];
+  const cooldownSkills = activeSkills.filter(s => s.baseCooldown > 0 && !s.isBuff);
+
+  const effectiveInterval = Math.max(0.1, (inputs.attackInterval || 1) / (1 + (inputs.attackSpeed || 0) / 100));
+  const cdrPct = clamp(inputs.cooldownReductionPercent || 0, 0, 80);
+  const cdrSec = inputs.fixedCooldownReductionSeconds || 0;
+
+  cooldownSkills.forEach(s => {
+    let cd = s.baseCooldown * (1 - cdrPct / 100) - cdrSec;
+    s.effectiveCooldown = Math.max(4, cd);
+  });
+
+  let t = 0;
+  const skillUsage = {
+    [primaryBasic.name]: { count: 0, hits: 0, totalPctDamage: 0 }
+  };
+  cooldownSkills.forEach(s => {
+    skillUsage[s.name] = { count: 0, hits: 0, totalPctDamage: 0 };
+  });
+
+  const lastCastTime = {};
+
+  while (t < duration) {
+    let castSkill = null;
+    for (const s of cooldownSkills) {
+      const last = lastCastTime[s.id] ?? -999;
+      if (t - last >= s.effectiveCooldown) {
+        castSkill = s;
+        break;
+      }
+    }
+
+    if (castSkill) {
+      lastCastTime[castSkill.id] = t;
+      skillUsage[castSkill.name].count++;
+      skillUsage[castSkill.name].hits += castSkill.metrics.hits;
+      skillUsage[castSkill.name].totalPctDamage += castSkill.metrics.totalPct;
+      t += effectiveInterval;
+    } else {
+      skillUsage[primaryBasic.name].count++;
+      skillUsage[primaryBasic.name].hits += primaryBasic.metrics.hits;
+      skillUsage[primaryBasic.name].totalPctDamage += primaryBasic.metrics.totalPct;
+      t += effectiveInterval;
+    }
+  }
+
+  let totalPctAll = 0;
+  let totalHitsAll = 0;
+  for (const info of Object.values(skillUsage)) {
+    totalPctAll += info.totalPctDamage;
+    totalHitsAll += info.hits;
+  }
+
+  const damagePer100Pct = calculateDamage({ ...inputs, skillCoefficient: 100 }).average;
+  const totalSimDamage = (totalPctAll / 100) * damagePer100Pct;
+  const simDps = totalSimDamage / duration;
+
+  let resHtml = `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:10px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:8px;margin-bottom:12px;">
+        <div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:1px solid var(--line);">
+          <span style="font-size:11px;color:var(--muted);font-weight:700;">전투 시간</span>
+          <div style="font-size:16px;font-weight:900;color:var(--ink);">${duration}초</div>
+        </div>
+        <div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:1px solid var(--line);">
+          <span style="font-size:11px;color:var(--muted);font-weight:700;">총 타격 횟수</span>
+          <div style="font-size:16px;font-weight:900;color:var(--primary);">${fmt(totalHitsAll)}회</div>
+        </div>
+        <div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:1px solid var(--line);">
+          <span style="font-size:11px;color:var(--muted);font-weight:700;">누적 총 피해량</span>
+          <div style="font-size:16px;font-weight:900;color:var(--primary-dark);">${fmt(totalSimDamage)}</div>
+        </div>
+        <div style="background:#eff6ff;padding:8px 10px;border-radius:6px;border:1px solid #bfdbfe;">
+          <span style="font-size:11px;color:#1e40af;font-weight:700;">실전 시뮬레이션 DPS</span>
+          <div style="font-size:16px;font-weight:900;color:#1d4ed8;">${fmt(simDps)}</div>
+        </div>
+      </div>
+
+      <div style="font-size:12px;font-weight:800;color:var(--ink);margin-bottom:6px;">📊 스킬별 딜 지분율 & 발동 횟수</div>
+      <div style="display:grid;gap:6px;">
+  `;
+
+  for (const [sName, info] of Object.entries(skillUsage)) {
+    if (info.count === 0) continue;
+    const share = totalPctAll > 0 ? (info.totalPctDamage / totalPctAll * 100).toFixed(1) : 0;
+    resHtml += `
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;">
+          <span><b>${escapeHtml(sName)}</b> (시전 ${info.count}회 · ${info.hits}타)</span>
+          <span style="font-weight:800;color:var(--primary);">${share}% (${fmt(info.totalPctDamage)}%)</span>
+        </div>
+        <div style="background:#e2e8f0;height:6px;border-radius:3px;overflow:hidden;">
+          <div style="background:var(--primary);width:${share}%;height:100%;"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  resHtml += `</div></div>`;
+  resultBox.innerHTML = resHtml;
+}
+
 function fillJobs() {
   const sel = $('job');
   if (!sel) return;
@@ -2200,6 +2485,7 @@ function fillJobs() {
   sel.innerHTML = '<option value="">직업 선택</option>';
   Object.entries(jobs).forEach(([id]) => sel.insertAdjacentHTML('beforeend', `<option value="${id}">${JOB_NAMES[id] || id}</option>`));
   renderJobStatMapping();
+  renderJobSkills();
   renderCompanionEffect();
 }
 
@@ -3056,6 +3342,7 @@ function activateTab(tabName) {
 
 function renderAll() {
   renderJobStatMapping();
+  renderJobSkills();
   renderCombat();
   renderCube();
   renderProbability();
@@ -3064,7 +3351,7 @@ function renderAll() {
 
 async function loadData() {
   try {
-    const [combat, stats, jobs, probabilities, potentialProbabilities, companionRuntime, companionRules, stageData, bossData, growthDungeonData, guildData, dropTableData] = await Promise.all([
+    const [combat, stats, jobs, probabilities, potentialProbabilities, companionRuntime, companionRules, stageData, bossData, growthDungeonData, guildData, dropTableData, jobSkills, patchNotes] = await Promise.all([
       fetch('data/combat-rules.json').then(r => r.json()),
       fetch('data/stat-rules.json').then(r => r.json()),
       fetch('data/job-stats.json').then(r => r.json()),
@@ -3076,13 +3363,16 @@ async function loadData() {
       fetch('data/boss-data.json').then(r => r.json()),
       fetch('data/growth-dungeon-data.json').then(r => r.json()),
       fetch('data/guild-data.json').then(r => r.json()),
-      fetch('data/drop-table-data.json').then(r => r.json())
+      fetch('data/drop-table-data.json').then(r => r.json()),
+      fetch('data/job-skills.json').then(r => r.json()),
+      fetch('data/official-patch-notes.json').then(r => r.json())
     ]);
     Object.assign(DATA, {
-      combat, stats, jobs, probabilities, potentialProbabilities, companionRuntime, companionRules, stageData, bossData, growthDungeonData, guildData, dropTableData
+      combat, stats, jobs, probabilities, potentialProbabilities, companionRuntime, companionRules, stageData, bossData, growthDungeonData, guildData, dropTableData, jobSkills, patchNotes
     });
     companionDatabase = companionRuntime;
     fillJobs();
+    renderJobSkills();
     fillStageChapters();
     loadLocal();
     fillStageChapters();
@@ -3136,16 +3426,22 @@ function bind() {
   });
 
   // Character & Target input change events
-  document.querySelectorAll('#characterForm input,#characterForm select,#targetForm input,#targetForm select').forEach(el => {
-    el.addEventListener('input', () => {
-      renderCompanionEffect();
-      if (['stageMode', 'stageChapter'].includes(el.id)) {
-        if (el.id === 'stageMode') fillStageChapters(); else fillStages();
-      } else if (el.id === 'stageSelect') {
-        applyStageTarget();
-        renderStageInfo();
-      }
-      renderCombat();
+  ['input', 'change'].forEach(evt => {
+    document.querySelectorAll('#characterForm input,#characterForm select,#targetForm input,#targetForm select').forEach(el => {
+      el.addEventListener(evt, () => {
+        renderCompanionEffect();
+        if (el.id === 'job') {
+          renderJobStatMapping();
+          renderJobSkills();
+        }
+        if (['stageMode', 'stageChapter'].includes(el.id)) {
+          if (el.id === 'stageMode') fillStageChapters(); else fillStages();
+        } else if (el.id === 'stageSelect') {
+          applyStageTarget();
+          renderStageInfo();
+        }
+        renderCombat();
+      });
     });
   });
 
