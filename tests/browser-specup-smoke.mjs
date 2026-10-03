@@ -1,0 +1,212 @@
+/**
+ * Automated Headless Browser End-to-End Test for Spec-Up Optimizer
+ * Uses Chrome/Edge CDP via native WebSocket in Node 24.
+ */
+import { spawn } from 'node:child_process';
+import assert from 'node:assert/strict';
+
+const EDGE_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
+const PORT = 9222;
+const APP_URL = 'http://127.0.0.1:8000/index.html';
+
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function main() {
+  console.log('Launching headless browser for E2E Spec-Up testing...');
+  const browserProc = spawn(EDGE_PATH, [
+    '--headless=new',
+    `--remote-debugging-port=${PORT}`,
+    '--no-first-run',
+    '--no-default-browser-check',
+    '--disable-gpu',
+    'about:blank'
+  ], { stdio: 'ignore' });
+
+  try {
+    // Wait for CDP endpoint to be ready
+    let versionData = null;
+    for (let i = 0; i < 20; i++) {
+      await sleep(300);
+      try {
+        const res = await fetch(`http://127.0.0.1:${PORT}/json/version`);
+        if (res.ok) {
+          versionData = await res.json();
+          break;
+        }
+      } catch {}
+    }
+
+    assert.ok(versionData, 'CDP endpoint must respond on port ' + PORT);
+    console.log('CDP browser ready:', versionData.Browser);
+
+    // Create a new tab / target
+    const newTabRes = await fetch(`http://127.0.0.1:${PORT}/json/new?${encodeURIComponent(APP_URL)}`, { method: 'PUT' });
+    const tabData = await newTabRes.json();
+    const wsUrl = tabData.webSocketDebuggerUrl;
+    assert.ok(wsUrl, 'Must have WebSocket debugger URL');
+
+    const ws = new WebSocket(wsUrl);
+
+    let nextId = 1;
+    const pending = new Map();
+
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.id && pending.has(msg.id)) {
+        const { resolve, reject } = pending.get(msg.id);
+        pending.delete(msg.id);
+        if (msg.error) reject(new Error(msg.error.message));
+        else resolve(msg.result);
+      }
+    };
+
+    await new Promise((resolve, reject) => {
+      ws.onopen = resolve;
+      ws.onerror = reject;
+    });
+
+    async function send(method, params = {}) {
+      const id = nextId++;
+      return new Promise((resolve, reject) => {
+        pending.set(id, { resolve, reject });
+        ws.send(JSON.stringify({ id, method, params }));
+      });
+    }
+
+    async function evaluate(expression) {
+      const res = await send('Runtime.evaluate', {
+        expression,
+        returnByValue: true,
+        awaitPromise: true
+      });
+      if (res.exceptionDetails) {
+        throw new Error(res.exceptionDetails.exception?.description || res.exceptionDetails.text);
+      }
+      return res.result?.value;
+    }
+
+    console.log('Connected via CDP WebSocket. Waiting for page data to load...');
+    await send('Page.enable');
+    await send('Runtime.enable');
+
+    // Wait until DATA is loaded and status strip indicates ready
+    let loaded = false;
+    for (let i = 0; i < 30; i++) {
+      await sleep(300);
+      const isReady = await evaluate(`
+        Boolean(document.getElementById('dataStatus')?.textContent?.includes('로드 완료'))
+      `);
+      if (isReady) {
+        loaded = true;
+        break;
+      }
+    }
+    assert.ok(loaded, 'Page must load data and show 로드 완료 in status strip');
+    console.log('Page & data loaded successfully.');
+
+    // Step 1: Switch to Spec-Up Tab
+    console.log('Step 1: Clicking [data-tab="specup"] button...');
+    const tabSwitchRes = await evaluate(`(() => {
+      const btn = document.querySelector('.tab[data-tab="specup"]');
+      if (!btn) return { error: 'Tab button not found' };
+      btn.click();
+      const panel = document.querySelector('.tab-panel[data-panel="specup"]');
+      return {
+        tabActive: btn.classList.contains('active'),
+        panelActive: panel ? panel.classList.contains('active') : false
+      };
+    })()`);
+    assert.ok(tabSwitchRes.tabActive, 'Spec-Up tab must be active');
+    assert.ok(tabSwitchRes.panelActive, 'Spec-Up tab panel must be active');
+    console.log('  -> Tab switched to Spec-Up successfully.');
+
+    // Step 2: Verify Equipment Table
+    console.log('Step 2: Checking equipment table rows...');
+    const rowCount = await evaluate(`document.querySelectorAll('#specupEquipTableBody tr').length`);
+    assert.equal(rowCount, 8, 'Must have 8 equipment rows rendered');
+    const firstEqName = await evaluate(`document.querySelector('#specupEquipTableBody tr input[data-field="name"]').value`);
+    assert.ok(firstEqName.includes('앱솔랩스'), 'Default preset should be 120 Absolab');
+    console.log(`  -> 8 equipment rows verified. First item: "${firstEqName}"`);
+
+    // Step 3: Test Presets Switching
+    console.log('Step 3: Testing 100제 / 140제 / 120제 preset buttons...');
+    await evaluate(`document.getElementById('specupPreset100Btn').click()`);
+    const name100 = await evaluate(`document.querySelector('#specupEquipTableBody tr input[data-field="name"]').value`);
+    assert.ok(name100.includes('파프니르'), '100제 preset must populate Fafnir equipment');
+
+    await evaluate(`document.getElementById('specupPreset140Btn').click()`);
+    const name140 = await evaluate(`document.querySelector('#specupEquipTableBody tr input[data-field="name"]').value`);
+    assert.ok(name140.includes('아케인셰이드'), '140제 preset must populate Arcane Shade equipment');
+
+    await evaluate(`document.getElementById('specupPreset120Btn').click()`);
+    const name120 = await evaluate(`document.querySelector('#specupEquipTableBody tr input[data-field="name"]').value`);
+    assert.ok(name120.includes('앱솔랩스'), '120제 preset restored Absolab equipment');
+    console.log('  -> Preset switching works seamlessly.');
+
+    // Step 4: Standalone Starforce Calculator Test
+    console.log('Step 4: Testing Standalone Starforce Calculator...');
+    await evaluate(`(() => {
+      document.getElementById('sfStandaloneStart').value = 10;
+      document.getElementById('sfStandaloneTarget').value = 12;
+      document.getElementById('runSfStandaloneBtn').click();
+    })()`);
+    const sfResultHtml = await evaluate(`document.getElementById('sfStandaloneResult').innerHTML`);
+    assert.ok(sfResultHtml.includes('기대 소모 메소'), 'SF result must display expected meso');
+    assert.ok(sfResultHtml.includes('기대 시도 횟수'), 'SF result must display expected attempts');
+    console.log('  -> Standalone Starforce Calculator rendered expected costs properly.');
+
+    // Step 5: Standalone Scroll Calculator Test
+    console.log('Step 5: Testing Standalone Scroll Calculator...');
+    await evaluate(`(() => {
+      document.getElementById('scrollStandaloneSuccess').value = 8;
+      document.getElementById('runScrollStandaloneBtn').click();
+    })()`);
+    const scrollResultHtml = await evaluate(`document.getElementById('scrollStandaloneResult').innerHTML`);
+    assert.ok(scrollResultHtml.includes('기대 주문서 소모량'), 'Scroll result must display expected scrolls');
+    assert.ok(scrollResultHtml.includes('순백'), 'Scroll result must display clean slate recovery info');
+    console.log('  -> Standalone Scroll Calculator rendered expectations properly.');
+
+    // Step 6: Full Portfolio Spec-Up Optimizer Execution
+    console.log('Step 6: Executing Full Portfolio Spec-Up Optimizer...');
+    await evaluate(`(() => {
+      document.getElementById('specupBudgetMeso').value = 50000000;
+      document.getElementById('specupMaxSteps').value = 15;
+      document.getElementById('runSpecupOptimizerBtn').click();
+    })()`);
+
+    const summaryText = await evaluate(`document.getElementById('specupDpsSummary').textContent`);
+    const gainPctText = await evaluate(`document.getElementById('specupDpsGainPct').textContent`);
+    const powerText = await evaluate(`document.getElementById('specupPowerSummary').textContent`);
+    const stepsCountText = await evaluate(`document.getElementById('specupStepsCount').textContent`);
+    const roadmapCardCount = await evaluate(`document.querySelectorAll('#specupRoadmapList .roadmap-card').length`);
+
+    console.log(`  DPS Summary: ${summaryText} (${gainPctText})`);
+    console.log(`  Power Summary: ${powerText}`);
+    console.log(`  Roadmap Steps: ${stepsCountText} (${roadmapCardCount} cards rendered)`);
+
+    assert.ok(summaryText.includes('➔'), 'DPS summary must display transition');
+    assert.ok(gainPctText.includes('%'), 'Gain pct must display percentage');
+    assert.ok(roadmapCardCount > 0, 'Roadmap cards must be rendered');
+
+    // Inspect first roadmap card details
+    const firstCardRank = await evaluate(`document.querySelector('#specupRoadmapList .roadmap-card .roadmap-rank').textContent`);
+    const firstCardTitle = await evaluate(`document.querySelector('#specupRoadmapList .roadmap-card .roadmap-title').textContent`);
+    const firstCardRoi = await evaluate(`document.querySelector('#specupRoadmapList .roadmap-card .roi-badge').textContent`);
+    console.log(`  First recommendation: [${firstCardRank}] ${firstCardTitle} (${firstCardRoi})`);
+
+    assert.equal(firstCardRank, '#1', 'First card must be rank #1');
+    assert.ok(firstCardRoi.includes('1만 메소당'), 'Must display ROI metric');
+
+    ws.close();
+    console.log('✅ ALL BROWSER E2E TESTS PASSED WITH 100% SUCCESS!');
+  } finally {
+    browserProc.kill();
+  }
+}
+
+main().catch(err => {
+  console.error('❌ Browser E2E Test Failed:', err);
+  process.exit(1);
+});

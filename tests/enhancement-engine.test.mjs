@@ -136,7 +136,76 @@ for (let i = 0; i < roadmap.steps.length; i++) {
   assert.ok(step.roi >= 0, `Step ${i + 1} ROI must be non-negative`);
 }
 
-console.log('enhancement-engine tests passed cleanly!');
+// 6. Edge Case Tests
+// Case 6A: Zero Budget
+const zeroBudgetRes = optimizeSpecUpPath({
+  budgetMeso: 0,
+  playerInputs: baseStats,
+  equipmentList: equips,
+  enhancementRules,
+  starforceProbabilities: probabilities.starforce,
+  potentialProbabilities: probabilities.normalPotentialPartial,
+  combatRules
+});
+assert.equal(zeroBudgetRes.steps.length, 0, 'Zero budget must produce 0 steps');
+assert.equal(zeroBudgetRes.initialDps, zeroBudgetRes.finalDps, 'Zero budget must keep DPS unchanged');
+assert.equal(zeroBudgetRes.budgetUsed, 0, 'Zero budget must use 0 meso');
+
+// Case 6B: Insufficient Budget (100 meso)
+const tinyBudgetRes = optimizeSpecUpPath({
+  budgetMeso: 100,
+  playerInputs: baseStats,
+  equipmentList: equips,
+  enhancementRules,
+  starforceProbabilities: probabilities.starforce,
+  potentialProbabilities: probabilities.normalPotentialPartial,
+  combatRules
+});
+assert.equal(tinyBudgetRes.steps.length, 0, 'Tiny budget insufficient for any upgrade must produce 0 steps');
+
+// Case 6C: Already Maxed Equipment
+const maxedEquips = [
+  { name: '종결 무기', slotType: 'weapon', itemLevel: 140, currentStar: 15, maxStar: 15, scrollSlotsTotal: 8, scrollSlotsUsed: 8, cubeGrade: 'legendary' }
+];
+const maxedRes = optimizeSpecUpPath({
+  budgetMeso: 100000000,
+  playerInputs: baseStats,
+  equipmentList: maxedEquips,
+  enhancementRules,
+  starforceProbabilities: probabilities.starforce,
+  potentialProbabilities: probabilities.normalPotentialPartial,
+  combatRules
+});
+assert.equal(maxedRes.steps.length, 0, 'Maxed equipment must produce 0 steps');
+
+// Case 6D: Large Budget (500M meso) with high step cap
+const bigBudgetRes = optimizeSpecUpPath({
+  budgetMeso: 500000000,
+  playerInputs: baseStats,
+  equipmentList: equips,
+  enhancementRules,
+  starforceProbabilities: probabilities.starforce,
+  potentialProbabilities: probabilities.normalPotentialPartial,
+  combatRules,
+  maxSteps: 30
+});
+assert.ok(bigBudgetRes.steps.length > 5, 'Big budget must yield multiple upgrade steps');
+assert.ok(bigBudgetRes.finalDps > roadmap.finalDps, 'Larger budget must yield equal or greater DPS than 50M budget');
+
+// 7. Markov Chain & Scroll Invariants
+// Invariant 7A: In safe zone (0~5 stars), path is strictly additive
+const sf0to3 = calculateStarforcePath(0, 3, { itemLevel: 120, slotType: 'weapon', probabilities: probabilities.starforce, rules: enhancementRules.starforce });
+const sf3to5 = calculateStarforcePath(3, 5, { itemLevel: 120, slotType: 'weapon', probabilities: probabilities.starforce, rules: enhancementRules.starforce });
+const sf0to5_check = calculateStarforcePath(0, 5, { itemLevel: 120, slotType: 'weapon', probabilities: probabilities.starforce, rules: enhancementRules.starforce });
+assert.ok(Math.abs((sf0to3.totalCost + sf3to5.totalCost) - sf0to5_check.totalCost) < 1, 'Safe starforce path cost must be strictly additive');
+
+// Invariant 7B: 15% scroll requires strictly more attempts and clean slates than 70% scroll
+const sc15 = calculateScrollEnhancement(0, 5, 'scroll15', { slotType: 'weapon', rules: enhancementRules });
+const sc70_5 = calculateScrollEnhancement(0, 5, 'scroll70', { slotType: 'weapon', rules: enhancementRules });
+assert.ok(sc15.expectedScrolls > sc70_5.expectedScrolls, '15% scroll expects more scrolls than 70%');
+assert.ok(sc15.expectedCleanSlates > sc70_5.expectedCleanSlates, '15% scroll expects more clean slates than 70%');
+
+console.log('enhancement-engine tests (including edge cases & invariants) passed cleanly!');
 console.log(`Initial DPS: ${roadmap.initialDps.toFixed(1)} -> Final DPS: ${roadmap.finalDps.toFixed(1)} (+${roadmap.totalDpsGainPct.toFixed(2)}%)`);
 console.log(`Budget Used: ${roadmap.budgetUsed.toLocaleString()} / ${roadmap.budgetTotal.toLocaleString()} meso across ${roadmap.steps.length} steps`);
 console.log('Top recommended initial steps:');
