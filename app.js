@@ -260,28 +260,6 @@ function initOcrModal(){
     return matched ? total : null;
   }
 
-  const STAT_LABELS = {
-    attackFlat: '공격력 (+)',
-    attackPct: '공격력%',
-    mainStat: '주스탯 (+)',
-    mainStatPct: '주스탯%',
-    subStat: '부스탯 (+)',
-    playerDefense: '캐릭터 방어력',
-    maxHp: '최대 HP',
-    damage: '데미지%',
-    damageAmp: '데미지 증폭%',
-    finalDamage: '최종 데미지%',
-    bossDamage: '보스 몬스터 데미지%',
-    normalDamage: '일반 몬스터 데미지%',
-    critRate: '크리티컬 확률%',
-    critDamage: '크리티컬 데미지%',
-    defPen: '방어 관통력%',
-    attackSpeed: '공격 속도%',
-    minDamage: '최소 데미지 배율%',
-    maxDamage: '최대 데미지 배율%',
-    basicDamage: '기본 공격 데미지%',
-    skillDamage: '스킬 데미지%'
-  };
 
   const STAT_LABELS = {
     attackFlat: '공격력 (+)',

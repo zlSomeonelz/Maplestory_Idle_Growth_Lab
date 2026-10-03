@@ -115,5 +115,12 @@ const dropData = JSON.parse(fs.readFileSync('data/drop-table-data.json', 'utf8')
 assert.ok(dropData.pq_meta.first, 'dropTableData should contain PQ metadata for first companion');
 assert.ok(dropData.rates.easy.normal, 'dropTableData should contain rates');
 
+// Syntax & Identifier Integrity Test for app.js
+import vm from 'node:vm';
+const appCode = fs.readFileSync('app.js', 'utf8');
+assert.doesNotThrow(() => {
+  new vm.Script(appCode.replace(/^import\s+.*?;\s*$/gm, ''));
+}, 'app.js must parse cleanly without syntax or redeclaration errors');
+
 console.log('engine tests passed');
 
