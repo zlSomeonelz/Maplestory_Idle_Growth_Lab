@@ -248,6 +248,22 @@ export function subtractStatGains(baseInputs, statGains = {}) {
   return out;
 }
 
+export function getEquipmentCubeStats(equip = {}) {
+  if (Array.isArray(equip.potentialLines) && equip.potentialLines.length > 0) {
+    const stats = {};
+    for (const line of equip.potentialLines) {
+      if (!line || !line.stat || line.stat === 'NONE') continue;
+      const val = Number(line.value) || 0;
+      if (val > 0) {
+        stats[line.stat] = (stats[line.stat] || 0) + val;
+      }
+    }
+    return stats;
+  }
+  const lines = equip.cubeValidLines !== undefined ? Number(equip.cubeValidLines) : 1;
+  return getCubeStatProfile(equip.slotType || 'armor', equip.cubeGrade || 'epic', lines);
+}
+
 export function getCubeStatProfile(slotType = 'armor', grade = 'epic', validLines = 1) {
   const lines = Math.max(0, Math.min(3, Number(validLines) || 0));
   if (lines === 0) return {};
@@ -271,6 +287,170 @@ export function getCubeStatProfile(slotType = 'armor', grade = 'epic', validLine
   if (grade === 'epic') return lines >= 2 ? { mainStatPct: 12 } : { mainStatPct: 6 };
   if (grade === 'unique') return lines >= 2 ? { mainStatPct: 15 } : { mainStatPct: 9 };
   return lines >= 2 ? { mainStatPct: 21 } : { mainStatPct: 12 };
+}
+
+/**
+ * MekiCalc-Style Single Equipment Cube Evaluator & Action Recommendation.
+ * Evaluates current potential lines, computes expected cost to improve, dynamic DPS delta & ROI,
+ * and outputs a concrete stop-line verdict ('STOP', 'REROLL', 'TIER_UP', 'KEEP').
+ */
+export function recommendCubeAction(equip, playerStats = {}, combatRules = {}, enhancementRules = {}) {
+  const grade = equip.cubeGrade || 'epic';
+  const slotType = equip.slotType || 'armor';
+  const currentCubeStats = getEquipmentCubeStats(equip);
+  const statsWithoutItem = subtractStatGains(playerStats, currentCubeStats);
+
+  const initialDpsRes = calculateDamage(playerStats, combatRules);
+  const currentDps = getEffectiveDPS(initialDpsRes);
+
+  const linesCount = Array.isArray(equip.potentialLines) && equip.potentialLines.length > 0
+    ? equip.potentialLines.filter(l => l && l.stat && l.stat !== 'NONE' && Number(l.value) > 0).length
+    : (equip.cubeValidLines !== undefined ? Number(equip.cubeValidLines) : 1);
+
+  const costPerTry = enhancementRules?.cubeCosts?.[grade] || (
+    grade === 'rare' ? 80000 : grade === 'epic' ? 200000 : grade === 'unique' ? 600000 : 1500000
+  );
+
+  // 1. Path A: Reroll at current grade
+  let rerollTargetLines = Math.min(2, linesCount + 1);
+  if (linesCount >= 2) rerollTargetLines = 3;
+  const expectedRerollTries = linesCount === 0 ? 8 : (linesCount === 1 ? 28 : 250);
+  const expectedRerollCost = expectedRerollTries * costPerTry;
+  const rerollStats = getCubeStatProfile(slotType, grade, rerollTargetLines);
+  const rerollTestInputs = applyStatGains(statsWithoutItem, rerollStats);
+  const rerollDpsRes = calculateDamage(rerollTestInputs, combatRules);
+  const rerollDps = getEffectiveDPS(rerollDpsRes);
+  const rerollDpsDelta = Math.max(0, rerollDps - currentDps);
+  const rerollGainPct = currentDps > 0 ? (rerollDpsDelta / currentDps) * 100 : 0;
+  const rerollRoi = expectedRerollCost > 0 ? (rerollGainPct / (expectedRerollCost / 1000000)) : 0;
+
+  // 2. Path B: Tier-Up (if not legendary)
+  let tierUpCost = 0;
+  let tierUpGainPct = 0;
+  let tierUpRoi = 0;
+  let tierUpDpsDelta = 0;
+  let nextGrade = grade;
+  if (grade !== 'legendary') {
+    nextGrade = grade === 'rare' ? 'epic' : grade === 'epic' ? 'unique' : 'legendary';
+    const expectedTierUpTries = nextGrade === 'epic' ? 20 : (nextGrade === 'unique' ? 45 : 100);
+    tierUpCost = expectedTierUpTries * costPerTry;
+    const tierUpStats = getCubeStatProfile(slotType, nextGrade, Math.max(1, linesCount));
+    const tierUpTestInputs = applyStatGains(statsWithoutItem, tierUpStats);
+    const tierUpDpsRes = calculateDamage(tierUpTestInputs, combatRules);
+    const tierUpDps = getEffectiveDPS(tierUpDpsRes);
+    tierUpDpsDelta = Math.max(0, tierUpDps - currentDps);
+    tierUpGainPct = currentDps > 0 ? (tierUpDpsDelta / currentDps) * 100 : 0;
+    tierUpRoi = tierUpCost > 0 ? (tierUpGainPct / (tierUpCost / 1000000)) : 0;
+  }
+
+  // Verdict Decision
+  let verdict = 'KEEP';
+  let verdictLabel = '⏸️ 임시 유지';
+  let badgeColor = '#475467';
+  let reason = '';
+  let chosenTarget = null;
+
+  const hasCritDamage = Number(currentCubeStats.critDamage || 0) >= 2;
+  const hasHighAttack = Number(currentCubeStats.attackPct || 0) >= 9 || (Number(currentCubeStats.attackPct || 0) >= 6 && Number(currentCubeStats.bossDamage || 0) >= 6);
+
+  if (linesCount >= 2 || (slotType === 'glove' && hasCritDamage && grade !== 'rare') || (slotType === 'weapon' && hasHighAttack && grade !== 'rare')) {
+    verdict = 'STOP';
+    verdictLabel = '🛑 스톱 (졸업 권장)';
+    badgeColor = '#0b7a58';
+    reason = '현재 옵션이 2줄 유효 이상이거나 핵심 극옵(크뎀/공보공)을 확보한 가성비 종결 상태입니다. 3줄 극옵 도전은 비용 대비 효율이 급감하므로 즉시 스톱하고 스타포스/주문서에 자원을 투자하세요.';
+    chosenTarget = {
+      type: 'reroll',
+      description: '3줄 극옵 도전 (비권장)',
+      cost: expectedRerollCost,
+      dpsDelta: rerollDpsDelta,
+      dpsGainPct: rerollGainPct,
+      roiPerMillion: rerollRoi
+    };
+  } else if (linesCount === 0) {
+    verdict = 'REROLL';
+    verdictLabel = '🔄 최우선 리롤';
+    badgeColor = '#b42318';
+    reason = '현재 유효 옵션이 없는 잡옵 상태입니다. 평균 8회 내외의 적은 비용으로 유효 1줄(공%/크뎀/주스탯)을 확보할 수 있어 100만 메소당 딜 상승 효율(ROI)이 전 부위 중 가장 높습니다.';
+    chosenTarget = {
+      type: 'reroll',
+      description: `${grade} 유효 1줄 확보`,
+      cost: expectedRerollCost,
+      dpsDelta: rerollDpsDelta,
+      dpsGainPct: rerollGainPct,
+      roiPerMillion: rerollRoi
+    };
+  } else if (grade === 'rare' || (slotType === 'glove' && grade === 'epic')) {
+    verdict = 'TIER_UP';
+    verdictLabel = '⬆️ 등급업 권장';
+    badgeColor = '#7c3aed';
+    reason = slotType === 'glove'
+      ? '장갑은 유니크 등급 이상에서 크리티컬 데미지%(핵심 스탯)가 출현합니다. 에픽 1줄에 머무르지 말고 유니크 등급업을 노리세요.'
+      : '레어 등급은 잠재능력 수치 상한이 낮습니다. 에픽 등급으로 승급하여 유효 퍼센트 옵션을 확보하세요.';
+    chosenTarget = {
+      type: 'tier_up',
+      description: `${nextGrade} 등급업`,
+      cost: tierUpCost,
+      dpsDelta: tierUpDpsDelta,
+      dpsGainPct: tierUpGainPct,
+      roiPerMillion: tierUpRoi
+    };
+  } else {
+    verdict = 'KEEP';
+    verdictLabel = '⏸️ 임시 유지';
+    badgeColor = '#d97706';
+    reason = '유효 1줄을 확보하여 가성비 라인을 달성했습니다. 잡옵(0줄) 부위 리롤이나 스타포스(10~15성)를 먼저 완료한 후 다음 단계로 넘어가세요.';
+    const pickTierUp = tierUpRoi > rerollRoi && grade !== 'legendary';
+    chosenTarget = pickTierUp ? {
+      type: 'tier_up',
+      description: `${nextGrade} 등급업`,
+      cost: tierUpCost,
+      dpsDelta: tierUpDpsDelta,
+      dpsGainPct: tierUpGainPct,
+      roiPerMillion: tierUpRoi
+    } : {
+      type: 'reroll',
+      description: `${grade} 유효 2줄 도전`,
+      cost: expectedRerollCost,
+      dpsDelta: rerollDpsDelta,
+      dpsGainPct: rerollGainPct,
+      roiPerMillion: rerollRoi
+    };
+  }
+
+  return {
+    equipmentId: equip.id,
+    equipmentName: equip.name,
+    slotType,
+    cubeGrade: grade,
+    currentLinesCount: linesCount,
+    currentStats: currentCubeStats,
+    currentDps,
+    verdict,
+    verdictLabel,
+    badgeColor,
+    reason,
+    target: chosenTarget
+  };
+}
+
+/**
+ * Evaluates and ranks all equipment slots by cube investment priority (MekiCalc Leaderboard).
+ * Highest priority (Reroll with high ROI) -> Tier-Up -> Keep -> Stop.
+ */
+export function rankAllEquipmentCubes(equipmentList = [], playerStats = {}, combatRules = {}, enhancementRules = {}) {
+  const recommendations = equipmentList.map(eq =>
+    recommendCubeAction(eq, playerStats, combatRules, enhancementRules)
+  );
+
+  const priorityOrder = { REROLL: 1, TIER_UP: 2, KEEP: 3, STOP: 4 };
+
+  return recommendations.sort((a, b) => {
+    const pA = priorityOrder[a.verdict] || 5;
+    const pB = priorityOrder[b.verdict] || 5;
+    if (pA !== pB) return pA - pB;
+    // Within same verdict group, sort by 100만 메소당 ROI descending
+    return (b.target?.roiPerMillion || 0) - (a.target?.roiPerMillion || 0);
+  });
 }
 
 /**
@@ -322,7 +502,8 @@ export function optimizeSpecUpPath({
     scrollSlotsTotal: Number(eq.scrollSlotsTotal) || 8,
     scrollSlotsUsed: Number(eq.scrollSlotsUsed) || 0,
     cubeGrade: eq.cubeGrade || 'epic', // 'rare', 'epic', 'unique', 'legendary'
-    cubeValidLines: Math.min(3, Math.max(0, Number(eq.cubeValidLines !== undefined ? eq.cubeValidLines : 1)))
+    cubeValidLines: Math.min(3, Math.max(0, Number(eq.cubeValidLines !== undefined ? eq.cubeValidLines : 1))),
+    potentialLines: Array.isArray(eq.potentialLines) ? JSON.parse(JSON.stringify(eq.potentialLines)) : null
   }));
 
   const steps = [];
@@ -407,7 +588,7 @@ export function optimizeSpecUpPath({
     for (const eq of equips) {
       const currentLines = eq.cubeValidLines;
       const currentGrade = eq.cubeGrade;
-      const currentCubeStats = getCubeStatProfile(eq.slotType, currentGrade, currentLines);
+      const currentCubeStats = getEquipmentCubeStats(eq);
       const cubeCost = enhancementRules.cubeCosts?.[currentGrade] || 200000;
 
       // 3A. Reroll at current grade to gain +1 valid line (if lines < 2)
@@ -500,6 +681,7 @@ export function optimizeSpecUpPath({
     } else if (chosen.type === 'cube') {
       chosen.equipment.cubeGrade = chosen.targetGrade;
       chosen.equipment.cubeValidLines = chosen.targetValidLines;
+      chosen.equipment.potentialLines = null;
       currentStats = subtractStatGains(currentStats, chosen.oldCubeStats);
       currentStats = applyStatGains(currentStats, chosen.newCubeStats);
     }

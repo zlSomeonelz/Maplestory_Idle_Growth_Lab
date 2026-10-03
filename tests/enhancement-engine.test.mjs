@@ -205,6 +205,100 @@ const sc70_5 = calculateScrollEnhancement(0, 5, 'scroll70', { slotType: 'weapon'
 assert.ok(sc15.expectedScrolls > sc70_5.expectedScrolls, '15% scroll expects more scrolls than 70%');
 assert.ok(sc15.expectedCleanSlates > sc70_5.expectedCleanSlates, '15% scroll expects more clean slates than 70%');
 
+// 8. MekiCalc Cube Recommendation & Slot Analysis Tests
+import {
+  recommendCubeAction,
+  rankAllEquipmentCubes,
+  getEquipmentCubeStats
+} from '../enhancement-engine.mjs';
+
+// 8.1 getEquipmentCubeStats with explicit lines vs fallback
+const eqWithLines = {
+  slotType: 'weapon',
+  cubeGrade: 'unique',
+  potentialLines: [
+    { stat: 'attackPct', value: 9, label: '공격력 +9%' },
+    { stat: 'bossDamage', value: 12, label: '보스 데미지 +12%' },
+    { stat: 'NONE', value: 0, label: '잡옵' }
+  ]
+};
+const statsFromLines = getEquipmentCubeStats(eqWithLines);
+assert.equal(statsFromLines.attackPct, 9);
+assert.equal(statsFromLines.bossDamage, 12);
+assert.equal(statsFromLines.mainStatPct, undefined);
+
+const eqFallback = { slotType: 'weapon', cubeGrade: 'unique', cubeValidLines: 1 };
+const statsFallback = getEquipmentCubeStats(eqFallback);
+assert.equal(statsFallback.attackPct, 9);
+
+// 8.2 recommendCubeAction verdicts
+// 8.2A REROLL for 0-line item (garbage lines)
+const eqGarbage = {
+  id: 'hat',
+  name: '앱솔랩스 모자',
+  slotType: 'armor',
+  cubeGrade: 'epic',
+  cubeValidLines: 0,
+  potentialLines: [
+    { stat: 'NONE', value: 0 },
+    { stat: 'NONE', value: 0 },
+    { stat: 'NONE', value: 0 }
+  ]
+};
+const recGarbage = recommendCubeAction(eqGarbage, baseStats, combatRules, enhancementRules);
+assert.equal(recGarbage.verdict, 'REROLL', '0-line item must have REROLL verdict');
+assert.ok(recGarbage.target.roiPerMillion > 0, 'Reroll on 0-line item must yield positive ROI');
+
+// 8.2B TIER_UP for rare item
+const eqRare = {
+  id: 'cape',
+  name: '앱솔랩스 망토',
+  slotType: 'armor',
+  cubeGrade: 'rare',
+  cubeValidLines: 1
+};
+const recRare = recommendCubeAction(eqRare, baseStats, combatRules, enhancementRules);
+assert.equal(recRare.verdict, 'TIER_UP', 'Rare item must recommend TIER_UP');
+
+// 8.2C STOP for 2-line unique weapon
+const eqFinished = {
+  id: 'weapon',
+  name: '앱솔랩스 무기',
+  slotType: 'weapon',
+  cubeGrade: 'unique',
+  cubeValidLines: 2,
+  potentialLines: [
+    { stat: 'attackPct', value: 9 },
+    { stat: 'bossDamage', value: 12 },
+    { stat: 'NONE', value: 0 }
+  ]
+};
+const recFinished = recommendCubeAction(eqFinished, baseStats, combatRules, enhancementRules);
+assert.equal(recFinished.verdict, 'STOP', '2-line unique weapon must have STOP verdict');
+
+// 8.2D STOP for unique glove with crit damage
+const eqGlove = {
+  id: 'glove',
+  name: '앱솔랩스 장갑',
+  slotType: 'glove',
+  cubeGrade: 'unique',
+  cubeValidLines: 1,
+  potentialLines: [
+    { stat: 'critDamage', value: 4 },
+    { stat: 'NONE', value: 0 },
+    { stat: 'NONE', value: 0 }
+  ]
+};
+const recGlove = recommendCubeAction(eqGlove, baseStats, combatRules, enhancementRules);
+assert.equal(recGlove.verdict, 'STOP', 'Unique glove with crit damage must have STOP verdict');
+
+// 8.3 rankAllEquipmentCubes Leaderboard sorting
+const testEquips = [eqFinished, eqGarbage, eqRare, eqGlove];
+const ranked = rankAllEquipmentCubes(testEquips, baseStats, combatRules, enhancementRules);
+assert.equal(ranked[0].equipmentId, 'hat', 'First recommendation must be the 0-line REROLL item');
+assert.equal(ranked[1].equipmentId, 'cape', 'Second recommendation should be TIER_UP item');
+assert.ok(ranked[ranked.length - 1].verdict === 'STOP', 'Last recommendations must be STOP items');
+
 console.log('enhancement-engine tests (including edge cases & invariants) passed cleanly!');
 console.log(`Initial DPS: ${roadmap.initialDps.toFixed(1)} -> Final DPS: ${roadmap.finalDps.toFixed(1)} (+${roadmap.totalDpsGainPct.toFixed(2)}%)`);
 console.log(`Budget Used: ${roadmap.budgetUsed.toLocaleString()} / ${roadmap.budgetTotal.toLocaleString()} meso across ${roadmap.steps.length} steps`);
@@ -212,3 +306,4 @@ console.log('Top recommended initial steps:');
 roadmap.steps.slice(0, 3).forEach((s, idx) => {
   console.log(`  ${idx + 1}. ${s.description} (비용: ${Math.round(s.cost).toLocaleString()} 메소, DPS +${s.dpsGainPct.toFixed(2)}%, ROI: ${s.roi.toFixed(4)})`);
 });
+console.log(`MekiCalc Cube Leaderboard verified (${ranked.length} items evaluated): #1 ${ranked[0].equipmentName} [${ranked[0].verdictLabel}]`);

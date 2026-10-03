@@ -199,6 +199,42 @@ async function main() {
     assert.equal(firstCardRank, '#1', 'First card must be rank #1');
     assert.ok(firstCardRoi.includes('1만 메소당'), 'Must display ROI metric');
 
+    // Step 7: MekiCalc Cube Leaderboard & 3-Line Modal Test
+    console.log('Step 7: Testing MekiCalc Cube Recommendation Leaderboard & 3-Line Modal...');
+    const cubeRecCount = await evaluate(`document.querySelectorAll('#mekiCubeRecList > div').length`);
+    assert.equal(cubeRecCount, 8, 'MekiCalc Cube Leaderboard must contain 8 equipment cards');
+    const firstCubeRecName = await evaluate(`document.querySelector('#mekiCubeRecList strong').textContent`);
+    const firstCubeVerdict = await evaluate(`document.querySelector('#mekiCubeRecList .badge').textContent`);
+    console.log(`  Top Cube Priority: [${firstCubeRecName}] ${firstCubeVerdict}`);
+    assert.ok(firstCubeVerdict.includes('리롤') || firstCubeVerdict.includes('등급업') || firstCubeVerdict.includes('유지'), 'Top priority should have active advice');
+
+    // Open 3-Line Edit Modal
+    await evaluate(`document.querySelector('#specupEquipTableBody .edit-cube-line-btn').click()`);
+    const modalIsOpen = await evaluate(`document.getElementById('cubeLineEditModal').hasAttribute('open')`);
+    assert.ok(modalIsOpen, 'Cube 3-Line Edit modal must open');
+
+    // Click 2-Line Valid Preset and Save
+    await evaluate(`document.getElementById('cubePreset2LineBtn').click()`);
+    const slot1Val = await evaluate(`document.getElementById('cubeSlot1Value').value`);
+    assert.ok(Number(slot1Val) > 0, 'Preset must populate valid slot value');
+    await evaluate(`document.getElementById('saveCubeEditBtn').click()`);
+
+    const modalIsClosed = await evaluate(`!document.getElementById('cubeLineEditModal').hasAttribute('open')`);
+    assert.ok(modalIsClosed, 'Cube modal must close after save');
+    console.log('  -> 3-Line potential editor modal saved and updated equipment successfully.');
+
+    // Step 8: Test Cube Tab Navigation & Load from Equipment
+    console.log('Step 8: Testing Cube Tab integration from Leaderboard...');
+    await evaluate(`document.querySelector('#mekiCubeRecList .goto-cube-tab-btn').click()`);
+    const cubeTabActive = await evaluate(`document.querySelector('.tab[data-tab="cube"]').classList.contains('active')`);
+    assert.ok(cubeTabActive, 'Active tab must switch to Cube Tab');
+
+    const curOptVal = await evaluate(`document.querySelector('#currentOptions .option-value').value`);
+    assert.ok(Number(curOptVal) >= 0, 'Current options in Cube Tab must be populated');
+    const cubeDeltaText = await evaluate(`document.getElementById('cubeDelta').textContent`);
+    console.log(`  Cube Tab evaluation rendered: ${cubeDeltaText}`);
+    assert.ok(cubeDeltaText.length > 0, 'Cube delta must be rendered');
+
     ws.close();
     console.log('✅ ALL BROWSER E2E TESTS PASSED WITH 100% SUCCESS!');
   } finally {

@@ -1,6 +1,6 @@
 import { calculateCombatPower, calculateDamage, calculatePvpDamage, calculateStatEfficiencies, cubeTargetSummary, probabilitySummary } from './engine.mjs';
 import { buildSkillModels, optimizeLoadout, simulateLoadout, DEFAULT_UNKNOWN_COOLDOWN, LOADOUT_SKILL_SLOTS } from './skill-optimizer.mjs';
-import { calculateStarforcePath, calculateScrollEnhancement, optimizeSpecUpPath, STARFORCE_MAX } from './enhancement-engine.mjs';
+import { calculateStarforcePath, calculateScrollEnhancement, optimizeSpecUpPath, STARFORCE_MAX, recommendCubeAction, rankAllEquipmentCubes, getEquipmentCubeStats } from './enhancement-engine.mjs';
 'use strict';
 
 const STORE = 'maple-growth-lab-mvp-v1';
@@ -3702,40 +3702,131 @@ window.addEventListener('message', event => {
 
 const SPECUP_STORE_KEY = 'maple-growth-lab-specup-equips-v01';
 
+const CUBE_LINE_STATS = [
+  ['NONE', '잡옵 (무효)'],
+  ['attackPct', '공격력 %'],
+  ['bossDamage', '보스 몬스터 데미지 %'],
+  ['critDamage', '크리티컬 데미지 %'],
+  ['critRate', '크리티컬 확률 %'],
+  ['mainStatPct', '주스탯 %'],
+  ['damage', '데미지 %'],
+  ['attackFlat', '공격력 (+)'],
+  ['mainStat', '주스탯 (+)']
+];
+
+const ENGINE_TO_CUBE_MAP = {
+  attackPct: 'ATK_PCT',
+  bossDamage: 'BOSS_DMG',
+  critDamage: 'CRIT_DMG',
+  critRate: 'CRIT_RATE',
+  mainStatPct: 'MAIN_STAT_PCT',
+  damage: 'DMG',
+  attackFlat: 'ATK_FLAT',
+  mainStat: 'MAIN_STAT_FLAT',
+  NONE: 'NONE'
+};
+
+const CUBE_TO_ENGINE_MAP = {
+  ATK_PCT: 'attackPct',
+  BOSS_DMG: 'bossDamage',
+  CRIT_DMG: 'critDamage',
+  CRIT_RATE: 'critRate',
+  MAIN_STAT_PCT: 'mainStatPct',
+  DMG: 'damage',
+  ATK_FLAT: 'attackFlat',
+  MAIN_STAT_FLAT: 'mainStat',
+  NONE: 'NONE'
+};
+
+function formatLineSummary(lines) {
+  if (!Array.isArray(lines) || !lines.length) return '1줄 유효';
+  const valid = lines.filter(l => l && l.stat && l.stat !== 'NONE' && Number(l.value) > 0);
+  if (!valid.length) return '잡옵 3줄 (0줄 유효)';
+  return valid.map(l => {
+    if (l.stat === 'attackPct') return `공 ${l.value}%`;
+    if (l.stat === 'bossDamage') return `보공 ${l.value}%`;
+    if (l.stat === 'critDamage') return `크뎀 ${l.value}%`;
+    if (l.stat === 'critRate') return `크확 ${l.value}%`;
+    if (l.stat === 'mainStatPct') return `주스탯 ${l.value}%`;
+    if (l.stat === 'damage') return `뎀 ${l.value}%`;
+    return `${l.stat} +${l.value}`;
+  }).join(' / ');
+}
+
+function generateDefaultLines(slotType, grade, validLines = 1) {
+  const lines = Math.max(0, Math.min(3, Number(validLines) || 0));
+  if (lines === 0) {
+    return [
+      { stat: 'NONE', value: 0 },
+      { stat: 'NONE', value: 0 },
+      { stat: 'NONE', value: 0 }
+    ];
+  }
+  const primaryVal = grade === 'rare' ? 3 : grade === 'epic' ? 6 : grade === 'unique' ? 9 : 12;
+  const secVal = grade === 'rare' ? 3 : grade === 'epic' ? 6 : grade === 'unique' ? 6 : 9;
+
+  if (slotType === 'glove') {
+    const cdVal = grade === 'rare' ? 2 : grade === 'epic' ? 2 : grade === 'unique' ? 4 : 8;
+    return [
+      { stat: 'critDamage', value: cdVal },
+      lines >= 2 ? { stat: 'attackPct', value: secVal } : { stat: 'NONE', value: 0 },
+      lines >= 3 ? { stat: 'mainStatPct', value: secVal } : { stat: 'NONE', value: 0 }
+    ];
+  }
+  if (slotType === 'weapon') {
+    const bdVal = grade === 'rare' ? 3 : grade === 'epic' ? 6 : grade === 'unique' ? 12 : 12;
+    return [
+      { stat: 'attackPct', value: primaryVal },
+      lines >= 2 ? { stat: 'bossDamage', value: bdVal } : { stat: 'NONE', value: 0 },
+      lines >= 3 ? { stat: 'attackPct', value: secVal } : { stat: 'NONE', value: 0 }
+    ];
+  }
+  return [
+    { stat: 'mainStatPct', value: primaryVal },
+    lines >= 2 ? { stat: 'mainStatPct', value: secVal } : { stat: 'NONE', value: 0 },
+    lines >= 3 ? { stat: 'mainStatPct', value: secVal } : { stat: 'NONE', value: 0 }
+  ];
+}
+
 const DEFAULT_SPECUP_EQUIPMENT_PRESETS = {
   120: [
-    { id: 'weapon', name: '앱솔랩스 무기', slotType: 'weapon', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 8, scrollSlotsUsed: 4, cubeGrade: 'unique', cubeValidLines: 1 },
-    { id: 'hat', name: '앱솔랩스 모자', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic', cubeValidLines: 1 },
-    { id: 'top_bottom', name: '앱솔랩스 한벌옷', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic', cubeValidLines: 1 },
-    { id: 'glove', name: '앱솔랩스 장갑', slotType: 'glove', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic', cubeValidLines: 0 },
-    { id: 'shoes', name: '앱솔랩스 신발', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic', cubeValidLines: 1 },
-    { id: 'cape', name: '앱솔랩스 망토', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'rare', cubeValidLines: 0 },
-    { id: 'accessory1', name: '마이스터링', slotType: 'accessory', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 4, scrollSlotsUsed: 2, cubeGrade: 'epic', cubeValidLines: 1 },
-    { id: 'accessory2', name: '도미네이터 펜던트', slotType: 'accessory', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 4, scrollSlotsUsed: 2, cubeGrade: 'epic', cubeValidLines: 1 }
+    { id: 'weapon', name: '앱솔랩스 무기', slotType: 'weapon', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 8, scrollSlotsUsed: 4, cubeGrade: 'unique', cubeValidLines: 1, potentialLines: [{ stat: 'attackPct', value: 9 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'hat', name: '앱솔랩스 모자', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic', cubeValidLines: 1, potentialLines: [{ stat: 'mainStatPct', value: 6 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'top_bottom', name: '앱솔랩스 한벌옷', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic', cubeValidLines: 1, potentialLines: [{ stat: 'mainStatPct', value: 6 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'glove', name: '앱솔랩스 장갑', slotType: 'glove', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic', cubeValidLines: 0, potentialLines: [{ stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'shoes', name: '앱솔랩스 신발', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'epic', cubeValidLines: 1, potentialLines: [{ stat: 'mainStatPct', value: 6 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'cape', name: '앱솔랩스 망토', slotType: 'armor', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 4, cubeGrade: 'rare', cubeValidLines: 0, potentialLines: [{ stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'accessory1', name: '마이스터링', slotType: 'accessory', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 4, scrollSlotsUsed: 2, cubeGrade: 'epic', cubeValidLines: 1, potentialLines: [{ stat: 'mainStatPct', value: 6 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'accessory2', name: '도미네이터 펜던트', slotType: 'accessory', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 4, scrollSlotsUsed: 2, cubeGrade: 'epic', cubeValidLines: 1, potentialLines: [{ stat: 'mainStatPct', value: 6 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] }
   ],
   100: [
-    { id: 'weapon', name: '파프니르 무기', slotType: 'weapon', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 7, scrollSlotsUsed: 3, cubeGrade: 'epic', cubeValidLines: 1 },
-    { id: 'hat', name: '파프니르 모자', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0 },
-    { id: 'top_bottom', name: '파프니르 상/하의', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0 },
-    { id: 'glove', name: '여제 장갑', slotType: 'glove', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0 },
-    { id: 'shoes', name: '여제 신발', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0 },
-    { id: 'cape', name: '여제 망토', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0 },
-    { id: 'accessory1', name: '골든 클로버 벨트', slotType: 'accessory', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 3, scrollSlotsUsed: 1, cubeGrade: 'rare', cubeValidLines: 0 },
-    { id: 'accessory2', name: '아쿠아틱 레터 눈장식', slotType: 'accessory', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 3, scrollSlotsUsed: 1, cubeGrade: 'rare', cubeValidLines: 0 }
+    { id: 'weapon', name: '파프니르 무기', slotType: 'weapon', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 7, scrollSlotsUsed: 3, cubeGrade: 'epic', cubeValidLines: 1, potentialLines: [{ stat: 'attackPct', value: 6 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'hat', name: '파프니르 모자', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0, potentialLines: [{ stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'top_bottom', name: '파프니르 상/하의', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0, potentialLines: [{ stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'glove', name: '여제 장갑', slotType: 'glove', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0, potentialLines: [{ stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'shoes', name: '여제 신발', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0, potentialLines: [{ stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'cape', name: '여제 망토', slotType: 'armor', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 6, scrollSlotsUsed: 3, cubeGrade: 'rare', cubeValidLines: 0, potentialLines: [{ stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'accessory1', name: '골든 클로버 벨트', slotType: 'accessory', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 3, scrollSlotsUsed: 1, cubeGrade: 'rare', cubeValidLines: 0, potentialLines: [{ stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'accessory2', name: '아쿠아틱 레터 눈장식', slotType: 'accessory', itemLevel: 100, currentStar: 8, maxStar: 12, scrollSlotsTotal: 3, scrollSlotsUsed: 1, cubeGrade: 'rare', cubeValidLines: 0, potentialLines: [{ stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] }
   ],
   140: [
-    { id: 'weapon', name: '아케인셰이드 무기', slotType: 'weapon', itemLevel: 140, currentStar: 15, maxStar: 20, scrollSlotsTotal: 9, scrollSlotsUsed: 6, cubeGrade: 'legendary', cubeValidLines: 2 },
-    { id: 'hat', name: '아케인셰이드 모자', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique', cubeValidLines: 1 },
-    { id: 'top_bottom', name: '아케인셰이드 한벌옷', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique', cubeValidLines: 1 },
-    { id: 'glove', name: '아케인셰이드 장갑', slotType: 'glove', itemLevel: 140, currentStar: 15, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 6, cubeGrade: 'unique', cubeValidLines: 2 },
-    { id: 'shoes', name: '아케인셰이드 신발', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique', cubeValidLines: 1 },
-    { id: 'cape', name: '아케인셰이드 망토', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique', cubeValidLines: 1 },
-    { id: 'accessory1', name: '거대한 공포', slotType: 'accessory', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 5, scrollSlotsUsed: 3, cubeGrade: 'unique', cubeValidLines: 1 },
-    { id: 'accessory2', name: '커맨더 포스 이어링', slotType: 'accessory', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 5, scrollSlotsUsed: 3, cubeGrade: 'unique', cubeValidLines: 1 }
+    { id: 'weapon', name: '아케인셰이드 무기', slotType: 'weapon', itemLevel: 140, currentStar: 15, maxStar: 20, scrollSlotsTotal: 9, scrollSlotsUsed: 6, cubeGrade: 'legendary', cubeValidLines: 2, potentialLines: [{ stat: 'attackPct', value: 12 }, { stat: 'bossDamage', value: 12 }, { stat: 'NONE', value: 0 }] },
+    { id: 'hat', name: '아케인셰이드 모자', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique', cubeValidLines: 1, potentialLines: [{ stat: 'mainStatPct', value: 9 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'top_bottom', name: '아케인셰이드 한벌옷', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique', cubeValidLines: 1, potentialLines: [{ stat: 'mainStatPct', value: 9 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'glove', name: '아케인셰이드 장갑', slotType: 'glove', itemLevel: 140, currentStar: 15, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 6, cubeGrade: 'unique', cubeValidLines: 2, potentialLines: [{ stat: 'critDamage', value: 4 }, { stat: 'attackPct', value: 6 }, { stat: 'NONE', value: 0 }] },
+    { id: 'shoes', name: '아케인셰이드 신발', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique', cubeValidLines: 1, potentialLines: [{ stat: 'mainStatPct', value: 9 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'cape', name: '아케인셰이드 망토', slotType: 'armor', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 8, scrollSlotsUsed: 5, cubeGrade: 'unique', cubeValidLines: 1, potentialLines: [{ stat: 'mainStatPct', value: 9 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'accessory1', name: '거대한 공포', slotType: 'accessory', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 5, scrollSlotsUsed: 3, cubeGrade: 'unique', cubeValidLines: 1, potentialLines: [{ stat: 'mainStatPct', value: 9 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] },
+    { id: 'accessory2', name: '커맨더 포스 이어링', slotType: 'accessory', itemLevel: 140, currentStar: 12, maxStar: 20, scrollSlotsTotal: 5, scrollSlotsUsed: 3, cubeGrade: 'unique', cubeValidLines: 1, potentialLines: [{ stat: 'mainStatPct', value: 9 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }] }
   ]
 };
 
 let specupEquipments = parseLocalJson(SPECUP_STORE_KEY, DEFAULT_SPECUP_EQUIPMENT_PRESETS[120]);
+specupEquipments.forEach(eq => {
+  if (!Array.isArray(eq.potentialLines) || eq.potentialLines.length === 0) {
+    eq.potentialLines = generateDefaultLines(eq.slotType, eq.cubeGrade, eq.cubeValidLines);
+  }
+});
 
 function formatStatGainsSummary(statGains) {
   if (!statGains || typeof statGains !== 'object') return '—';
@@ -3758,51 +3849,64 @@ function formatStatGainsSummary(statGains) {
 function renderSpecupEquipTable() {
   const tbody = $('specupEquipTableBody');
   if (!tbody) return;
-  tbody.innerHTML = specupEquipments.map(eq => `
-    <tr style="border-bottom:1px solid var(--line);">
-      <td style="padding:6px 4px;font-weight:700;">
-        <input type="text" data-eq-id="${escapeHtml(eq.id)}" data-field="name" value="${escapeHtml(eq.name)}" style="width:105px;font-size:12px;padding:4px 6px;">
-      </td>
-      <td style="padding:6px 4px;">
-        <select data-eq-id="${escapeHtml(eq.id)}" data-field="itemLevel" style="font-size:12px;padding:4px;">
-          <option value="100" ${eq.itemLevel === 100 ? 'selected' : ''}>100제</option>
-          <option value="120" ${eq.itemLevel === 120 ? 'selected' : ''}>120제</option>
-          <option value="140" ${eq.itemLevel === 140 ? 'selected' : ''}>140제</option>
-          <option value="160" ${eq.itemLevel === 160 ? 'selected' : ''}>160제</option>
-        </select>
-      </td>
-      <td style="padding:6px 4px;">
-        <div style="display:flex;align-items:center;gap:3px;">
-          <input type="number" min="0" max="30" data-eq-id="${escapeHtml(eq.id)}" data-field="currentStar" value="${eq.currentStar}" style="width:46px;font-size:12px;padding:4px;">
-          <span>/</span>
-          <input type="number" min="5" max="30" data-eq-id="${escapeHtml(eq.id)}" data-field="maxStar" value="${eq.maxStar}" style="width:46px;font-size:12px;padding:4px;">
-        </div>
-      </td>
-      <td style="padding:6px 4px;">
-        <div style="display:flex;align-items:center;gap:3px;">
-          <input type="number" min="0" max="15" data-eq-id="${escapeHtml(eq.id)}" data-field="scrollSlotsUsed" value="${eq.scrollSlotsUsed}" style="width:44px;font-size:12px;padding:4px;">
-          <span>/</span>
-          <input type="number" min="1" max="15" data-eq-id="${escapeHtml(eq.id)}" data-field="scrollSlotsTotal" value="${eq.scrollSlotsTotal}" style="width:44px;font-size:12px;padding:4px;">
-        </div>
-      </td>
-      <td style="padding:6px 4px;">
-        <select data-eq-id="${escapeHtml(eq.id)}" data-field="cubeGrade" style="font-size:12px;padding:4px;">
-          <option value="rare" ${eq.cubeGrade === 'rare' ? 'selected' : ''}>레어</option>
-          <option value="epic" ${eq.cubeGrade === 'epic' ? 'selected' : ''}>에픽</option>
-          <option value="unique" ${eq.cubeGrade === 'unique' ? 'selected' : ''}>유니크</option>
-          <option value="legendary" ${eq.cubeGrade === 'legendary' ? 'selected' : ''}>레전더리</option>
-        </select>
-      </td>
-      <td style="padding:6px 4px;">
-        <select data-eq-id="${escapeHtml(eq.id)}" data-field="cubeValidLines" style="font-size:12px;padding:4px;width:125px;">
-          <option value="0" ${(eq.cubeValidLines ?? 1) === 0 ? 'selected' : ''}>0줄 (잡옵 3줄)</option>
-          <option value="1" ${(eq.cubeValidLines ?? 1) === 1 ? 'selected' : ''}>1줄 유효 (기본작)</option>
-          <option value="2" ${(eq.cubeValidLines ?? 1) === 2 ? 'selected' : ''}>2줄 유효 (준종결)</option>
-          <option value="3" ${(eq.cubeValidLines ?? 1) === 3 ? 'selected' : ''}>3줄 극옵 (완결)</option>
-        </select>
-      </td>
-    </tr>
-  `).join('');
+  const inputs = typeof readInputs === 'function' ? readInputs() : {};
+
+  tbody.innerHTML = specupEquipments.map(eq => {
+    const rec = recommendCubeAction(eq, inputs, DATA.combat || {}, DATA.enhancementRules || {});
+    const linesSummary = formatLineSummary(eq.potentialLines);
+
+    return `
+      <tr style="border-bottom:1px solid var(--line);">
+        <td style="padding:6px 4px;font-weight:700;">
+          <input type="text" data-eq-id="${escapeHtml(eq.id)}" data-field="name" value="${escapeHtml(eq.name)}" style="width:105px;font-size:12px;padding:4px 6px;">
+        </td>
+        <td style="padding:6px 4px;">
+          <select data-eq-id="${escapeHtml(eq.id)}" data-field="itemLevel" style="font-size:12px;padding:4px;">
+            <option value="100" ${eq.itemLevel === 100 ? 'selected' : ''}>100제</option>
+            <option value="120" ${eq.itemLevel === 120 ? 'selected' : ''}>120제</option>
+            <option value="140" ${eq.itemLevel === 140 ? 'selected' : ''}>140제</option>
+            <option value="160" ${eq.itemLevel === 160 ? 'selected' : ''}>160제</option>
+          </select>
+        </td>
+        <td style="padding:6px 4px;">
+          <div style="display:flex;align-items:center;gap:3px;">
+            <input type="number" min="0" max="30" data-eq-id="${escapeHtml(eq.id)}" data-field="currentStar" value="${eq.currentStar}" style="width:46px;font-size:12px;padding:4px;">
+            <span>/</span>
+            <input type="number" min="5" max="30" data-eq-id="${escapeHtml(eq.id)}" data-field="maxStar" value="${eq.maxStar}" style="width:46px;font-size:12px;padding:4px;">
+          </div>
+        </td>
+        <td style="padding:6px 4px;">
+          <div style="display:flex;align-items:center;gap:3px;">
+            <input type="number" min="0" max="15" data-eq-id="${escapeHtml(eq.id)}" data-field="scrollSlotsUsed" value="${eq.scrollSlotsUsed}" style="width:44px;font-size:12px;padding:4px;">
+            <span>/</span>
+            <input type="number" min="1" max="15" data-eq-id="${escapeHtml(eq.id)}" data-field="scrollSlotsTotal" value="${eq.scrollSlotsTotal}" style="width:44px;font-size:12px;padding:4px;">
+          </div>
+        </td>
+        <td style="padding:6px 4px;">
+          <select data-eq-id="${escapeHtml(eq.id)}" data-field="cubeGrade" style="font-size:12px;padding:4px;">
+            <option value="rare" ${eq.cubeGrade === 'rare' ? 'selected' : ''}>레어</option>
+            <option value="epic" ${eq.cubeGrade === 'epic' ? 'selected' : ''}>에픽</option>
+            <option value="unique" ${eq.cubeGrade === 'unique' ? 'selected' : ''}>유니크</option>
+            <option value="legendary" ${eq.cubeGrade === 'legendary' ? 'selected' : ''}>레전더리</option>
+          </select>
+        </td>
+        <td style="padding:6px 4px;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="badge" style="background:${rec.badgeColor};color:#fff;font-size:11px;padding:2px 6px;border-radius:4px;font-weight:700;">${rec.verdictLabel}</span>
+            <button type="button" class="button secondary edit-cube-line-btn" data-eq-id="${escapeHtml(eq.id)}" style="font-size:11px;padding:2px 6px;">✏️ 3줄 편집</button>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;" title="${escapeHtml(linesSummary)}">
+            ${escapeHtml(linesSummary)}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Bind edit buttons
+  tbody.querySelectorAll('.edit-cube-line-btn').forEach(btn => {
+    btn.addEventListener('click', () => openCubeEditModal(btn.dataset.eqId));
+  });
 
   // Bind input changes to update specupEquipments state & persist
   tbody.querySelectorAll('input, select').forEach(el => {
@@ -3811,15 +3915,228 @@ function renderSpecupEquipTable() {
       const field = el.dataset.field;
       const targetEq = specupEquipments.find(e => e.id === eqId);
       if (targetEq) {
-        if (['itemLevel', 'currentStar', 'maxStar', 'scrollSlotsUsed', 'scrollSlotsTotal', 'cubeValidLines'].includes(field)) {
+        if (['itemLevel', 'currentStar', 'maxStar', 'scrollSlotsUsed', 'scrollSlotsTotal'].includes(field)) {
           targetEq[field] = Number(el.value) || 0;
+        } else if (field === 'cubeGrade') {
+          targetEq.cubeGrade = el.value;
+          // adapt lines if needed
+          if (!targetEq.potentialLines) {
+            targetEq.potentialLines = generateDefaultLines(targetEq.slotType, targetEq.cubeGrade, targetEq.cubeValidLines);
+          }
         } else {
           targetEq[field] = el.value;
         }
         localStorage.setItem(SPECUP_STORE_KEY, JSON.stringify(specupEquipments));
+        renderMekiCubeLeaderboard();
+        renderCubeEquipmentLoader();
       }
     });
   });
+
+  renderMekiCubeLeaderboard();
+  renderCubeEquipmentLoader();
+}
+
+function renderMekiCubeLeaderboard() {
+  const container = $('mekiCubeRecList');
+  if (!container) return;
+  const inputs = typeof readInputs === 'function' ? readInputs() : {};
+  const ranked = rankAllEquipmentCubes(specupEquipments, inputs, DATA.combat || {}, DATA.enhancementRules || {});
+
+  container.innerHTML = ranked.map((rec, idx) => {
+    const linesSummary = formatLineSummary(rec.currentLines);
+    const target = rec.target || {};
+    return `
+      <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-weight:900;color:var(--primary-dark);font-size:13px;">#${idx + 1}</span>
+            <strong style="font-size:13.5px;color:var(--ink);">${escapeHtml(rec.equipmentName)}</strong>
+            <span class="badge" style="background:${rec.badgeColor};color:#fff;font-size:11px;padding:2px 6px;border-radius:4px;">${rec.verdictLabel}</span>
+            <small style="color:var(--muted);font-size:11px;">(${CUBE_GRADE_NAMES[rec.cubeGrade] || rec.cubeGrade} · ${escapeHtml(linesSummary)})</small>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button type="button" class="button secondary edit-cube-line-btn" data-eq-id="${escapeHtml(rec.equipmentId)}" style="font-size:11.5px;padding:3px 8px;">✏️ 3줄 편집</button>
+            <button type="button" class="button ghost goto-cube-tab-btn" data-eq-id="${escapeHtml(rec.equipmentId)}" style="font-size:11.5px;padding:3px 8px;">🎲 큐브 탭에서 시뮬</button>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#475467;line-height:1.4;">
+          ${escapeHtml(rec.reason)}
+        </div>
+        <div style="display:flex;gap:12px;font-size:11.5px;background:#f8fafc;padding:6px 8px;border-radius:6px;flex-wrap:wrap;align-items:center;">
+          <span>🎯 목표: <strong>${escapeHtml(target.description || '—')}</strong></span>
+          <span>기대 비용: <strong>${target.cost > 0 ? fmt(target.cost) + ' 메소' : '0'}</strong></span>
+          <span>예상 딜 상승: <strong style="color:#0b7a58;">+${(target.dpsGainPct || 0).toFixed(2)}% (+${fmt(target.dpsDelta || 0)} DPS)</strong></span>
+          <span>가성비: <strong style="color:var(--primary-dark);">${(target.roiPerMillion || 0) > 0 ? '+' + (target.roiPerMillion).toFixed(4) + '% / 100만 메소' : '—'}</strong></span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.querySelectorAll('.edit-cube-line-btn').forEach(btn => {
+    btn.addEventListener('click', () => openCubeEditModal(btn.dataset.eqId));
+  });
+  container.querySelectorAll('.goto-cube-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => openEquipmentInCubeTab(btn.dataset.eqId));
+  });
+}
+
+let currentEditingEquipId = null;
+
+function applyLinesToModalInputs(lines) {
+  [1, 2, 3].forEach((slotNum, idx) => {
+    const line = lines[idx] || { stat: 'NONE', value: 0 };
+    const statEl = $(`cubeSlot${slotNum}Stat`);
+    const valEl = $(`cubeSlot${slotNum}Value`);
+    if (statEl) statEl.value = line.stat || 'NONE';
+    if (valEl) valEl.value = Number(line.value) || 0;
+  });
+}
+
+function openCubeEditModal(eqId) {
+  const eq = specupEquipments.find(e => e.id === eqId);
+  if (!eq) return;
+  currentEditingEquipId = eqId;
+
+  const modal = $('cubeLineEditModal');
+  if (!modal) return;
+
+  if ($('cubeEditModalTitle')) $('cubeEditModalTitle').textContent = `[${eq.name}] 3줄 잠재능력 설정`;
+  if ($('cubeEditGrade')) $('cubeEditGrade').value = eq.cubeGrade || 'epic';
+
+  const lines = (Array.isArray(eq.potentialLines) && eq.potentialLines.length > 0)
+    ? eq.potentialLines
+    : generateDefaultLines(eq.slotType, eq.cubeGrade, eq.cubeValidLines);
+
+  applyLinesToModalInputs(lines);
+
+  if (typeof modal.showModal === 'function') modal.showModal(); else modal.setAttribute('open', '');
+}
+
+function initCubeEditModal() {
+  const modal = $('cubeLineEditModal');
+  if (!modal) return;
+
+  const statOptionsHtml = CUBE_LINE_STATS.map(([k, lbl]) => `<option value="${k}">${lbl}</option>`).join('');
+  ['cubeSlot1Stat', 'cubeSlot2Stat', 'cubeSlot3Stat'].forEach(id => {
+    const sel = $(id);
+    if (sel) sel.innerHTML = statOptionsHtml;
+  });
+
+  const closeModal = () => {
+    if (typeof modal.close === 'function') modal.close(); else modal.removeAttribute('open');
+  };
+
+  $('closeCubeEditModalBtn')?.addEventListener('click', closeModal);
+  $('cancelCubeEditBtn')?.addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+  $('cubePresetGarbageBtn')?.addEventListener('click', () => {
+    applyLinesToModalInputs([
+      { stat: 'NONE', value: 0 },
+      { stat: 'NONE', value: 0 },
+      { stat: 'NONE', value: 0 }
+    ]);
+  });
+
+  $('cubePreset1LineBtn')?.addEventListener('click', () => {
+    const eq = specupEquipments.find(e => e.id === currentEditingEquipId);
+    const grade = $('cubeEditGrade')?.value || 'epic';
+    const lines = generateDefaultLines(eq?.slotType || 'armor', grade, 1);
+    applyLinesToModalInputs(lines);
+  });
+
+  $('cubePreset2LineBtn')?.addEventListener('click', () => {
+    const eq = specupEquipments.find(e => e.id === currentEditingEquipId);
+    const grade = $('cubeEditGrade')?.value || 'unique';
+    const lines = generateDefaultLines(eq?.slotType || 'armor', grade, 2);
+    applyLinesToModalInputs(lines);
+  });
+
+  $('cubePreset3LineBtn')?.addEventListener('click', () => {
+    const eq = specupEquipments.find(e => e.id === currentEditingEquipId);
+    const grade = $('cubeEditGrade')?.value || 'legendary';
+    const lines = generateDefaultLines(eq?.slotType || 'armor', grade, 3);
+    applyLinesToModalInputs(lines);
+  });
+
+  $('saveCubeEditBtn')?.addEventListener('click', () => {
+    const eq = specupEquipments.find(e => e.id === currentEditingEquipId);
+    if (!eq) return;
+
+    eq.cubeGrade = $('cubeEditGrade')?.value || 'epic';
+    const lines = [1, 2, 3].map(i => {
+      const stat = $(`cubeSlot${i}Stat`)?.value || 'NONE';
+      const val = Number($(`cubeSlot${i}Value`)?.value || 0);
+      return { stat, value: val };
+    });
+    eq.potentialLines = lines;
+    eq.cubeValidLines = lines.filter(l => l.stat !== 'NONE' && l.value > 0).length;
+
+    localStorage.setItem(SPECUP_STORE_KEY, JSON.stringify(specupEquipments));
+    renderSpecupEquipTable();
+    renderMekiCubeLeaderboard();
+    renderCubeEquipmentLoader();
+
+    closeModal();
+    setStatus(`[${eq.name}] 3줄 잠재능력 설정이 저장되었습니다.`, 'good');
+  });
+}
+
+function renderCubeEquipmentLoader() {
+  const sel = $('cubeLoadFromEquipSelect');
+  if (!sel) return;
+  const prevVal = sel.value;
+  sel.innerHTML = specupEquipments.map(eq =>
+    `<option value="${escapeHtml(eq.id)}">${escapeHtml(eq.name)} (${CUBE_GRADE_NAMES[eq.cubeGrade] || eq.cubeGrade})</option>`
+  ).join('');
+  if (prevVal && specupEquipments.some(e => e.id === prevVal)) {
+    sel.value = prevVal;
+  }
+}
+
+function openEquipmentInCubeTab(eqId) {
+  const eq = specupEquipments.find(e => e.id === eqId);
+  if (!eq) return;
+
+  activateTab('cube');
+
+  if ($('cubeLoadFromEquipSelect')) {
+    $('cubeLoadFromEquipSelect').value = eq.id;
+  }
+
+  if ($('cubeEquipment')) {
+    $('cubeEquipment').value = eq.slotType === 'weapon' ? 'weapon' : (eq.slotType === 'accessory' ? 'accessory' : 'armor');
+    $('cubeEquipment').dispatchEvent(new Event('change'));
+  }
+
+  if ($('cubeGrade')) {
+    $('cubeGrade').value = eq.cubeGrade;
+    $('cubeGrade').dispatchEvent(new Event('change'));
+  }
+
+  const lines = (Array.isArray(eq.potentialLines) && eq.potentialLines.length > 0)
+    ? eq.potentialLines
+    : generateDefaultLines(eq.slotType, eq.cubeGrade, eq.cubeValidLines);
+
+  const curContainer = $('currentOptions');
+  if (curContainer) {
+    const rows = curContainer.querySelectorAll('.option-row');
+    rows.forEach((row, idx) => {
+      const line = lines[idx] || { stat: 'NONE', value: 0 };
+      const statSel = row.querySelector('.option-stat');
+      const valInput = row.querySelector('.option-value');
+      if (statSel) {
+        statSel.value = ENGINE_TO_CUBE_MAP[line.stat] || 'NONE';
+      }
+      if (valInput) {
+        valInput.value = line.value || 0;
+      }
+    });
+  }
+
+  renderCube();
+  setStatus(`[${eq.name}]의 잠재능력 3줄을 큐브 분석기로 불러왔습니다.`, 'good');
 }
 
 function applySpecupPreset(level) {
@@ -3974,6 +4291,7 @@ function handleRunSpecupOptimizer() {
 }
 
 function initSpecupTab() {
+  initCubeEditModal();
   renderSpecupEquipTable();
   $('specupPreset120Btn')?.addEventListener('click', () => applySpecupPreset(120));
   $('specupPreset100Btn')?.addEventListener('click', () => applySpecupPreset(100));
@@ -3981,6 +4299,10 @@ function initSpecupTab() {
   $('runSpecupOptimizerBtn')?.addEventListener('click', handleRunSpecupOptimizer);
   $('runSfStandaloneBtn')?.addEventListener('click', handleRunSfStandalone);
   $('runScrollStandaloneBtn')?.addEventListener('click', handleRunScrollStandalone);
+  $('cubeLoadFromEquipBtn')?.addEventListener('click', () => {
+    const selId = $('cubeLoadFromEquipSelect')?.value;
+    if (selId) openEquipmentInCubeTab(selId);
+  });
 }
 
 /* ==========================================================================
@@ -4000,6 +4322,8 @@ function activateTab(tabName) {
     optimizeContent();
   } else if (tabName === 'specup') {
     renderSpecupEquipTable();
+  } else if (tabName === 'cube') {
+    renderCubeEquipmentLoader();
   }
 }
 
