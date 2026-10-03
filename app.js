@@ -701,7 +701,7 @@ const companionScenarios = {
   weaponDungeon: { label: '무기·강화 던전', core: 'farm', focus: 'farm', note: '일반 몬스터 처리 속도와 기본/스킬 공격 비중을 봅니다.' },
   growthDungeon: { label: '경험치·장비 던전', core: 'farm', focus: 'farm', note: '웨이브 처리용 일반 데미지·공격 속도를 비교합니다.' },
   chapterChallenge: { label: '챕터 도전', core: 'chapter', focus: 'balanced', note: '보스와 일반 웨이브 중 약한 쪽을 기준으로 안전하게 비교합니다.' },
-  arena: { label: '아레나', core: 'pvp', focus: 'boss', note: 'PvP 피해·생존 모델이 없어 자동 DPS 순위를 확정하지 않습니다.' },
+  arena: { label: '아레나', core: 'pvp', focus: 'pvp', note: 'PvP에서는 보스/일반 몬스터 데미지가 적용되지 않으며, 공격력·공속·크리티컬·최대/최소 데미지 위주로 반영됩니다.' },
   survival: { label: '생존·해금', core: 'survival', focus: 'boss', note: '생존 성공 확률 모델이 없어 DPS보다 통과 조건을 먼저 봅니다.' }
 };
 
@@ -1106,6 +1106,21 @@ function companionDpsImpact(stats, type) {
     }
   }
 
+  if (stats.minDamage || stats.maxDamage) {
+    const baseMin = contentBaseline('contentMinDamage') ?? 100;
+    const baseMax = contentBaseline('contentMaxDamage') ?? 100;
+    const before = Math.max(1, (baseMin + baseMax) / 2);
+    const after = Math.max(1, (baseMin + Number(stats.minDamage || 0) + baseMax + Number(stats.maxDamage || 0)) / 2);
+    const ratio = after / before;
+    if (Number.isFinite(ratio) && ratio > 0) {
+      factor *= ratio;
+      const parts = [];
+      if (stats.minDamage) parts.push(`최소 +${Number(stats.minDamage).toFixed(1)}%p`);
+      if (stats.maxDamage) parts.push(`최대 +${Number(stats.maxDamage).toFixed(1)}%p`);
+      details.push(`최소/최대 데미지(${parts.join(', ')}) ×${ratio.toFixed(4)}`);
+    }
+  }
+
   return { factor, details, unknown };
 }
 
@@ -1159,17 +1174,29 @@ function updateCompanionResult() {
   const goal = $('compGoal')?.value || 'boss';
   const result = companionContentScore(selected, goal);
   if ($('companionVerdict')) {
+    const pvpIgnored = goal === 'pvp' && (result.stats.bossDamage || result.stats.normalDamage) ? ' (보공/일공 0% 제외 반영)' : '';
     $('companionVerdict').className = 'verdict good';
-    $('companionVerdict').textContent = `${selected.length < COMPANION_SLOT_COUNT ? `입력 ${selected.length}/${COMPANION_SLOT_COUNT}개 · ` : ''}${selectedCompanionScenario().label} · ${result.display}`;
+    $('companionVerdict').textContent = `${selected.length < COMPANION_SLOT_COUNT ? `입력 ${selected.length}/${COMPANION_SLOT_COUNT}개 · ` : ''}${selectedCompanionScenario().label} · ${result.display}${pvpIgnored}`;
   }
   if ($('companionSummary')) {
     $('companionSummary').textContent = companionSummary(selected, result, goal);
   }
 }
 
-function companionSummary(selected, result) {
+function companionSummary(selected, result, goal = $('compGoal')?.value || 'boss') {
   const statText = companionEffectText(result.stats);
   const ownText = selected.map(s => `${s.label}: ${companionLabel(s.job)} ${companionGradeLabel(s.grade)} Lv.${s.level} · 연동 공격 ${s.supporter?.linkedAttackStatBaseRatio ?? '—'}‰`).join('\n');
+
+  let pvpNotice = '';
+  if (goal === 'pvp' && (result.stats.bossDamage || result.stats.normalDamage)) {
+    const invalidStats = [];
+    if (result.stats.bossDamage) invalidStats.push(`보스 몬스터 데미지 +${Number(result.stats.bossDamage).toFixed(1)}%p`);
+    if (result.stats.normalDamage) invalidStats.push(`일반 몬스터 데미지 +${Number(result.stats.normalDamage).toFixed(1)}%p`);
+    pvpNotice = `\n\n⚠️ 아레나(PvP) 무효 스탯 안내:
+- [${invalidStats.join(', ')}]은(는) 유저 간 대전인 아레나에서 적용되지 않아 실전 DPS 기여도가 0%입니다.
+- 추천 유효 동료: 캡틴(크리티컬 데미지), 아크메이지 불·독(크리티컬 확률), 바이퍼(주 스탯%), 섀도어(최소 데미지), 팔라딘(기본 공격 데미지), 비숍(스킬 데미지), 다크나이트·나이트워커(명중)`;
+  }
+
   return `[실제 동료 세팅 비교]
 목표: ${selectedCompanionScenario().label}
 
@@ -1181,7 +1208,7 @@ ${statText}
 
 상대 DPS 배율
 - ${result.display}
-- ${result.impact.details.length ? result.impact.details.join(' · ') : '직접 계산 배율 없음'}
+- ${result.impact.details.length ? result.impact.details.join(' · ') : '직접 계산 배율 없음'}${pvpNotice}
 ${result.impact.unknown.length ? '\n추가 기준값 필요: ' + [...new Set(result.impact.unknown)].join(', ') : ''}
 
 ※ 동료 장착 효과는 캐릭터 전투 계산 및 종합 전투력에 실시간 자동 반영됩니다.`;
@@ -1194,7 +1221,7 @@ function companionRarityScore(grade) {
 }
 
 function companionOptimizerStatScore(stats, type) {
-  if (type === 'survival' || type === 'pvp') return 0;
+  if (type === 'survival') return 0;
   if (type === 'chapter') {
     const boss = companionDpsImpact(stats, 'boss').factor;
     const farm = companionDpsImpact(stats, 'farm').factor;
@@ -1206,10 +1233,12 @@ function companionOptimizerStatScore(stats, type) {
 
 function companionRawTieScore(stats, type, candidate) {
   const keys = type === 'boss'
-    ? ['bossDamage', 'attackPlus', 'attackSpeed', 'critRate', 'critDamage']
+    ? ['bossDamage', 'attackPlus', 'attackSpeed', 'critRate', 'critDamage', 'maxDamage', 'minDamage', 'mainPct']
     : (type === 'farm'
-      ? ['normalDamage', 'attackPlus', 'attackSpeed', 'basicDamage', 'skillDamage']
-      : ['attackPlus', 'bossDamage', 'normalDamage', 'attackSpeed', 'critRate', 'critDamage', 'maxDamage']);
+      ? ['normalDamage', 'attackPlus', 'attackSpeed', 'basicDamage', 'skillDamage', 'maxDamage', 'minDamage', 'mainPct']
+      : (type === 'pvp'
+        ? ['attackPlus', 'attackSpeed', 'critRate', 'critDamage', 'maxDamage', 'minDamage', 'basicDamage', 'skillDamage', 'mainPct', 'hit']
+        : ['attackPlus', 'attackSpeed', 'critRate', 'critDamage', 'maxDamage', 'minDamage', 'mainPct']));
   const direct = keys.reduce((sum, key) => sum + (Number(stats[key]) || 0), 0);
   return direct + (candidate ? companionRarityScore(candidate.grade) * 1e-4 + (Number(candidate.level) || 0) * 1e-7 : 0);
 }
