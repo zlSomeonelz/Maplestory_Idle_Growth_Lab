@@ -2464,7 +2464,7 @@ function initOcrModal() {
     { target: 'maxDamage', keywords: ['최대 데미지 배율', '최대데미지 배율', '최대 데미지', '최대 데미'] },
     { target: 'attackSpeed', keywords: ['공격 속도', '공격속도', '공속', '공격속', '공격속:'] },
     { target: 'playerDefense', keywords: ['방어력'] },
-    { target: 'maxHp', keywords: ['최대 HP', '최대HP', '최대16', '최대 16', '최대1P', '최대 1P', '최대10', '최대 10', '최대1O', '최대 1O', 'Hh HP', 'ZC HP', 'ZICH HP', 'ZIC HP', 'ICH HP', '치대 HP', '부레 치나', 'EEK'] },
+    { target: 'maxHp', keywords: ['최대 HP', '최대HP', '최대16', '최대 16', '최대1P', '최대 1P', '최대10', '최대 10', '최대1O', '최대 1O', 'ch HP', 'chHP', 'c HP', 'h HP', 'Hh HP', 'ZC HP', 'ZICH HP', 'ZIC HP', 'ICH HP', '치대 HP', '부레 치나', 'HP', 'hp', 'EEK'] },
     { target: 'maxMp', keywords: ['최대 MP', '최대MP', '최대 mp', '최대”', '최대"', '최대 M', 'At MP', 'AL MP', '최대11『', '최대11'] },
     { target: 'accuracy', keywords: ['명중', '명중률'] },
     { target: 'evasion', keywords: ['회피', '회피율'] },
