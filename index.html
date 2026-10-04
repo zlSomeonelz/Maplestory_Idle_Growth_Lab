@@ -89,133 +89,271 @@
     <section class="card content-preset-card" id="contentPresetRoot" aria-labelledby="contentPresetHeading"></section>
 
     <!-- Navigation Tabs -->
-    <nav class="tabs" aria-label="기능 선택">
-      <button class="tab active" data-tab="combat">⚔️ 전투 계산 & 효율</button>
+    <nav class="tabs" aria-label="기능 선택" id="mainTabs">
+      <button class="tab active" data-tab="combat">⚔️ 실전 전투 시뮬레이션</button>
+      <button class="tab" data-tab="character">📊 캐릭터 스펙 &amp; 스탯</button>
+      <button class="tab" data-tab="efficiency">📈 스탯 성장 효율 (v4)</button>
       <button class="tab" data-tab="specup">💰 재화 스펙업 최적화</button>
-      <button class="tab" data-tab="companion">👥 동료 & 프리셋 최적화</button>
-      <button class="tab" data-tab="content">🗺️ 콘텐츠 & 챕터 진단</button>
-      <button class="tab" data-tab="cube">🧊 큐브 & 확률 분석</button>
-      <button class="tab" data-tab="inventory">📸 OCR 도구 서랍</button>
+      <button class="tab" data-tab="cube">🧊 큐브 &amp; 잠재능력</button>
+      <button class="tab" data-tab="companion">👥 동료 &amp; 프리셋</button>
+      <button class="tab" data-tab="content">🗺️ 콘텐츠 &amp; 챕터</button>
+      <button class="tab" data-tab="inventory">📸 OCR 도구</button>
     </nav>
 
     <main>
-      <!-- TAB 1: Combat Calculation & Stat Efficiencies -->
+      <!-- TAB 1: Combat Simulation & DPS Results (MekiCalc-Style Full Width) -->
       <section class="tab-panel active" data-panel="combat">
-        <div class="grid two-col">
-          <form class="card" id="characterForm">
-            <div class="section-heading">
-              <div><span class="step">01</span><h2>캐릭터 스탯 설정</h2></div>
-              <button type="button" class="button secondary" id="openOcrInFormBtn" style="padding:4px 9px;font-size:12px;">📸 OCR 입력</button>
-            </div>
-            <p class="hint">게임 스탯 창의 수치를 직접 입력하거나 스크린샷 OCR로 자동 분석합니다.</p>
-            <div class="fields compact">
-              <label>직업<select id="job"><option value="">직업 선택</option></select></label>
-              <label>레벨<input id="level" type="number" min="1" value="100"></label>
-              <label>공격력(+)<input id="attackFlat" type="number" min="0" step="0.01" value="1000"></label>
-              <label>공격력%<input id="attackPct" type="number" min="0" step="0.01" value="0"></label>
-              <label>최대 HP<input id="maxHp" type="number" min="0" step="1" value="0"></label>
-              <label>캐릭터 방어력<input id="playerDefense" type="number" min="0" step="1" value="0"></label>
-              <label>최대 MP<input id="maxMp" type="number" min="0" step="1" value="500"></label>
-              <label>회피<input id="evasion" type="number" min="0" step="0.01" value="0"></label>
-              <label>주스탯(+)<input id="mainStat" type="number" min="0" step="0.01" value="1000"></label>
-              <label>주스탯%<input id="mainStatPct" type="number" min="0" step="0.01" value="0"></label>
-              <label>부스탯(+)<input id="subStat" type="number" min="0" step="0.01" value="400"></label>
-              <label>데미지%<input id="damage" type="number" step="0.01" value="0"></label>
-              <label>데미지 증폭%<input id="damageAmp" type="number" step="0.01" value="0"></label>
-              <label>최종 데미지%<input id="finalDamage" type="number" step="0.01" value="0"></label>
-              <label>크리티컬 확률%<input id="critRate" type="number" min="0" max="100" step="0.01" value="0"></label>
-              <label>크리티컬 데미지%<input id="critDamage" type="number" step="0.01" value="0"></label>
-              <label>최소 데미지 배율%<input id="minDamage" type="number" step="0.01" value="65"></label>
-              <label>최대 데미지 배율%<input id="maxDamage" type="number" step="0.01" value="100"></label>
-              <label>마스터리·기타 증가%<input id="mastery" type="number" step="0.01" value="0"></label>
-              <label>스킬 계수%<input id="skillCoefficient" type="number" min="0" step="0.01" value="100"></label>
-              <label>기본 공격 간격(초)<input id="attackInterval" type="number" min="0.01" step="0.01" value="1"></label>
-              <label>공격 속도%<input id="attackSpeed" type="number" min="0" step="0.01" value="0"></label>
-            </div>
-            <details class="companion-box">
-              <summary class="companion-heading"><strong>직업별 주·부 스탯 입력</strong><span class="badge official">공식 직업 매핑</span></summary>
-              <div class="fields compact">
-                <label>스탯 계산 방식<select id="statInputMode"><option value="aggregate">주·부 스탯 합산값 직접 입력</option><option value="job">직업별 원시 스탯으로 계산</option></select></label>
-              </div>
-              <div class="formula-note" id="jobStatMapping">직업을 선택하면 주·부 스탯 매핑을 표시합니다.</div>
-              <div class="fields compact">
-                <label>STR<input id="statSTR" type="number" min="0" step="0.01" value="0"></label>
-                <label>DEX<input id="statDEX" type="number" min="0" step="0.01" value="0"></label>
-                <label>INT<input id="statINT" type="number" min="0" step="0.01" value="0"></label>
-                <label>LUK<input id="statLUK" type="number" min="0" step="0.01" value="0"></label>
-              </div>
-            </details>
-            <details class="companion-box" id="jobSkillsBox" open>
-              <summary class="companion-heading"><strong>직업 스킬 DB & 실전 딜사이클 시뮬레이터</strong><span class="badge official">공식 DB</span></summary>
-              <div id="jobSkillContent">
-                <div class="small text-muted" style="padding:8px 0;">직업을 선택하면 1~4차 스킬 계수, 타수, 쿨타임 및 추천 딜사이클을 확인하고 실전 전투 시뮬레이션을 실행할 수 있습니다.</div>
-              </div>
-            </details>
-            <details class="companion-box" open>
-              <summary class="companion-heading"><strong>전투력 보조 능력치</strong><span class="badge official">공식 전투력 식</span></summary>
-              <div class="fields compact">
-                <label>명중<input id="accuracy" type="number" min="0" step="0.01" value="100"></label>
-                <label>방어 관통력%<input id="defPen" type="number" min="0" max="100" step="0.01" value="0"></label>
-                <label>보스 몬스터 데미지%<input id="bossDamage" type="number" step="0.01" value="0"></label>
-                <label>일반 몬스터 데미지%<input id="normalDamage" type="number" step="0.01" value="0"></label>
-                <label>기본 공격 데미지%<input id="basicDamage" type="number" step="0.01" value="0"></label>
-                <label>스킬 데미지%<input id="skillDamage" type="number" step="0.01" value="0"></label>
-                <label>상태이상 데미지%<input id="statusDamage" type="number" step="0.01" value="0"></label>
-                <label>받는 피해 감소%<input id="dmgReduction" type="number" step="0.01" value="0"></label>
-                <label>동료 소환 지속시간 증가%<input id="companionDuration" type="number" step="0.01" value="0"></label>
-                <label>버프 지속시간 증가%<input id="buffDuration" type="number" step="0.01" value="0"></label>
-                <label>디버프 내성%<input id="debuffResist" type="number" step="0.01" value="0"></label>
-                <label>기본 공격 대상 수 증가<input id="extraTargets" type="number" min="0" step="1" value="0"></label>
-                <label>스킬 쿨타임 감소%<input id="cooldownReductionPct" type="number" min="0" max="80" step="0.01" value="0"></label>
-                <label>스킬 쿨타임 감소(초)<input id="cooldownReductionSec" type="number" min="0" step="0.01" value="0"></label>
-                <label>1차 스킬 레벨<input id="skillLevel1" type="number" min="1" step="1" value="1"></label>
-                <label>2차 스킬 레벨<input id="skillLevel2" type="number" min="1" step="1" value="1"></label>
-                <label>3차 스킬 레벨<input id="skillLevel3" type="number" min="1" step="1" value="1"></label>
-                <label>4차 스킬 레벨<input id="skillLevel4" type="number" min="0" step="1" value="0"></label>
-                <label>1레벨당 주스탯<input id="mainStatPerLevel1" type="number" min="0" step="0.01" value="10"></label>
-              </div>
-            </details>
-          </form>
-
-          <div>
-            <form class="card" id="targetForm">
-              <div class="section-heading"><div><span class="step">02</span><h2>목표 대상 설정</h2></div></div>
-              <div class="fields compact">
-                <label>목표 유형<select id="targetType"><option value="normal">일반 몬스터 (사냥/던전)</option><option value="boss">보스 몬스터 (레이드/월드보스)</option><option value="pvp">PvP 대항전 (아레나/콜로세움)</option></select></label>
-                <label>PvP 콘텐츠 분류<select id="pvpContent"><option value="arena">아레나</option><option value="worldArena">월드 아레나</option><option value="colosseum">콜로세움</option></select></label>
-                <label>대상 레벨<input id="targetLevel" type="number" min="1" value="100"></label>
-                <label>대상 방어력<input id="targetDefense" type="number" min="0" step="0.01" value="0"></label>
-                <label>대상 최대 HP (PvP/보스)<input id="targetMaxHp" type="number" min="0" step="1" value="0"></label>
-                <label>대상 받는 피해 감소%<input id="targetTaken" type="number" min="0" step="0.01" value="0"></label>
-                <label>대상 크리티컬 저항%<input id="targetCritResist" type="number" min="0" step="0.01" value="0"></label>
-              </div>
-              <button class="button primary full" type="button" id="calculateCombat">전투 계산 실행</button>
-            </form>
-
-            <section class="card result-card">
-              <div class="section-heading"><h2>전투 분석 결과</h2><span class="badge official">공식 수식 적용</span></div>
-              <div class="result-grid">
-                <div class="metric"><span>평균 타격 피해</span><strong id="avgDamage">0</strong><small id="damageRange">최소 0 · 최대 0</small></div>
-                <div class="metric primary-metric"><span>초당 공격 피해(DPS)</span><strong id="dps">0</strong><small id="dpsNote">간격 1초 기준</small></div>
-                <div class="metric"><span>종합 전투력</span><strong id="combatPower">0</strong><small id="combatPowerNote">공식 산출식</small></div>
-                <div class="metric"><span>방어 감쇄율</span><strong id="defenseFactor">100.00%</strong><small id="defenseNote">관통 점감 적용</small></div>
-              </div>
-              <div class="breakdown" id="combatBreakdown"></div>
-              <div class="stage-verdict" id="stageVerdict"></div>
-            </section>
-
-            <section class="card efficiency-card">
-              <div class="section-heading"><div><h2>한계 스탯 성장 효율 랭킹</h2></div><span class="badge official">DPS 기여도</span></div>
-              <p class="hint">현재 스펙에서 어떤 능력치를 1단위/1% 올렸을 때 DPS 증가율이 가장 높은지 순위화합니다.</p>
-              <div class="efficiency-grid" id="statEfficienciesRoot"></div>
-            </section>
-
-            <section class="card">
-              <div class="section-heading"><h2>🔥 추천 성장 가이드 (Spec-Up Report)</h2><span class="badge official">콘텐츠 최적화</span></div>
-              <div id="specUpGuideContent"></div>
-            </section>
+        <!-- Target Settings Card -->
+        <form class="card" id="targetForm">
+          <div class="section-heading">
+            <div><span class="step">01</span><h2>목표 대상 &amp; 실전 시뮬레이션 설정</h2></div>
+            <button type="button" class="button secondary" id="goToCharacterTabBtn" style="padding:5px 12px;font-size:12px;">
+              📊 캐릭터 스펙 수정
+            </button>
           </div>
-        </div>
+          <p class="hint">일반 사냥, 보스 레이드, PvP 환경을 선택하여 실시간 타격 피해 및 초당 공격 피해(DPS)를 시뮬레이션합니다.</p>
+
+          <!-- Current Character Spec Mini Banner -->
+          <div class="current-spec-summary-bar">
+            <div>
+              <span>적용 캐릭터: <strong id="combatJobSummary">직업 선택</strong> (Lv.<span id="combatLevelSummary">100</span>)</span>
+              <span style="margin-left:10px;color:var(--muted);">· 공격력 <strong id="combatAtkSummary">1,000</strong> · 주스탯 <strong id="combatMainSummary">1,000</strong></span>
+            </div>
+            <button type="button" class="button secondary" id="openOcrInCombatBtn" style="padding:4px 9px;font-size:12px;">📸 OCR 입력</button>
+          </div>
+
+          <div class="fields compact">
+            <label>목표 유형
+              <select id="targetType">
+                <option value="normal">일반 몬스터 (사냥/던전)</option>
+                <option value="boss">보스 몬스터 (레이드/월드보스)</option>
+                <option value="pvp">PvP 대항전 (아레나/콜로세움)</option>
+              </select>
+            </label>
+            <label>PvP 콘텐츠 분류
+              <select id="pvpContent">
+                <option value="arena">아레나</option>
+                <option value="worldArena">월드 아레나</option>
+                <option value="colosseum">콜로세움</option>
+              </select>
+            </label>
+            <label>대상 레벨<input id="targetLevel" type="number" min="1" value="100"></label>
+            <label>대상 방어력<input id="targetDefense" type="number" min="0" step="0.01" value="0"></label>
+            <label>대상 최대 HP (PvP/보스)<input id="targetMaxHp" type="number" min="0" step="1" value="0"></label>
+            <label>대상 받는 피해 감소%<input id="targetTaken" type="number" min="0" step="0.01" value="0"></label>
+            <label>대상 크리티컬 저항%<input id="targetCritResist" type="number" min="0" step="0.01" value="0"></label>
+          </div>
+          <button class="button primary full" type="button" id="calculateCombat" style="margin-top:14px;font-size:15px;padding:12px;">
+            ⚔️ 실전 전투 계산 실행
+          </button>
+        </form>
+
+        <!-- MekiCalc-Style Hero Result Dashboard (Full Width) -->
+        <section class="card result-card meki-hero-card">
+          <div class="section-heading">
+            <h2>🏆 실전 전투 분석 결과</h2>
+            <span class="badge official">공식 수식 적용</span>
+          </div>
+
+          <!-- Badges bar (MekiCalc style) -->
+          <div class="meki-badge-bar">
+            <span class="meki-badge accent" id="heroTargetBadge">🎯 일반 몬스터 (사냥/던전)</span>
+            <span class="meki-badge" id="heroSpeedBadge">⏱️ 공격 간격 1.000초</span>
+            <span class="meki-badge success" id="heroDefBadge">🛡️ 방어 감쇄율 100.00% (관통 0%)</span>
+          </div>
+
+          <!-- Hero 2-Column KPI Grid (Large prominent MekiCalc style) -->
+          <div class="meki-kpi-grid">
+            <div class="meki-kpi-hero highlight">
+              <span class="meki-kpi-title">초당 공격 피해 (종합 DPS)</span>
+              <strong class="meki-kpi-val" id="dps">0</strong>
+              <small class="meki-kpi-sub" id="dpsNote">간격 1초 기준</small>
+            </div>
+            <div class="meki-kpi-hero power-box">
+              <span class="meki-kpi-title">종합 전투력</span>
+              <strong class="meki-kpi-val power-val" id="combatPower">0</strong>
+              <small class="meki-kpi-sub" id="combatPowerNote">공식 산출식</small>
+            </div>
+          </div>
+
+          <!-- Secondary Metrics Grid -->
+          <div class="meki-sub-grid">
+            <div class="meki-sub-box">
+              <span>평균 타격 피해</span>
+              <strong id="avgDamage">0</strong>
+              <small id="damageRange">최소 0 · 최대 0</small>
+            </div>
+            <div class="meki-sub-box">
+              <span>적 방어 감쇄율</span>
+              <strong id="defenseFactor">100.00%</strong>
+              <small id="defenseNote">관통 점감 적용</small>
+            </div>
+          </div>
+
+          <div class="breakdown" id="combatBreakdown"></div>
+          <div class="stage-verdict" id="stageVerdict"></div>
+        </section>
+
+        <!-- Job Skill DB & Simulator (Full Width) -->
+        <details class="card companion-box" id="jobSkillsBox" open>
+          <summary class="companion-heading">
+            <strong>⚔️ 직업 스킬 DB &amp; 실전 딜사이클 시뮬레이터</strong>
+            <span class="badge official">공식 DB 연동</span>
+          </summary>
+          <div id="jobSkillContent">
+            <div class="small text-muted" style="padding:8px 0;">직업을 선택하면 해당 직업의 1~4차 공식 스킬 계수, 타수, 쿨타임 및 추천 딜사이클을 확인하고 실전 전투 시뮬레이션을 실행할 수 있습니다.</div>
+          </div>
+        </details>
+
+        <!-- Marginal Stat Efficiency Quick Preview Card -->
+        <section class="card">
+          <div class="section-heading">
+            <div>
+              <span class="step">📈</span>
+              <h2>한계 스탯 성장 효율 요약 (Top 3)</h2>
+            </div>
+            <span class="badge official">DPS 기여도</span>
+          </div>
+          <p class="hint">현재 스펙에서 1단위/1% 올렸을 때 DPS 증가율이 가장 높은 최우선 스탯 3개입니다.</p>
+          <div id="statEfficienciesQuickRoot"></div>
+          <button type="button" class="button secondary full" id="goToEfficiencyTabBtn" style="margin-top:10px;">
+            📈 전체 한계 스탯 성장 랭킹 &amp; v4 효율 분석 보러가기 →
+          </button>
+        </section>
+
+        <!-- Spec-Up Growth Guide Card (Full Width) -->
+        <section class="card">
+          <div class="section-heading">
+            <h2>🔥 콘텐츠별 추천 성장 가이드 (Spec-Up Report)</h2>
+            <span class="badge official">콘텐츠 최적화</span>
+          </div>
+          <div id="specUpGuideContent"></div>
+        </section>
+      </section>
+
+      <!-- TAB 2: Character Specs & Stats Setup (Dedicated Full-Width Tab) -->
+      <section class="tab-panel" data-panel="character">
+        <form class="card" id="characterForm">
+          <div class="section-heading">
+            <div><span class="step">01</span><h2>캐릭터 기본 스탯 설정</h2></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" class="button secondary" id="openOcrInFormBtn" style="padding:6px 12px;font-size:12px;">📸 OCR 입력</button>
+              <button type="button" class="button primary" id="goToCombatFromCharBtn" style="padding:6px 12px;font-size:12px;">⚔️ 전투 결과 보기</button>
+            </div>
+          </div>
+          <p class="hint">
+            게임 스탯 창의 수치를 직접 입력하거나 스크린샷 OCR로 자동 분석합니다.
+            입력된 모든 수치는 전투 시뮬레이션, 스탯 성장 효율, 스펙업 로드맵에 실시간 자동 반영됩니다.
+          </p>
+
+          <div class="fields compact">
+            <label>직업<select id="job"><option value="">직업 선택</option></select></label>
+            <label>레벨<input id="level" type="number" min="1" value="100"></label>
+            <label>공격력(+)<input id="attackFlat" type="number" min="0" step="0.01" value="1000"></label>
+            <label>공격력%<input id="attackPct" type="number" min="0" step="0.01" value="0"></label>
+            <label>최대 HP<input id="maxHp" type="number" min="0" step="1" value="0"></label>
+            <label>캐릭터 방어력<input id="playerDefense" type="number" min="0" step="1" value="0"></label>
+            <label>최대 MP<input id="maxMp" type="number" min="0" step="1" value="500"></label>
+            <label>회피<input id="evasion" type="number" min="0" step="0.01" value="0"></label>
+            <label>주스탯(+)<input id="mainStat" type="number" min="0" step="0.01" value="1000"></label>
+            <label>주스탯%<input id="mainStatPct" type="number" min="0" step="0.01" value="0"></label>
+            <label>부스탯(+)<input id="subStat" type="number" min="0" step="0.01" value="400"></label>
+            <label>데미지%<input id="damage" type="number" step="0.01" value="0"></label>
+            <label>데미지 증폭%<input id="damageAmp" type="number" step="0.01" value="0"></label>
+            <label>최종 데미지%<input id="finalDamage" type="number" step="0.01" value="0"></label>
+            <label>크리티컬 확률%<input id="critRate" type="number" min="0" max="100" step="0.01" value="0"></label>
+            <label>크리티컬 데미지%<input id="critDamage" type="number" step="0.01" value="0"></label>
+            <label>최소 데미지 배율%<input id="minDamage" type="number" step="0.01" value="65"></label>
+            <label>최대 데미지 배율%<input id="maxDamage" type="number" step="0.01" value="100"></label>
+            <label>마스터리·기타 증가%<input id="mastery" type="number" step="0.01" value="0"></label>
+            <label>스킬 계수%<input id="skillCoefficient" type="number" min="0" step="0.01" value="100"></label>
+            <label>기본 공격 간격(초)<input id="attackInterval" type="number" min="0.01" step="0.01" value="1"></label>
+            <label>공격 속도%<input id="attackSpeed" type="number" min="0" step="0.01" value="0"></label>
+          </div>
+
+          <details class="companion-box" style="margin-top:14px;">
+            <summary class="companion-heading"><strong>직업별 주·부 스탯 입력</strong><span class="badge official">공식 직업 매핑</span></summary>
+            <div class="fields compact">
+              <label>스탯 계산 방식<select id="statInputMode"><option value="aggregate">주·부 스탯 합산값 직접 입력</option><option value="job">직업별 원시 스탯으로 계산</option></select></label>
+            </div>
+            <div class="formula-note" id="jobStatMapping">직업을 선택하면 주·부 스탯 매핑을 표시합니다.</div>
+            <div class="fields compact">
+              <label>STR<input id="statSTR" type="number" min="0" step="0.01" value="0"></label>
+              <label>DEX<input id="statDEX" type="number" min="0" step="0.01" value="0"></label>
+              <label>INT<input id="statINT" type="number" min="0" step="0.01" value="0"></label>
+              <label>LUK<input id="statLUK" type="number" min="0" step="0.01" value="0"></label>
+            </div>
+          </details>
+
+          <details class="companion-box" open style="margin-top:14px;">
+            <summary class="companion-heading"><strong>전투력 보조 능력치</strong><span class="badge official">공식 전투력 식</span></summary>
+            <div class="fields compact">
+              <label>명중<input id="accuracy" type="number" min="0" step="0.01" value="100"></label>
+              <label>방어 관통력%<input id="defPen" type="number" min="0" max="100" step="0.01" value="0"></label>
+              <label>보스 몬스터 데미지%<input id="bossDamage" type="number" step="0.01" value="0"></label>
+              <label>일반 몬스터 데미지%<input id="normalDamage" type="number" step="0.01" value="0"></label>
+              <label>기본 공격 데미지%<input id="basicDamage" type="number" step="0.01" value="0"></label>
+              <label>스킬 데미지%<input id="skillDamage" type="number" step="0.01" value="0"></label>
+              <label>상태이상 데미지%<input id="statusDamage" type="number" step="0.01" value="0"></label>
+              <label>받는 피해 감소%<input id="dmgReduction" type="number" step="0.01" value="0"></label>
+              <label>동료 소환 지속시간 증가%<input id="companionDuration" type="number" step="0.01" value="0"></label>
+              <label>버프 지속시간 증가%<input id="buffDuration" type="number" step="0.01" value="0"></label>
+              <label>디버프 내성%<input id="debuffResist" type="number" step="0.01" value="0"></label>
+              <label>기본 공격 대상 수 증가<input id="extraTargets" type="number" min="0" step="1" value="0"></label>
+              <label>스킬 쿨타임 감소%<input id="cooldownReductionPct" type="number" min="0" max="80" step="0.01" value="0"></label>
+              <label>스킬 쿨타임 감소(초)<input id="cooldownReductionSec" type="number" min="0" step="0.01" value="0"></label>
+              <label>1차 스킬 레벨<input id="skillLevel1" type="number" min="1" step="1" value="1"></label>
+              <label>2차 스킬 레벨<input id="skillLevel2" type="number" min="1" step="1" value="1"></label>
+              <label>3차 스킬 레벨<input id="skillLevel3" type="number" min="1" step="1" value="1"></label>
+              <label>4차 스킬 레벨<input id="skillLevel4" type="number" min="0" step="1" value="0"></label>
+              <label>1레벨당 주스탯<input id="mainStatPerLevel1" type="number" min="0" step="0.01" value="10"></label>
+            </div>
+          </details>
+
+          <button type="button" class="button primary full" id="charApplyAndCombatBtn" style="margin-top:16px;font-size:16px;padding:14px;">
+            ⚔️ 스탯 적용 및 실전 전투 계산 결과 확인하기
+          </button>
+        </form>
+      </section>
+
+      <!-- TAB 3: Stat Efficiencies v4 (MekiCalc-Style Stat Comparison Dedicated Tab) -->
+      <section class="tab-panel" data-panel="efficiency">
+        <section class="card efficiency-card">
+          <div class="section-heading">
+            <div>
+              <span class="step">📈</span>
+              <h2>한계 스탯 성장 효율 랭킹 (스탯효율계산기 v4 연동)</h2>
+            </div>
+            <span class="badge official">DPS 기여도</span>
+          </div>
+          <p class="hint">
+            현재 캐릭터 스펙에서 어떤 능력치를 1단위 또는 1% 올렸을 때 DPS 증가율이 가장 높은지 수학적 편미분(Marginal Efficiency)으로 순위화합니다.
+            어떤 옵션을 우선적으로 올려야 효율적인지 한눈에 확인할 수 있습니다.
+          </p>
+          <div class="efficiency-grid" id="statEfficienciesRoot"></div>
+        </section>
+
+        <!-- Diminishing Returns & Saturation Guide Card -->
+        <section class="card">
+          <div class="section-heading">
+            <h2>💡 스탯별 점감 효과(Diminishing Returns) &amp; 최적 성장 원리</h2>
+            <span class="badge official">수학적 원리</span>
+          </div>
+          <div style="font-size:13px;line-height:1.6;color:var(--ink);">
+            <div style="background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px;">
+              <strong style="color:var(--primary-dark);font-size:14px;">1. 주스탯(+)의 점감 효과</strong><br>
+              주스탯 합산값이 500일 때는 +100 증가가 DPS를 약 +15% 증가시키지만, 주스탯이 5,000을 넘어가면 동일한 +100 증가의 DPS 기여율은 +1.8%로 급격히 감소합니다.
+            </div>
+            <div style="background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px;">
+              <strong style="color:var(--primary-dark);font-size:14px;">2. 크리티컬 데미지% &amp; 최종 데미지%의 폭발적 효율</strong><br>
+              크리티컬 확률이 80%~100%에 도달한 중·후반부에서는 크리티컬 데미지%와 최종 데미지%가 곱연산으로 작용하여 주스탯 대비 수십 배 높은 딜 상승률을 기록합니다.
+            </div>
+            <div style="background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:14px;">
+              <strong style="color:var(--primary-dark);font-size:14px;">3. 방어 관통력%의 구간별 변곡점</strong><br>
+              적 방어력이 높은 상위 챕터 및 보스전에서는 관통력이 부족하면 데미지가 최대 80%까지 감소합니다. 따라서 고난도 콘텐츠일수록 방어 관통력의 효율 순위가 급상승합니다.
+            </div>
+          </div>
+        </section>
       </section>
 
       <!-- TAB: Spec-Up Optimization (재화 기반 스펙업 최적화 - MekiCalc & 스탯효율 연동) -->
@@ -258,179 +396,177 @@
           </button>
         </section>
 
-        <div class="grid two-col">
-          <!-- Left Column: Equipment Inputs & Standalone MekiCalc Simulators -->
-          <div>
-            <!-- Equipment Status Card -->
-            <section class="card">
-              <div class="section-heading">
-                <div><h3>⚔️ 현재 장비 부위별 강화 현황</h3></div>
-                <span class="badge provisional">8개 주요 부위</span>
-              </div>
-              <p class="hint">각 장비 부위의 현재 성급, 주문서 완작 슬롯 수, 잠재능력 등급을 입력합니다.</p>
-              <div class="table-responsive">
-                <table class="styled-table" id="specupEquipTable">
-                  <thead>
-                    <tr>
-                      <th style="min-width:120px;">부위명</th>
-                      <th style="min-width:75px;">레벨</th>
-                      <th style="min-width:110px;">성급 (현재/최대)</th>
-                      <th style="min-width:110px;">주문서 (성공/총)</th>
-                      <th style="min-width:85px;">잠재 등급</th>
-                      <th style="min-width:240px;">현재 큐브 3줄 &amp; MekiCalc 추천</th>
-                    </tr>
-                  </thead>
-                  <tbody id="specupEquipTableBody">
-                    <!-- Populated dynamically -->
-                  </tbody>
-                </table>
-              </div>
-            </section>
+        <!-- Results Overview Card (MekiCalc-Style Full Width) -->
+        <section class="card result-card" style="margin-top:14px;">
+          <div class="section-heading">
+            <div>
+              <span class="step">📊</span>
+              <h3>스펙업 최적화 분석 결과 (ROI 로드맵)</h3>
+            </div>
+            <span class="badge official">최고 가성비 로드맵</span>
+          </div>
 
-            <!-- MekiCalc Cube Recommendation Leaderboard -->
-            <section class="card" id="mekiCubeRecCard" style="margin-top:14px;">
-              <div class="section-heading">
-                <div>
-                  <span class="step">🧊</span>
-                  <h3>MekiCalc 부위별 큐브 추천 순위 (어떤 부위 먼저 돌릴까?)</h3>
-                </div>
-                <span class="badge official">ROI 랭킹</span>
+          <div class="result-grid">
+            <div class="metric primary-metric">
+              <span>예상 DPS 변화</span>
+              <strong id="specupDpsSummary">0 ➔ 0</strong>
+              <small id="specupDpsGainPct">+0.00% 증가</small>
+            </div>
+            <div class="metric">
+              <span>종합 전투력 변화</span>
+              <strong id="specupPowerSummary">0 ➔ 0</strong>
+              <small id="specupPowerGainPct">+0.00% 증가</small>
+            </div>
+            <div class="metric">
+              <span>예산 소모 / 잔여</span>
+              <strong id="specupBudgetSummary">0 메소</strong>
+              <small id="specupBudgetLeft">남은 예산: 0</small>
+            </div>
+            <div class="metric">
+              <span>최적화 단계</span>
+              <strong id="specupStepsCount">0 단계</strong>
+              <small>추천 강화 항목</small>
+            </div>
+          </div>
+
+          <!-- Roadmap Timeline / Step list -->
+          <div style="margin-top:16px;">
+            <h4 style="margin:0 0 10px;font-size:15px;color:var(--ink);">🚀 단계별 추천 강화 순서 (ROI 순위)</h4>
+            <div id="specupRoadmapList" style="display:grid;gap:8px;max-height:480px;overflow-y:auto;padding-right:4px;">
+              <div class="stage-verdict" style="margin:0;">
+                상단의 <strong>[🚀 최고 가성비 스펙업 로드맵 계산]</strong> 버튼을 누르면 보유 메소 내에서 DPS 증가율이 가장 높은 강화 항목들이 순서대로 표시됩니다.
               </div>
-              <p class="hint">각 장비의 현재 3줄 옵션과 기대 메소 대비 딜 상승률(ROI)을 분석하여, 지금 당장 큐브를 돌려야 하는 부위와 멈춰야 하는 부위를 1위부터 순서대로 안내합니다.</p>
-              <div id="mekiCubeRecList" style="display:grid;gap:8px;margin-top:10px;">
+            </div>
+          </div>
+
+          <!-- Dynamic Saturation Note -->
+          <div class="formula-note" style="margin-top:16px;">
+            <strong>💡 동적 스탯 포화도(Saturation) &amp; 딜 증가율 수학적 원리:</strong><br>
+            단순히 스탯만 더하는 것이 아니라, 캐릭터의 <strong>현재 보스 데미지%, 크리티컬 확률/데미지, 공격력%의 포화 상태</strong>를 매 단계마다 실시간 재계산합니다.<br>
+            예를 들어 크리티컬 확률이 100%에 가까울수록 장갑 잠재(크뎀)의 효율이 폭발적으로 상승하며, 보스 데미지가 낮을 때는 무기 잠재가 우선 추천됩니다.
+            한 강화를 진행하면 스탯 버킷이 갱신되어 다음 최적 강화 순위가 지능적으로 변동됩니다.
+          </div>
+        </section>
+
+        <!-- Equipment Status Card (Full Width - 100% Responsive) -->
+        <section class="card" style="margin-top:14px;">
+          <div class="section-heading">
+            <div>
+              <span class="step">⚔️</span>
+              <h3>현재 장비 부위별 강화 현황</h3>
+            </div>
+            <span class="badge provisional">8개 주요 부위</span>
+          </div>
+          <p class="hint">각 장비 부위의 현재 성급, 주문서 완작 슬롯 수, 잠재능력 등급을 입력합니다.</p>
+          <div class="table-responsive">
+            <table class="styled-table" id="specupEquipTable">
+              <thead>
+                <tr>
+                  <th style="min-width:120px;">부위명</th>
+                  <th style="min-width:75px;">레벨</th>
+                  <th style="min-width:110px;">성급 (현재/최대)</th>
+                  <th style="min-width:110px;">주문서 (성공/총)</th>
+                  <th style="min-width:85px;">잠재 등급</th>
+                  <th style="min-width:240px;">현재 큐브 3줄 &amp; MekiCalc 추천</th>
+                </tr>
+              </thead>
+              <tbody id="specupEquipTableBody">
                 <!-- Populated dynamically -->
-              </div>
-            </section>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-            <!-- Standalone MekiCalc Simulators -->
-            <section class="card">
-              <div class="section-heading">
-                <div><h3>🎲 단독 강화 기대치 계산기 (MekiCalc 스타일)</h3></div>
-              </div>
+        <!-- MekiCalc Cube Recommendation Leaderboard (Full Width) -->
+        <section class="card" id="mekiCubeRecCard" style="margin-top:14px;">
+          <div class="section-heading">
+            <div>
+              <span class="step">🧊</span>
+              <h3>MekiCalc 부위별 큐브 추천 순위 (어떤 부위 먼저 돌릴까?)</h3>
+            </div>
+            <span class="badge official">ROI 랭킹</span>
+          </div>
+          <p class="hint">각 장비의 현재 3줄 옵션과 기대 메소 대비 딜 상승률(ROI)을 분석하여, 지금 당장 큐브를 돌려야 하는 부위와 멈춰야 하는 부위를 1위부터 순서대로 안내합니다.</p>
+          <div id="mekiCubeRecList" style="display:grid;gap:8px;margin-top:10px;">
+            <!-- Populated dynamically -->
+          </div>
+        </section>
 
-              <!-- Starforce Standalone -->
-              <details class="tool-drawer" open style="margin-top:8px;">
-                <summary>⭐ 스타포스 구간별 기대비용 & 파괴/하락 시뮬레이터 (마르코프 연쇄)</summary>
-                <div class="tool-body" style="padding:12px;">
-                  <div class="fields" style="grid-template-columns: repeat(2, 1fr);gap:8px;">
-                    <label>장비 부위
-                      <select id="sfStandaloneSlot">
-                        <option value="weapon">무기 (Weapon)</option>
-                        <option value="glove">장갑 (Glove)</option>
-                        <option value="armor">방어구 (Armor)</option>
-                        <option value="accessory">장신구 (Accessory)</option>
-                      </select>
-                    </label>
-                    <label>장비 레벨
-                      <select id="sfStandaloneLevel">
-                        <option value="100">100제</option>
-                        <option value="120" selected>120제</option>
-                        <option value="140">140제</option>
-                        <option value="160">160제</option>
-                      </select>
-                    </label>
-                    <label>시작 성급
-                      <input id="sfStandaloneStart" type="number" min="0" max="29" value="10">
-                    </label>
-                    <label>목표 성급
-                      <input id="sfStandaloneTarget" type="number" min="1" max="30" value="15">
-                    </label>
-                  </div>
-                  <button type="button" class="button secondary" id="runSfStandaloneBtn" style="margin-top:10px;width:100%;">
-                    ⭐ 스타포스 기대치 계산
-                  </button>
-                  <div id="sfStandaloneResult" style="margin-top:10px;font-size:12px;color:#475467;">
-                    시작 및 목표 성급을 입력하고 계산을 누르면 기대 비용과 파괴 횟수가 출력됩니다.
-                  </div>
-                </div>
-              </details>
-
-              <!-- Scroll Standalone -->
-              <details class="tool-drawer" style="margin-top:10px;">
-                <summary>📜 주문서 완작 & 순백의 주문서 기대치 계산기</summary>
-                <div class="tool-body" style="padding:12px;">
-                  <div class="fields" style="grid-template-columns: repeat(2, 1fr);gap:8px;">
-                    <label>장비 부위
-                      <select id="scrollStandaloneSlot">
-                        <option value="weapon">무기 (공격력)</option>
-                        <option value="armor">방어구 (주스탯/HP)</option>
-                      </select>
-                    </label>
-                    <label>주문서 종류
-                      <select id="scrollStandaloneType">
-                        <option value="scroll100">100% 주문서 (안전)</option>
-                        <option value="scroll70" selected>70% 주문서 (표준)</option>
-                        <option value="scroll30">30% 주문서 (고급)</option>
-                        <option value="scroll15">15% 주문서 (극옵)</option>
-                      </select>
-                    </label>
-                    <label>목표 성공 슬롯 수
-                      <input id="scrollStandaloneSuccess" type="number" min="1" max="10" value="8">
-                    </label>
-                  </div>
-                  <button type="button" class="button secondary" id="runScrollStandaloneBtn" style="margin-top:10px;width:100%;">
-                    📜 주문서 완작 기대치 계산
-                  </button>
-                  <div id="scrollStandaloneResult" style="margin-top:10px;font-size:12px;color:#475467;">
-                    목표 성공 슬롯과 주문서를 선택하면 기대 주문서/순백 소모량이 출력됩니다.
-                  </div>
-                </div>
-              </details>
-            </section>
+        <!-- Standalone MekiCalc Simulators (Full Width Drawers) -->
+        <section class="card" style="margin-top:14px;">
+          <div class="section-heading">
+            <div><h3>🎲 단독 강화 기대치 계산기 (MekiCalc 스타일)</h3></div>
           </div>
 
-          <!-- Right Column: Optimization Results & Dynamic Roadmap -->
-          <div>
-            <!-- Results Overview Card -->
-            <section class="card result-card">
-              <div class="section-heading">
-                <div><h3>📊 스펙업 최적화 분석 결과</h3></div>
-                <span class="badge official">최고 가성비 로드맵</span>
+          <!-- Starforce Standalone -->
+          <details class="tool-drawer" open style="margin-top:8px;">
+            <summary>⭐ 스타포스 구간별 기대비용 &amp; 파괴/하락 시뮬레이터 (마르코프 연쇄)</summary>
+            <div class="tool-body" style="padding:12px;">
+              <div class="fields" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));gap:8px;">
+                <label>장비 부위
+                  <select id="sfStandaloneSlot">
+                    <option value="weapon">무기 (Weapon)</option>
+                    <option value="glove">장갑 (Glove)</option>
+                    <option value="armor">방어구 (Armor)</option>
+                    <option value="accessory">장신구 (Accessory)</option>
+                  </select>
+                </label>
+                <label>장비 레벨
+                  <select id="sfStandaloneLevel">
+                    <option value="100">100제</option>
+                    <option value="120" selected>120제</option>
+                    <option value="140">140제</option>
+                    <option value="160">160제</option>
+                  </select>
+                </label>
+                <label>시작 성급
+                  <input id="sfStandaloneStart" type="number" min="0" max="29" value="10">
+                </label>
+                <label>목표 성급
+                  <input id="sfStandaloneTarget" type="number" min="1" max="30" value="15">
+                </label>
               </div>
+              <button type="button" class="button secondary" id="runSfStandaloneBtn" style="margin-top:10px;width:100%;">
+                ⭐ 스타포스 기대치 계산
+              </button>
+              <div id="sfStandaloneResult" style="margin-top:10px;font-size:12px;color:#475467;">
+                시작 및 목표 성급을 입력하고 계산을 누르면 기대 비용과 파괴 횟수가 출력됩니다.
+              </div>
+            </div>
+          </details>
 
-              <div class="result-grid">
-                <div class="metric primary-metric">
-                  <span>예상 DPS 변화</span>
-                  <strong id="specupDpsSummary">0 ➔ 0</strong>
-                  <small id="specupDpsGainPct">+0.00% 증가</small>
-                </div>
-                <div class="metric">
-                  <span>종합 전투력 변화</span>
-                  <strong id="specupPowerSummary">0 ➔ 0</strong>
-                  <small id="specupPowerGainPct">+0.00% 증가</small>
-                </div>
-                <div class="metric">
-                  <span>예산 소모 / 잔여</span>
-                  <strong id="specupBudgetSummary">0 메소</strong>
-                  <small id="specupBudgetLeft">남은 예산: 0</small>
-                </div>
-                <div class="metric">
-                  <span>최적화 단계</span>
-                  <strong id="specupStepsCount">0 단계</strong>
-                  <small>추천 강화 항목</small>
-                </div>
+          <!-- Scroll Standalone -->
+          <details class="tool-drawer" style="margin-top:10px;">
+            <summary>📜 주문서 완작 &amp; 순백의 주문서 기대치 계산기</summary>
+            <div class="tool-body" style="padding:12px;">
+              <div class="fields" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));gap:8px;">
+                <label>장비 부위
+                  <select id="scrollStandaloneSlot">
+                    <option value="weapon">무기 (공격력)</option>
+                    <option value="armor">방어구 (주스탯/HP)</option>
+                  </select>
+                </label>
+                <label>주문서 종류
+                  <select id="scrollStandaloneType">
+                    <option value="scroll100">100% 주문서 (안전)</option>
+                    <option value="scroll70" selected>70% 주문서 (표준)</option>
+                    <option value="scroll30">30% 주문서 (고급)</option>
+                    <option value="scroll15">15% 주문서 (극옵)</option>
+                  </select>
+                </label>
+                <label>목표 성공 슬롯 수
+                  <input id="scrollStandaloneSuccess" type="number" min="1" max="10" value="8">
+                </label>
               </div>
-
-              <!-- Roadmap Timeline / Step list -->
-              <div style="margin-top:16px;">
-                <h4 style="margin:0 0 10px;font-size:15px;color:var(--ink);">🚀 단계별 추천 강화 순서 (ROI 순위)</h4>
-                <div id="specupRoadmapList" style="display:grid;gap:8px;max-height:480px;overflow-y:auto;padding-right:4px;">
-                  <div class="stage-verdict" style="margin:0;">
-                    상단의 <strong>[🚀 최고 가성비 스펙업 로드맵 계산]</strong> 버튼을 누르면 보유 메소 내에서 DPS 증가율이 가장 높은 강화 항목들이 순서대로 표시됩니다.
-                  </div>
-                </div>
+              <button type="button" class="button secondary" id="runScrollStandaloneBtn" style="margin-top:10px;width:100%;">
+                📜 주문서 완작 기대치 계산
+              </button>
+              <div id="scrollStandaloneResult" style="margin-top:10px;font-size:12px;color:#475467;">
+                목표 성공 슬롯과 주문서를 선택하면 기대 주문서/순백 소모량이 출력됩니다.
               </div>
-
-              <!-- Dynamic Saturation Note -->
-              <div class="formula-note" style="margin-top:16px;">
-                <strong>💡 동적 스탯 포화도(Saturation) &amp; 딜 증가율 수학적 원리:</strong><br>
-                단순히 스탯만 더하는 것이 아니라, 캐릭터의 <strong>현재 보스 데미지%, 크리티컬 확률/데미지, 공격력%의 포화 상태</strong>를 매 단계마다 실시간 재계산합니다.<br>
-                예를 들어 크리티컬 확률이 100%에 가까울수록 장갑 잠재(크뎀)의 효율이 폭발적으로 상승하며, 보스 데미지가 낮을 때는 무기 잠재가 우선 추천됩니다.
-                한 강화를 진행하면 스탯 버킷이 갱신되어 다음 최적 강화 순위가 지능적으로 변동됩니다.
-              </div>
-            </section>
-          </div>
-        </div>
+            </div>
+          </details>
+        </section>
       </section>
 
       <!-- TAB 2: Companion & Build Presets Optimization -->

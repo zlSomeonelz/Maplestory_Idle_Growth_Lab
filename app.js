@@ -2151,14 +2151,15 @@ function renderStageVerdict() {
 
 function renderStatEfficiencies() {
   const box = $('statEfficienciesRoot') || $('statEfficiencyBox');
-  if (!box) return;
+  const quickBox = $('statEfficienciesQuickRoot');
   const inputs = readInputs();
   const effs = calculateStatEfficiencies(inputs, DATA.combat || {});
   if (!effs.length) {
-    box.innerHTML = '';
+    if (box) box.innerHTML = '';
+    if (quickBox) quickBox.innerHTML = '';
     return;
   }
-  const topRows = effs.slice(0, 6).map((item, index) =>
+  const allRows = effs.map((item, index) =>
     `<div class="efficiency-row">
       <span class="eff-rank">${index + 1}위</span>
       <span class="eff-label">${escapeHtml(item.label)}</span>
@@ -2166,7 +2167,20 @@ function renderStatEfficiencies() {
       <span class="eff-badge">${item.ratioPct >= 0 ? '+' : ''}${item.ratioPct.toFixed(2)}%</span>
     </div>`
   ).join('');
-  box.innerHTML = `<div class="efficiency-grid">${topRows}</div>`;
+  if (box) {
+    box.innerHTML = `<div class="efficiency-grid">${allRows}</div>`;
+  }
+  if (quickBox) {
+    const quickRows = effs.slice(0, 3).map((item, index) =>
+      `<div class="efficiency-row">
+        <span class="eff-rank">${index + 1}위</span>
+        <span class="eff-label">${escapeHtml(item.label)}</span>
+        <span class="eff-delta">+${fmt(item.deltaDps)} DPS</span>
+        <span class="eff-badge">${item.ratioPct >= 0 ? '+' : ''}${item.ratioPct.toFixed(2)}%</span>
+      </div>`
+    ).join('');
+    quickBox.innerHTML = `<div class="efficiency-grid">${quickRows}</div>`;
+  }
 }
 
 function renderSpecUpGuide() {
@@ -2728,9 +2742,39 @@ function fillJobs() {
   renderCompanionEffect();
 }
 
+function updateCombatSpecSummary() {
+  const jobKey = $('job')?.value;
+  const jobName = JOB_NAMES[jobKey] || '직업 미선택';
+  const lv = $('level')?.value || 100;
+  const atk = n('attackFlat');
+  const main = n('mainStat');
+  if ($('combatJobSummary')) $('combatJobSummary').textContent = jobName;
+  if ($('combatLevelSummary')) $('combatLevelSummary').textContent = lv;
+  if ($('combatAtkSummary')) $('combatAtkSummary').textContent = fmt(atk);
+  if ($('combatMainSummary')) $('combatMainSummary').textContent = fmt(main);
+}
+
 function renderCombat() {
   const r = calculate();
   const power = calculatePower();
+  updateCombatSpecSummary();
+
+  if ($('heroTargetBadge')) {
+    const target = $('targetType')?.value || 'normal';
+    const targetNames = { normal: '🎯 일반 몬스터 (사냥/던전)', boss: '👑 보스 몬스터 (레이드)', pvp: '⚔️ PvP 대항전' };
+    $('heroTargetBadge').textContent = targetNames[target] || '🎯 일반 몬스터';
+  }
+  if ($('heroSpeedBadge')) {
+    const atkSpeed = n('attackSpeed');
+    const atkInterval = n('attackInterval') || 1;
+    const effectiveInterval = Math.max(0.1, atkInterval / (1 + atkSpeed / 100));
+    $('heroSpeedBadge').textContent = `⏱️ 공격 간격 ${effectiveInterval.toFixed(3)}초 (공속 ${atkSpeed}%)`;
+  }
+  if ($('heroDefBadge')) {
+    const pen = r.effectiveDefPen || 0;
+    $('heroDefBadge').textContent = `🛡️ 방어 감쇄율 ${(r.defenseFactor * 100).toFixed(2)}% (관통 ${pen.toFixed(1)}%)`;
+  }
+
   if ($('avgDamage')) $('avgDamage').textContent = fmt(r.average);
   if ($('damageRange')) $('damageRange').textContent = `최소 ${fmt(r.min)} · 최대 ${fmt(r.max)}`;
   if ($('dps')) $('dps').textContent = fmt(r.dps);
@@ -3116,7 +3160,7 @@ let pendingOcrStats = {};
 
 function initOcrModal() {
   const modal = $('ocrModal');
-  const openBtns = [$('openOcrModalBtn'), $('openOcrInFormBtn'), $('openOcrFromDrawerBtn')].filter(Boolean);
+  const openBtns = [$('openOcrModalBtn'), $('openOcrInFormBtn'), $('openOcrFromDrawerBtn'), $('openOcrInCombatBtn')].filter(Boolean);
   const closeBtn = $('closeOcrModalBtn');
   const runBtn = $('runOcrModalBtn');
   const applyBtn = $('applyOcrModalBtn');
@@ -3769,7 +3813,7 @@ window.addEventListener('storage', event => {
 window.addEventListener('message', event => {
   if (event.data?.type === 'maple-growth-lab-stats') {
     applyDetailedStats(event.data.stats || {});
-    activateTab('combat');
+    activateTab('character');
     const target = $('characterForm');
     if (target) {
       target.classList.remove('focus-flash');
@@ -4424,6 +4468,10 @@ function activateTab(tabName) {
     renderSpecupEquipTable();
   } else if (tabName === 'cube') {
     renderCubeEquipmentLoader();
+  } else if (tabName === 'efficiency') {
+    renderStatEfficiencies();
+  } else if (tabName === 'combat') {
+    renderCombat();
   }
 }
 
@@ -4540,6 +4588,13 @@ function bind() {
   });
 
   $('calculateCombat')?.addEventListener('click', renderCombat);
+  $('goToCharacterTabBtn')?.addEventListener('click', () => activateTab('character'));
+  $('goToCombatFromCharBtn')?.addEventListener('click', () => activateTab('combat'));
+  $('charApplyAndCombatBtn')?.addEventListener('click', () => {
+    renderCombat();
+    activateTab('combat');
+  });
+  $('goToEfficiencyTabBtn')?.addEventListener('click', () => activateTab('efficiency'));
   $('calculateCube')?.addEventListener('click', renderCube);
   $('cubeGrade')?.addEventListener('change', fillCubeSources);
   $('cubeEquipment')?.addEventListener('change', fillCubeSources);
