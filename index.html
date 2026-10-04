@@ -84,7 +84,6 @@
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="font-size:18px;">🗺️</span>
           <strong style="font-size:15px;color:var(--ink);">목표 중심 3단계 올인원 육성 워크플로우</strong>
-          <span class="badge official" style="background:#6366f1;color:#fff;font-size:11px;">MekiCalc Guide</span>
         </div>
         <div style="font-size:12px;color:var(--muted);">
           현재 목표: <strong id="wfActiveTargetLabel" style="color:#4f46d9;">🎯 챕터 보스 레이드</strong>
@@ -118,7 +117,7 @@
           <div class="wf-step-num">STEP 3</div>
           <div class="wf-step-content">
             <strong class="wf-step-title">🚀 최적화 &amp; 큐브 강화</strong>
-            <span class="wf-step-desc">MekiCalc 80% 큐브 추천 &amp; 재화 로드맵</span>
+            <span class="wf-step-desc">큐브 잠재 추천 &amp; 재화 로드맵</span>
           </div>
         </div>
       </div>
@@ -128,7 +127,7 @@
     <nav class="tabs" aria-label="기능 선택" id="mainTabs">
       <button class="tab active" data-tab="character">📊 캐릭터 스펙 &amp; 스탯</button>
       <button class="tab" data-tab="combat">⚔️ 실전 전투 시뮬레이션</button>
-      <button class="tab" data-tab="efficiency">📈 스탯 성장 효율 (v4)</button>
+      <button class="tab" data-tab="efficiency">📈 스탯 성장 효율</button>
       <button class="tab" data-tab="specup">💰 재화 스펙업 최적화</button>
       <button class="tab" data-tab="cube">🧊 큐브 &amp; 잠재능력</button>
       <button class="tab" data-tab="companion">👥 동료 &amp; 프리셋</button>
@@ -178,7 +177,7 @@
           </div>
 
           <details class="companion-box" style="margin-top:14px;">
-            <summary class="companion-heading"><strong>직업별 주·부 스탯 입력</strong><span class="badge official">공식 직업 매핑</span></summary>
+            <summary class="companion-heading"><strong>직업별 주·부 스탯 입력</strong></summary>
             <div class="fields compact">
               <label>스탯 계산 방식<select id="statInputMode"><option value="aggregate">주·부 스탯 합산값 직접 입력</option><option value="job">직업별 원시 스탯으로 계산</option></select></label>
             </div>
@@ -192,7 +191,7 @@
           </details>
 
           <details class="companion-box" open style="margin-top:14px;">
-            <summary class="companion-heading"><strong>전투력 보조 능력치</strong><span class="badge official">공식 전투력 식</span></summary>
+            <summary class="companion-heading"><strong>전투력 보조 능력치</strong></summary>
             <div class="fields compact">
               <label>명중<input id="accuracy" type="number" min="0" step="0.01" value="100"></label>
               <label>방어 관통력%<input id="defPen" type="number" min="0" max="100" step="0.01" value="0"></label>
@@ -386,7 +385,7 @@
           <p class="hint">현재 스펙에서 1단위/1% 올렸을 때 DPS 증가율이 가장 높은 최우선 스탯 3개입니다.</p>
           <div id="statEfficienciesQuickRoot"></div>
           <button type="button" class="button secondary full" id="goToEfficiencyTabBtn" style="margin-top:10px;">
-            📈 전체 한계 스탯 성장 랭킹 &amp; v4 효율 분석 보러가기 →
+            📈 전체 한계 스탯 성장 랭킹 &amp; 효율 분석 보러가기 →
           </button>
         </section>
 
@@ -400,13 +399,13 @@
         </section>
       </section>
 
-      <!-- TAB 3: Stat Efficiencies v4 (MekiCalc-Style Stat Comparison Dedicated Tab) -->
+      <!-- TAB 3: Stat Efficiencies -->
       <section class="tab-panel" data-panel="efficiency">
         <section class="card efficiency-card">
           <div class="section-heading">
             <div>
               <span class="step">📈</span>
-              <h2>한계 스탯 성장 효율 랭킹 (스탯효율계산기 v4 연동)</h2>
+              <h2>한계 스탯 성장 효율 랭킹</h2>
             </div>
             <span class="badge official">DPS 기여도</span>
           </div>
@@ -761,7 +760,7 @@
           <section class="card">
             <div class="section-heading">
               <div>
-                <h2>🏆 MekiCalc 큐브 강화 우선순위 랭킹</h2>
+                <h2>🏆 큐브 강화 우선순위 랭킹</h2>
               </div>
               <span class="badge official">80% 신뢰수준 비용 기준</span>
             </div>
