@@ -64,6 +64,37 @@ assert.equal(res.potentialLines[1].stat, 'critRate');
 assert.equal(res.potentialLines[1].value, 6);
 assert.equal(res.potentialLines[2].stat, 'damage');
 assert.equal(res.potentialLines[2].value, 12);
+assert.equal(res.hasAdditional, false, 'Zakum Helmet has no additional potential');
+assert.equal(res.additionalGrade, null);
+assert.equal(res.additionalLines.length, 0);
+
+// 2B. Top with Unopened Additional Potential & Cursor Noise
+const topOcrText = `
+상의 슬롯 강화 효과
+다크 카테
+레전더리 상의 장착중
+하급 Lv.87
+잠재 옵션 유니크
+크리티컬 확률 9%
+INT 200
+LUK 9× 빼
+장착효과
+공격력 5567
+최대 HP 27617
+`;
+const topRes = parseEquipmentOcrText(topOcrText, 10, 'LUK');
+assert.equal(topRes.slotId, 'top');
+assert.equal(topRes.slotName, '상의');
+assert.equal(topRes.grade, 'unique');
+assert.equal(topRes.currentStar, 10);
+assert.equal(topRes.potentialLines[0].stat, 'critRate');
+assert.equal(topRes.potentialLines[0].value, 9);
+assert.equal(topRes.potentialLines[1].stat, 'NONE'); // INT 200 is off-stat (잡옵)
+assert.equal(topRes.potentialLines[2].stat, 'mainStatPct'); // LUK 9%
+assert.equal(topRes.potentialLines[2].value, 9);
+assert.equal(topRes.hasAdditional, false);
+assert.equal(topRes.additionalGrade, null);
+assert.equal(topRes.additionalLines.length, 0);
 
 // 3. Dual Potential Test (Cloak with 윗잠 and 밑잠)
 const cloakOcrText = `
@@ -105,6 +136,7 @@ assert.equal(cloakRes.potentialLines[2].stat, 'maxHpPct');
 assert.equal(cloakRes.potentialLines[2].value, 15);
 
 // 밑잠 (에디셔널 잠재 옵션)
+assert.equal(cloakRes.hasAdditional, true);
 assert.equal(cloakRes.additionalGrade, 'normal');
 assert.equal(cloakRes.additionalLines.length, 3);
 assert.equal(cloakRes.additionalLines[0].stat, 'NONE'); // STR 3% is off-stat (잡옵)

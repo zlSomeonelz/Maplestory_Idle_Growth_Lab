@@ -57,8 +57,8 @@ export function parsePotentialLine(line, jobMainStat = 'LUK') {
     return { stat: 'maxHpPct', value: val, raw: trimmed, display: `HP ${val}%` };
   }
 
-  // 2. Specific Stat Names (STR, DEX, INT, LUK, 주스탯)
-  const statMatch = trimmed.match(/(?:^|[\s|:·•\-])(STR|DEX|PEX|INT|LUK|주스탯|부스탯|올스탯)\s*([0-9.]+)\s*%/i);
+  // 2. Specific Stat Names (STR, DEX, INT, LUK, 주스탯) with percentage or OCR symbol variants (%, ×, x, X, etc.)
+  const statMatch = trimmed.match(/(?:^|[\s|:·•\-])(STR|DEX|PEX|INT|LUK|주스탯|부스탯|올스탯)[,\s]*([0-9.]+)\s*(?:%|[×xX]|o\/o|\/o)/i);
   if (statMatch) {
     let statName = statMatch[1].toUpperCase();
     if (statName === 'PEX') statName = 'DEX';
@@ -96,11 +96,26 @@ export function parsePotentialLine(line, jobMainStat = 'LUK') {
     }
   }
 
-  // 4. Flat Stats (only when line does not contain %)
-  if (!trimmed.includes('%')) {
+  // 4. Flat Stats (only when line does not contain % or x/X/×)
+  if (!trimmed.includes('%') && !/[0-9.]+\s*[×xX]/.test(trimmed)) {
+    const flatStatMatch = trimmed.match(/(?:^|[\s|:·•\-])(STR|DEX|PEX|INT|LUK|주스탯|부스탯|올스탯)[,\s]*([0-9,]+)/i);
+    if (flatStatMatch) {
+      let statName = flatStatMatch[1].toUpperCase();
+      if (statName === 'PEX') statName = 'DEX';
+      const val = Number(flatStatMatch[2].replace(/,/g, ''));
+      const normalizedMain = (jobMainStat || 'LUK').toUpperCase();
+      if (statName === '주스탯' || statName === '올스탯' || statName === normalizedMain) {
+        return { stat: 'mainStat', value: val, raw: trimmed, display: `${statName}(+) ${val}` };
+      }
+      const subStatMap = { 'LUK': 'DEX', 'STR': 'DEX', 'DEX': 'STR', 'INT': 'LUK' };
+      if (statName === '부스탯' || statName === subStatMap[normalizedMain]) {
+        return { stat: 'subStat', value: val, raw: trimmed, display: `${statName}(+) ${val}` };
+      }
+      return { stat: 'NONE', value: 0, raw: trimmed, display: `${statName}(+) ${val} (잡옵)` };
+    }
+
     const flatPatterns = [
       { stat: 'attackFlat', re: /(?:공격력|마력)\s*([0-9,]+)/i, label: '공(+)' },
-      { stat: 'mainStat', re: /(?:STR|DEX|INT|LUK|주스탯)\s*([0-9,]+)/i, label: '주스탯(+)' },
       { stat: 'maxHp', re: /(?:최대\s*HP|HP)\s*([0-9,]+)/i, label: 'HP(+)' }
     ];
     for (const p of flatPatterns) {
@@ -137,19 +152,32 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
     quality: null,
     currentStar: typeof starCount === 'number' ? starCount : null,
     potentialLines: [],
-    additionalGrade: 'normal',
+    hasAdditional: false,
+    additionalGrade: null,
     additionalLines: [],
     equippedStats: {}
   };
 
   // 1. Split text into Main Potential (윗잠) and Additional Potential (밑잠)
+  const hasAdditional = /(?:에디[셔서][널블서]?|에디|additional)/i.test(text);
   const addSplit = text.split(/(?:에디[셔서][널블서]?|에디|additional)/i);
   const mainSec = addSplit[0];
-  const addSec = addSplit.slice(1).join('\n') || '';
+  const addSec = hasAdditional ? (addSplit.slice(1).join('\n') || '') : '';
 
   // 1A. Detect Main Potential Grade (윗잠)
-  const mainGradeMatch = mainSec.match(/(유니크|유4크|유43|유닉|레전더리|레전|에픽|레어|미스틱)/) ||
-                         mainSec.match(/잠재\s*[옵점][션선]?[^\n]*(Ey|sua)/i);
+  // Check immediately following '잠재 옵션' first so item quality (e.g. 레전더리 상의) does not shadow cube grade
+  let mainGradeMatch = null;
+  const potSecText = /(?:잠재\s*[옵점][션선]?|[점잠]재\s*옵션)/i.test(mainSec)
+    ? mainSec.split(/(?:잠재\s*[옵점][션선]?|[점잠]재\s*옵션)/i)[1]
+    : null;
+  if (potSecText) {
+    mainGradeMatch = potSecText.match(/(유니크|유4크|유43|유닉|레전더리|레전|에픽|레어|미스틱)/) ||
+                     potSecText.match(/^\s*(?:[^\n]*?)(Ey|sua)/i);
+  }
+  if (!mainGradeMatch) {
+    mainGradeMatch = mainSec.match(/잠재\s*[옵점][션선]?[^\n]*(Ey|sua|유니크|유4크|유43|유닉|레전더리|레전|에픽|레어|미스틱)/i) ||
+                     mainSec.match(/(유니크|유4크|유43|유닉|레전더리|레전|에픽|레어|미스틱)/);
+  }
   if (mainGradeMatch) {
     const rawGrade = (mainGradeMatch[1] || '').toLowerCase();
     if (rawGrade === '유4크' || rawGrade === '유43' || rawGrade === '유닉' || rawGrade === 'ey' || rawGrade === 'sua') {
@@ -162,7 +190,7 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
   }
 
   // 1B. Detect Additional Potential Grade (밑잠)
-  if (addSec) {
+  if (hasAdditional && addSec) {
     const addGradeMatch = addSec.match(/(노말|레어|에픽|유니크|유4크|유43|유닉|레전더리|레전)/) ||
                           addSec.match(/에디[^\n]*(Ey|sua)/i);
     if (addGradeMatch) {
@@ -174,7 +202,11 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
       } else {
         result.additionalGrade = GRADE_MAP[rawAddGrade] || 'normal';
       }
+    } else {
+      result.additionalGrade = 'normal';
     }
+  } else {
+    result.additionalGrade = null;
   }
 
   // 2. Detect Slot
@@ -243,12 +275,7 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
     if (sfMatch) {
       result.currentStar = Math.min(30, Math.max(0, Number(sfMatch[1])));
     } else {
-      const eSfMatch = text.match(/Lv\s*\.?\s*\d+\s*[A-Za-z]?\s*.*?(\d{1,2})/);
-      if (eSfMatch && Number(eSfMatch[1]) <= 30) {
-        result.currentStar = Number(eSfMatch[1]);
-      } else {
-        result.currentStar = 10;
-      }
+      result.currentStar = 10;
     }
   }
 
@@ -289,7 +316,12 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
   result.potentialLines = extract3Lines(potSec);
 
   // 7. Detect Additional Potential Lines (밑잠 3줄)
-  result.additionalLines = extract3Lines(addSec);
+  result.hasAdditional = hasAdditional;
+  if (hasAdditional && addSec) {
+    result.additionalLines = extract3Lines(addSec);
+  } else {
+    result.additionalLines = [];
+  }
 
   // 8. Detect Equipped Stats (공격력, 데미지, 크확, HP)
   const equipSec = text.includes('장착') && text.includes('효과') ? text.split(/장착\s*효과/)[1] : text;

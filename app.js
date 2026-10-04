@@ -4890,8 +4890,8 @@ function renderSpecupEquipTable() {
           <div style="font-size:11.5px;color:var(--ink);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;" title="윗잠: ${escapeHtml(linesSummary)}">
             🔮 윗: <span style="font-weight:700;color:#4f46e5;">${CUBE_GRADE_NAMES[eq.cubeGrade] || eq.cubeGrade}</span> (${escapeHtml(linesSummary)})
           </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;" title="밑잠: ${escapeHtml(formatLineSummary(eq.additionalLines || []))}">
-            💠 밑: <span style="font-weight:700;color:#0b7a58;">${GRADE_KOREAN[eq.additionalGrade] || '노말'}</span> (${escapeHtml(formatLineSummary(eq.additionalLines || []))})
+          <div style="font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;" title="밑잠: ${escapeHtml(eq.hasAdditional && eq.additionalGrade ? formatLineSummary(eq.additionalLines || []) : '미개방')}">
+            💠 밑: ${eq.hasAdditional && eq.additionalGrade ? `<span style="font-weight:700;color:#0b7a58;">${GRADE_KOREAN[eq.additionalGrade] || eq.additionalGrade}</span> (${escapeHtml(formatLineSummary(eq.additionalLines || []))})` : '<span style="color:#6b7280;">미개방</span>'}
           </div>
         </td>
       </tr>
@@ -5542,10 +5542,10 @@ function initEquipOcr() {
         let detectedStars = null;
         try {
           const starCanvas = document.createElement('canvas');
-          const sx = isWide ? Math.round(img.width * 0.33) : Math.round(img.width * 0.05);
-          const sy = isWide ? Math.round(img.height * 0.08) : Math.round(img.height * 0.02);
+          const sx = isWide ? Math.round(img.width * 0.342) : Math.round(img.width * 0.05);
+          const sy = isWide ? Math.round(img.height * 0.10) : Math.round(img.height * 0.02);
           const sw = isWide ? Math.round(img.width * 0.26) : Math.round(img.width * 0.90);
-          const sh = isWide ? Math.round(img.height * 0.10) : Math.round(img.height * 0.15);
+          const sh = isWide ? Math.round(img.height * 0.05) : Math.round(img.height * 0.15);
           starCanvas.width = Math.max(10, sw);
           starCanvas.height = Math.max(10, sh);
           const sCtx = starCanvas.getContext('2d');
@@ -5593,10 +5593,16 @@ function initEquipOcr() {
               targetEq.potentialLines = parsed.potentialLines;
               targetEq.cubeValidLines = parsed.potentialLines.filter(l => l && l.stat !== 'NONE' && l.value > 0).length;
             }
-            if (parsed.additionalGrade) targetEq.additionalGrade = parsed.additionalGrade;
-            if (parsed.additionalLines && parsed.additionalLines.length) {
-              targetEq.additionalLines = parsed.additionalLines;
-              targetEq.additionalValidLines = parsed.additionalLines.filter(l => l && l.stat !== 'NONE' && l.value > 0).length;
+            if (parsed.hasAdditional && parsed.additionalGrade) {
+              targetEq.hasAdditional = true;
+              targetEq.additionalGrade = parsed.additionalGrade;
+              targetEq.additionalLines = parsed.additionalLines || [];
+              targetEq.additionalValidLines = (parsed.additionalLines || []).filter(l => l && l.stat !== 'NONE' && l.value > 0).length;
+            } else {
+              targetEq.hasAdditional = false;
+              targetEq.additionalGrade = null;
+              targetEq.additionalLines = [];
+              targetEq.additionalValidLines = 0;
             }
             successCount++;
 
@@ -5616,7 +5622,9 @@ function initEquipOcr() {
                   🔮 윗잠: <strong>${GRADE_KOREAN[targetEq.cubeGrade] || targetEq.cubeGrade}</strong> · ${formatLineSummary(targetEq.potentialLines)}
                 </div>
                 <div style="font-size:11px;color:var(--muted);margin-top:2px;">
-                  💠 밑잠: <strong>${GRADE_KOREAN[targetEq.additionalGrade] || targetEq.additionalGrade || '노말'}</strong> · ${formatLineSummary(targetEq.additionalLines || [])}
+                  💠 밑잠: ${targetEq.hasAdditional && targetEq.additionalGrade
+                    ? `<strong>${GRADE_KOREAN[targetEq.additionalGrade] || targetEq.additionalGrade}</strong> · ${formatLineSummary(targetEq.additionalLines || [])}`
+                    : `<span style="color:#6b7280;font-weight:600;">미개방 (옵션 없음)</span>`}
                 </div>
               `;
               resultsEl.appendChild(card);
