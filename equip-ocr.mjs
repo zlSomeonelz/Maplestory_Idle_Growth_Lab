@@ -51,16 +51,17 @@ export function parsePotentialLine(line, jobMainStat = 'LUK') {
   const trimmed = line.trim();
 
   // 1. Check HP% first (to avoid conflict with flat HP or number 10 in OCR)
-  const hpPctMatch = trimmed.match(/(?:최대\s*HP|최대\s*1[0-9]|HP)\s*([0-9.]+)\s*%/i);
+  const hpPctMatch = trimmed.match(/(?:최대\s*HP|최대\s*1[0-9]|최대|HP)\s*([0-9.]+)\s*%/i);
   if (hpPctMatch) {
     const val = Number(hpPctMatch[1]);
     return { stat: 'maxHpPct', value: val, raw: trimmed, display: `HP ${val}%` };
   }
 
   // 2. Specific Stat Names (STR, DEX, INT, LUK, 주스탯)
-  const statMatch = trimmed.match(/(?:^|\s)(STR|DEX|INT|LUK|주스탯|부스탯|올스탯)\s*([0-9.]+)\s*%/i);
+  const statMatch = trimmed.match(/(?:^|[\s|:·•\-])(STR|DEX|PEX|INT|LUK|주스탯|부스탯|올스탯)\s*([0-9.]+)\s*%/i);
   if (statMatch) {
-    const statName = statMatch[1].toUpperCase();
+    let statName = statMatch[1].toUpperCase();
+    if (statName === 'PEX') statName = 'DEX';
     const val = Number(statMatch[2]);
     const normalizedMain = (jobMainStat || 'LUK').toUpperCase();
     if (statName === '주스탯' || statName === '올스탯' || statName === normalizedMain) {
@@ -75,25 +76,40 @@ export function parsePotentialLine(line, jobMainStat = 'LUK') {
   }
 
   // 3. Other Combat & Utility Stats
-  const patterns = [
+  const pctPatterns = [
     { stat: 'critDamage', re: /(?:크리티컬\s*데미지|크뎀)\s*([0-9.]+)\s*%/i, label: '크뎀' },
     { stat: 'critRate', re: /(?:크리티컬\s*확률|크확)\s*([0-9.]+)\s*%/i, label: '크확' },
     { stat: 'bossDamage', re: /(?:보스\s*몬스터\s*공격\s*시\s*데미지|보스\s*데미지|보스\s*공격력|보공)\s*([0-9.]+)\s*%/i, label: '보공' },
     { stat: 'attackPct', re: /(?:공격력|마력)\s*([0-9.]+)\s*%/i, label: '공%' },
     { stat: 'damage', re: /(?:데미지|뎀)\s*([0-9.]+)\s*%/i, label: '데미지' },
     { stat: 'defPen', re: /(?:방어율\s*무시|방어력\s*관통|방무|방관)\s*([0-9.]+)\s*%/i, label: '방관' },
-    { stat: 'cooldownReduction', re: /(?:스킬\s*재사용\s*대기시간\s*감소|재사용\s*대기시간)\s*([0-9.]+)\s*초?/i, label: '쿨감' },
-    { stat: 'attackFlat', re: /(?:공격력|마력)\s*([0-9,]+)(?!%)/i, label: '공(+)' },
-    { stat: 'mainStat', re: /(?:STR|DEX|INT|LUK|주스탯)\s*([0-9,]+)(?!%)/i, label: '주스탯(+)' },
-    { stat: 'maxHp', re: /(?:최대\s*HP|HP)\s*([0-9,]+)(?!%)/i, label: 'HP(+)' }
+    { stat: 'cooldownReduction', re: /(?:스킬\s*재사용\s*대기시간\s*감소|재사용\s*대기시간)\s*([0-9.]+)\s*초?/i, label: '쿨감' }
   ];
 
-  for (const p of patterns) {
+  for (const p of pctPatterns) {
     const match = trimmed.match(p.re);
     if (match) {
-      const val = Number(match[1].replace(/,/g, ''));
+      const val = Number(match[1]);
       if (!isNaN(val) && val > 0) {
         return { stat: p.stat, value: val, raw: trimmed, display: `${p.label} ${val}%` };
+      }
+    }
+  }
+
+  // 4. Flat Stats (only when line does not contain %)
+  if (!trimmed.includes('%')) {
+    const flatPatterns = [
+      { stat: 'attackFlat', re: /(?:공격력|마력)\s*([0-9,]+)/i, label: '공(+)' },
+      { stat: 'mainStat', re: /(?:STR|DEX|INT|LUK|주스탯)\s*([0-9,]+)/i, label: '주스탯(+)' },
+      { stat: 'maxHp', re: /(?:최대\s*HP|HP)\s*([0-9,]+)/i, label: 'HP(+)' }
+    ];
+    for (const p of flatPatterns) {
+      const match = trimmed.match(p.re);
+      if (match) {
+        const val = Number(match[1].replace(/,/g, ''));
+        if (!isNaN(val) && val > 0) {
+          return { stat: p.stat, value: val, raw: trimmed, display: `${p.label} ${val}` };
+        }
       }
     }
   }
@@ -127,21 +143,37 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
   };
 
   // 1. Split text into Main Potential (윗잠) and Additional Potential (밑잠)
-  const addSplit = text.split(/에디셔널\s*잠재\s*옵션/);
+  const addSplit = text.split(/(?:에디[셔서][널블서]?|에디|additional)/i);
   const mainSec = addSplit[0];
-  const addSec = addSplit[1] || '';
+  const addSec = addSplit.slice(1).join('\n') || '';
 
   // 1A. Detect Main Potential Grade (윗잠)
-  const mainGradeMatch = mainSec.match(/(유니크|레전더리|에픽|레어|미스틱)/);
+  const mainGradeMatch = mainSec.match(/(유니크|유4크|유43|유닉|레전더리|레전|에픽|레어|미스틱)/) ||
+                         mainSec.match(/잠재\s*[옵점][션선]?[^\n]*(Ey|sua)/i);
   if (mainGradeMatch) {
-    result.grade = GRADE_MAP[mainGradeMatch[1]] || 'epic';
+    const rawGrade = (mainGradeMatch[1] || '').toLowerCase();
+    if (rawGrade === '유4크' || rawGrade === '유43' || rawGrade === '유닉' || rawGrade === 'ey' || rawGrade === 'sua') {
+      result.grade = 'unique';
+    } else if (rawGrade === '레전') {
+      result.grade = 'legendary';
+    } else {
+      result.grade = GRADE_MAP[rawGrade] || 'epic';
+    }
   }
 
   // 1B. Detect Additional Potential Grade (밑잠)
   if (addSec) {
-    const addGradeMatch = addSec.match(/(노말|레어|에픽|유니크|레전더리)/);
+    const addGradeMatch = addSec.match(/(노말|레어|에픽|유니크|유4크|유43|유닉|레전더리|레전)/) ||
+                          addSec.match(/에디[^\n]*(Ey|sua)/i);
     if (addGradeMatch) {
-      result.additionalGrade = GRADE_MAP[addGradeMatch[1]] || 'normal';
+      const rawAddGrade = (addGradeMatch[1] || '').toLowerCase();
+      if (rawAddGrade === '유4크' || rawAddGrade === '유43' || rawAddGrade === '유닉' || rawAddGrade === 'ey' || rawAddGrade === 'sua') {
+        result.additionalGrade = 'unique';
+      } else if (rawAddGrade === '레전') {
+        result.additionalGrade = 'legendary';
+      } else {
+        result.additionalGrade = GRADE_MAP[rawAddGrade] || 'normal';
+      }
     }
   }
 
@@ -220,41 +252,44 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
     }
   }
 
-  // 6. Detect Main Potential Lines (윗잠 3줄)
-  const potSec = mainSec.includes('잠재 옵션') ? mainSec.split('잠재 옵션')[1] : mainSec;
-  const potLinesRaw = potSec.split('\n').map(l => l.trim()).filter(Boolean);
-
-  for (const line of potLinesRaw) {
-    if (result.potentialLines.length >= 3) break;
-    if (/장착\s*효과|자동\s*분해|일괄\s*분해|강화/.test(line)) break;
-
-    const parsedLine = parsePotentialLine(line, jobMainStat);
-    if (parsedLine.stat !== 'NONE') {
-      result.potentialLines.push(parsedLine);
+  // 6. Extract up to 3 lines for a potential section
+  function extract3Lines(sec) {
+    if (!sec) {
+      return [
+        { stat: 'NONE', value: 0, display: '잡옵' },
+        { stat: 'NONE', value: 0, display: '잡옵' },
+        { stat: 'NONE', value: 0, display: '잡옵' }
+      ];
     }
+    const lines = sec.split('\n').map(l => l.trim()).filter(Boolean);
+    const parsedLines = [];
+    for (const line of lines) {
+      if (parsedLines.length >= 3) break;
+      if (/강화\s*효과|상세보기|장착\s*효과|자동\s*분해|일괄\s*분해|슬롯/.test(line)) continue;
+      if (/^(?:잠재\s*[옵점][션선]?|[점잠]재\s*옵션|옵션|에디셔널)/.test(line)) continue;
+      if (!line.includes('%') && /공격력\s+[0-9,]+/.test(line)) continue;
+      if (!line.includes('%') && /최대\s*HP\s+[0-9,]+/.test(line)) continue;
+
+      const isCandidate = /(?:LUK|STR|DEX|PEX|INT|HP|MP|공격력|마력|크리티컬|데미지|보스|방어|최대|[0-9.]+%\s*)/i.test(line);
+      if (!isCandidate) continue;
+
+      const parsed = parsePotentialLine(line, jobMainStat);
+      parsedLines.push(parsed);
+    }
+    while (parsedLines.length < 3) {
+      parsedLines.push({ stat: 'NONE', value: 0, display: '잡옵' });
+    }
+    return parsedLines;
   }
 
-  while (result.potentialLines.length < 3) {
-    result.potentialLines.push({ stat: 'NONE', value: 0 });
-  }
+  // 6. Detect Main Potential Lines (윗잠 3줄)
+  const potSec = /(?:잠재\s*[옵점][션선]?|[점잠]재\s*옵션)/i.test(mainSec)
+    ? mainSec.split(/(?:잠재\s*[옵점][션선]?|[점잠]재\s*옵션)/i)[1]
+    : mainSec;
+  result.potentialLines = extract3Lines(potSec);
 
   // 7. Detect Additional Potential Lines (밑잠 3줄)
-  if (addSec) {
-    const addLinesRaw = addSec.split('\n').map(l => l.trim()).filter(Boolean);
-    for (const line of addLinesRaw) {
-      if (result.additionalLines.length >= 3) break;
-      if (/장착\s*효과|자동\s*분해|일괄\s*분해|강화/.test(line)) break;
-
-      const parsedLine = parsePotentialLine(line, jobMainStat);
-      if (parsedLine.stat !== 'NONE') {
-        result.additionalLines.push(parsedLine);
-      }
-    }
-  }
-
-  while (result.additionalLines.length < 3) {
-    result.additionalLines.push({ stat: 'NONE', value: 0 });
-  }
+  result.additionalLines = extract3Lines(addSec);
 
   // 8. Detect Equipped Stats (공격력, 데미지, 크확, HP)
   const equipSec = text.includes('장착') && text.includes('효과') ? text.split(/장착\s*효과/)[1] : text;

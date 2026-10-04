@@ -100,16 +100,18 @@ assert.equal(cloakRes.grade, 'unique');
 assert.equal(cloakRes.potentialLines.length, 3);
 assert.equal(cloakRes.potentialLines[0].stat, 'mainStatPct');
 assert.equal(cloakRes.potentialLines[0].value, 9);
-assert.equal(cloakRes.potentialLines[1].stat, 'maxHpPct');
-assert.equal(cloakRes.potentialLines[1].value, 15);
+assert.equal(cloakRes.potentialLines[1].stat, 'NONE'); // INT 6% is off-stat (잡옵)
+assert.equal(cloakRes.potentialLines[2].stat, 'maxHpPct');
+assert.equal(cloakRes.potentialLines[2].value, 15);
 
 // 밑잠 (에디셔널 잠재 옵션)
 assert.equal(cloakRes.additionalGrade, 'normal');
 assert.equal(cloakRes.additionalLines.length, 3);
-assert.equal(cloakRes.additionalLines[0].stat, 'mainStatPct'); // LUK 3%
-assert.equal(cloakRes.additionalLines[0].value, 3);
-assert.equal(cloakRes.additionalLines[1].stat, 'subStatPct');  // DEX 3%
+assert.equal(cloakRes.additionalLines[0].stat, 'NONE'); // STR 3% is off-stat (잡옵)
+assert.equal(cloakRes.additionalLines[1].stat, 'mainStatPct'); // LUK 3%
 assert.equal(cloakRes.additionalLines[1].value, 3);
+assert.equal(cloakRes.additionalLines[2].stat, 'subStatPct');  // DEX 3%
+assert.equal(cloakRes.additionalLines[2].value, 3);
 
 // 4. Yellow Star Pixel Counter Test
 const width = 100;

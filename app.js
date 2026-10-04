@@ -4693,7 +4693,14 @@ function formatLineSummary(lines) {
     if (l.stat === 'critDamage') return `크뎀 ${l.value}%`;
     if (l.stat === 'critRate') return `크확 ${l.value}%`;
     if (l.stat === 'mainStatPct') return `주스탯 ${l.value}%`;
+    if (l.stat === 'subStatPct') return `부스탯 ${l.value}%`;
     if (l.stat === 'damage') return `뎀 ${l.value}%`;
+    if (l.stat === 'maxHpPct') return `HP ${l.value}%`;
+    if (l.stat === 'defPen') return `방관 ${l.value}%`;
+    if (l.stat === 'cooldownReduction') return `쿨감 ${l.value}초`;
+    if (l.stat === 'attackFlat') return `공 +${l.value}`;
+    if (l.stat === 'mainStat') return `주스탯 +${l.value}`;
+    if (l.stat === 'maxHp') return `HP +${l.value}`;
     return `${l.stat} +${l.value}`;
   }).join(' / ');
 }
@@ -5552,10 +5559,10 @@ function initEquipOcr() {
 
         // 2. Prepare canvas for OCR
         const ocrCanvas = document.createElement('canvas');
-        const cropX = isWide ? Math.round(img.width * 0.28) : 0;
+        const cropX = isWide ? Math.round(img.width * 0.48) : 0;
         const cropY = isWide ? Math.round(img.height * 0.06) : 0;
-        const cropW = isWide ? Math.round(img.width * 0.64) : img.width;
-        const cropH = isWide ? Math.round(img.height * 0.86) : img.height;
+        const cropW = isWide ? Math.round(img.width * 0.44) : img.width;
+        const cropH = isWide ? Math.round(img.height * 0.74) : img.height;
 
         const scale = 1.5;
         ocrCanvas.width = Math.round(cropW * scale);
