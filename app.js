@@ -1656,16 +1656,47 @@ function stageRows() {
 function fillStageChapters() {
   const sel = $('stageChapter');
   if (!sel) return;
-  const chapters = [...new Set(stageRows().map(x => x.chapter))];
+  const mode = $('stageMode')?.value || 'trial';
+  const modeRows = stageRows();
+  const chapters = [...new Set(modeRows.map(x => x.chapter))];
   chapters.sort((a, b) => {
     if (typeof a === 'number' && typeof b === 'number') return a - b;
     return String(a).localeCompare(String(b), 'ko');
   });
   const current = sel.value;
-  const next = current || String(chapters[0] || '');
+  let next = current;
+  if (!next || !chapters.map(String).includes(String(next))) {
+    const playerLv = n('level') || 100;
+    const levelMatch = chapters.find(c => typeof c === 'number' && c * 10 >= playerLv);
+    next = levelMatch !== undefined ? String(levelMatch) : String(chapters[0] || '');
+  }
   sel.innerHTML = '<option value="">구분/챕터 선택</option>' + chapters.map(c => `<option value="${c}">${typeof c === 'number' ? c + '장' : c}</option>`).join('');
   if (chapters.map(String).includes(String(next))) sel.value = next;
   fillStages();
+}
+
+function updateTrialSubToggle() {
+  const mode = $('stageMode')?.value || 'trial';
+  const row = selectedStageRow();
+  const subRow = $('trialTargetSubRow');
+  const pvpField = $('pvpContentField');
+  const chField = $('stageChapterField');
+  const stField = $('stageSelectField');
+
+  if (chField) chField.style.display = (mode === 'pvp' || mode === 'custom') ? 'none' : '';
+  if (stField) stField.style.display = (mode === 'pvp' || mode === 'custom') ? 'none' : '';
+  if (pvpField) pvpField.style.display = (mode === 'pvp') ? '' : 'none';
+
+  if (!subRow) return;
+  if (mode === 'trial' && row) {
+    const hasBoss = Boolean(row.BossHp_min || row.BossHp_max);
+    const hasNormal = Boolean(row.NormalHp_min || row.NormalHp_max);
+    if (hasBoss && hasNormal) {
+      subRow.style.display = '';
+      return;
+    }
+  }
+  subRow.style.display = 'none';
 }
 
 function fillStages() {
@@ -1675,7 +1706,13 @@ function fillStages() {
   const rows = stageRows().filter(x => !chapter || String(x.chapter) === String(chapter));
   const current = sel.value;
   sel.innerHTML = '<option value="">단계/스테이지 선택</option>' + rows.map(x => `<option value="${x.stage}">${x.stage} · ${x.category || '일반'}</option>`).join('');
-  if (rows.some(x => String(x.stage) === String(current))) sel.value = current;
+  if (rows.some(x => String(x.stage) === String(current))) {
+    sel.value = current;
+  } else if (rows.length > 0) {
+    const bossRow = rows.find(x => x.category === '보스') || rows[rows.length - 1];
+    sel.value = bossRow.stage;
+  }
+  updateTrialSubToggle();
   applyStageTarget();
   renderStageInfo();
 }
@@ -1686,17 +1723,68 @@ function selectedStageRow() {
 }
 
 function applyStageTarget() {
+  const mode = $('stageMode')?.value || 'trial';
+  if (mode === 'pvp') {
+    if ($('targetType')) $('targetType').value = 'pvp';
+    renderStageVerdict();
+    return;
+  }
+  if (mode === 'custom') {
+    renderStageVerdict();
+    return;
+  }
+
   const row = selectedStageRow();
   if (!row) return;
+
   const def = (Number(row.Defence_min || 0) + Number(row.Defence_max || row.Defence_min || 0)) / 2;
-  const isBoss = row.category === '보스' || row.category === '파티보스' || row.category === '월드보스' || (Boolean(row.BossHp_min) && !row.NormalHp_min);
-  const hpKey = $('stageMode')?.value === 'trial' ? (isBoss ? 'BossHp' : 'NormalHp') : 'MaxHp';
-  const minVal = Number(row[hpKey + '_min']) || Number(row.MaxHp_min) || Number(row.BossHp_min) || Number(row.NormalHp_min) || 0;
-  const maxVal = Number(row[hpKey + '_max']) || Number(row.MaxHp_max) || Number(row.BossHp_max) || Number(row.NormalHp_max) || minVal;
-  const hp = (minVal + maxVal) / 2;
+  const hasBoss = Boolean(Number(row.BossHp_min || row.BossHp_max || 0));
+  const hasNormal = Boolean(Number(row.NormalHp_min || row.NormalHp_max || 0));
+  const subTarget = $('trialTargetSub')?.value || 'boss';
+
+  let isBoss = false;
+  let hp = 0;
+
+  if (mode === 'trial') {
+    if (row.category === '보스' || !hasNormal) {
+      isBoss = true;
+      hp = Number(row.BossHp_min || row.BossHp_max || 0);
+    } else if (hasBoss && subTarget === 'boss') {
+      isBoss = true;
+      hp = Number(row.BossHp_min || row.BossHp_max || 0);
+    } else {
+      isBoss = false;
+      const minN = Number(row.NormalHp_min || 0);
+      const maxN = Number(row.NormalHp_max || minN);
+      hp = (minN + maxN) / 2;
+    }
+  } else if (mode === 'hunt') {
+    isBoss = false;
+    const minVal = Number(row.NormalHp_min || row.MaxHp_min || 0);
+    const maxVal = Number(row.NormalHp_max || row.MaxHp_max || minVal);
+    hp = (minVal + maxVal) / 2;
+  } else {
+    isBoss = row.category === '보스' || row.category === '파티보스' || row.category === '월드보스' || hasBoss;
+    const hpKey = isBoss ? 'BossHp' : 'NormalHp';
+    const minVal = Number(row[hpKey + '_min']) || Number(row.MaxHp_min) || Number(row.BossHp_min) || Number(row.NormalHp_min) || Number(row.hp) || 0;
+    const maxVal = Number(row[hpKey + '_max']) || Number(row.MaxHp_max) || Number(row.BossHp_max) || Number(row.NormalHp_max) || minVal;
+    hp = (minVal + maxVal) / 2;
+  }
+
   if (def && $('targetDefense')) $('targetDefense').value = def;
   if (hp && $('targetMaxHp')) $('targetMaxHp').value = hp;
-  if ($('targetType') && $('targetType').value !== 'pvp') $('targetType').value = isBoss ? 'boss' : 'normal';
+  if ($('targetType') && $('targetType').value !== 'pvp') {
+    $('targetType').value = isBoss ? 'boss' : 'normal';
+  }
+
+  if ($('targetLevel')) {
+    if (typeof row.chapter === 'number' && row.chapter > 0) {
+      $('targetLevel').value = row.chapter * 10;
+    } else if (row.level) {
+      $('targetLevel').value = row.level;
+    }
+  }
+
   renderStageVerdict();
 }
 
@@ -1716,22 +1804,66 @@ function stageHpAverage(row, type) {
 }
 
 function renderStageInfo() {
-  const box = $('stageInfo'), row = selectedStageRow();
-  if (!box) return;
-  if (!row) {
-    box.textContent = '스테이지를 선택하면 몬스터 HP·방어력·명중·회피를 표시합니다.';
+  const box = $('stageInfo');
+  const linkedText = $('contentLinkedStageText');
+  const mode = $('stageMode')?.value || 'trial';
+
+  if (mode === 'pvp') {
+    if (box) box.innerHTML = `<span class="badge official">⚔️ PvP 대항전 모드</span> 아레나·콜로세움 상대의 방어력과 체력을 기준으로 계산합니다.`;
+    if (linkedText) linkedText.textContent = '⚔️ PvP 대항전 (아레나/콜로세움)';
     return;
   }
-  const range = (a, b) => a === undefined || a === null ? '—' : a === b ? String(a) : `${a}~${b}`;
-  const hp = (row.BossHp_min !== undefined && row.BossHp_min !== null)
-    ? `보스 HP ${range(fmt(row.BossHp_min), fmt(row.BossHp_max))} · 일반 HP ${range(fmt(row.NormalHp_min), fmt(row.NormalHp_max))}`
-    : (row.MaxHp_min !== undefined ? `HP ${range(fmt(row.MaxHp_min), fmt(row.MaxHp_max))}` : `HP ${fmt(row.hp || 0)}`);
+  if (mode === 'custom') {
+    if (box) box.innerHTML = `<span class="badge">✏️ 직접 수치 입력</span> 아래 세부 수치 설정에서 원하는 대상 레벨, 방어력, 체력을 자유롭게 입력하세요.`;
+    if (linkedText) linkedText.textContent = '✏️ 직접 수치 입력 모드';
+    return;
+  }
+
+  const row = selectedStageRow();
+  if (!box) return;
+  if (!row) {
+    box.textContent = '스테이지를 선택하면 몬스터 HP·방어력·명중·회피 정보를 표시합니다.';
+    if (linkedText) linkedText.textContent = '선택된 스테이지 없음';
+    return;
+  }
+
+  const range = (a, b) => (a === undefined || a === null || a === '') ? '—' : a === b ? String(a) : `${a}~${b}`;
+  const isTrial = mode === 'trial';
+  const hasBoss = Boolean(row.BossHp_min || row.BossHp_max);
+  const hasNormal = Boolean(row.NormalHp_min || row.NormalHp_max);
+  const subTarget = $('trialTargetSub')?.value || 'boss';
+
+  let hpDesc = '';
+  if (isTrial && hasBoss && hasNormal) {
+    hpDesc = subTarget === 'boss'
+      ? `👑 <strong>보스 HP ${fmt(row.BossHp_min)}</strong> · 일반 HP ${range(fmt(row.NormalHp_min), fmt(row.NormalHp_max))}`
+      : `보스 HP ${fmt(row.BossHp_min)} · 👾 <strong>일반 HP ${range(fmt(row.NormalHp_min), fmt(row.NormalHp_max))}</strong>`;
+  } else if (hasBoss && !hasNormal) {
+    hpDesc = `👑 <strong>보스 HP ${range(fmt(row.BossHp_min), fmt(row.BossHp_max))}</strong>`;
+  } else if (row.MaxHp_min !== undefined) {
+    hpDesc = `🎯 <strong>HP ${range(fmt(row.MaxHp_min), fmt(row.MaxHp_max))}</strong>`;
+  } else {
+    hpDesc = `🎯 <strong>HP ${fmt(row.hp || 0)}</strong>`;
+  }
+
   const def = range(row.Defence_min ?? row.defence, row.Defence_max ?? row.defence);
   const hit = range(row.HitChance_min ?? row.hit, row.HitChance_max ?? row.hit);
   const avoid = range(row.AvoidChance_min ?? row.avoid, row.AvoidChance_max ?? row.avoid);
-  const timeLimit = row.time_sec ? ` · 제한시간 ${row.time_sec}초` : '';
-  box.innerHTML = `<strong>${escapeHtml(row.stage || `${row.chapter}-${row.stage_no}`)}</strong> (${escapeHtml(row.category || '일반')})<br>` +
-    `${hp} · 방어력 ${def} · 명중 ${hit} · 회피 ${avoid}${timeLimit}`;
+  const timeLimit = row.time_sec ? ` · ⏱️ 제한시간 ${row.time_sec}초` : '';
+  const monCount = row.MonsterCount ? ` · 몬스터 ${row.MonsterCount}마리` : '';
+
+  box.innerHTML = `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
+    <strong>👾 ${escapeHtml(row.stage || `${row.chapter}-${row.stage_no}`)}</strong>
+    <span class="badge ${row.category === '보스' ? 'accent' : 'official'}">${escapeHtml(row.category || '일반')}</span>
+    <span class="badge success" style="font-size:11px;">🟢 공식 DB 연동</span>
+  </div>
+  <div style="font-size:12.5px;color:var(--ink);line-height:1.5;">
+    ${hpDesc} · <b>방어력</b> ${def} · <b>회피</b> ${avoid} · <b>요구 명중</b> ${hit}${timeLimit}${monCount}
+  </div>`;
+
+  if (linkedText) {
+    linkedText.innerHTML = `<strong>👾 ${escapeHtml(row.stage)} (${escapeHtml(row.category || '일반')})</strong> — 방어력 ${def} · ${hpDesc}`;
+  }
 }
 
 const contentGuides = {
@@ -2796,8 +2928,29 @@ function renderCombat() {
 
   if ($('heroTargetBadge')) {
     const target = $('targetType')?.value || 'normal';
-    const targetNames = { normal: '🎯 일반 몬스터 (사냥/던전)', boss: '👑 보스 몬스터 (레이드)', pvp: '⚔️ PvP 대항전' };
-    $('heroTargetBadge').textContent = targetNames[target] || '🎯 일반 몬스터';
+    const mode = $('stageMode')?.value || 'trial';
+    const row = selectedStageRow();
+    if (mode === 'pvp' || target === 'pvp') {
+      const pvpNames = { arena: '아레나', worldArena: '월드 아레나', colosseum: '콜로세움' };
+      $('heroTargetBadge').textContent = `⚔️ PvP 대항전 (${pvpNames[$('pvpContent')?.value] || '아레나'})`;
+    } else if (mode === 'custom') {
+      $('heroTargetBadge').textContent = target === 'boss' ? '👑 직접 입력 보스' : '🎯 직접 입력 몬스터';
+    } else if (row) {
+      const modeNames = {
+        trial: '챕터 도전',
+        hunt: '챕터 사냥',
+        boss_raid: '보스 레이드',
+        world_boss: '월드 보스',
+        growth_dungeon: '성장 던전',
+        guild_content: '길드 콘텐츠'
+      };
+      const label = modeNames[mode] || '스테이지';
+      const typeIcon = target === 'boss' ? '👑' : '🎯';
+      $('heroTargetBadge').textContent = `${typeIcon} [${label} ${row.stage}] ${target === 'boss' ? '보스' : '일반 몬스터'}`;
+    } else {
+      const targetNames = { normal: '🎯 일반 몬스터 (사냥/던전)', boss: '👑 보스 몬스터 (레이드)', pvp: '⚔️ PvP 대항전' };
+      $('heroTargetBadge').textContent = targetNames[target] || '🎯 일반 몬스터';
+    }
   }
   if ($('heroSpeedBadge')) {
     const atkSpeed = n('attackSpeed');
@@ -5174,13 +5327,27 @@ function updateWorkflowStepper(tabName) {
   if (targetLabel) {
     const targetType = $('targetType')?.value;
     const stageMode = $('stageMode')?.value;
+    const stageSelect = $('stageSelect')?.value;
     const presetName = $('buildPresetSelect')?.value || $('presetSelect')?.value;
     if (presetName) {
       targetLabel.textContent = `🎯 ${presetName}`;
+    } else if (stageMode === 'pvp' || targetType === 'pvp') {
+      targetLabel.textContent = '⚔️ PvP 대항전 (아레나)';
+    } else if (stageMode === 'custom') {
+      targetLabel.textContent = targetType === 'boss' ? '👑 직접 입력 보스' : '🎯 직접 입력 몬스터';
+    } else if (stageSelect) {
+      const modeNames = {
+        trial: '⚔️ 챕터 도전',
+        hunt: '🎯 챕터 사냥',
+        boss_raid: '👑 보스 레이드',
+        world_boss: '🌍 월드 보스',
+        growth_dungeon: '💎 성장 던전',
+        guild_content: '🛡️ 길드 콘텐츠'
+      };
+      const prefix = modeNames[stageMode] || '🎯';
+      targetLabel.textContent = `${prefix} ${stageSelect}`;
     } else if (targetType === 'boss') {
       targetLabel.textContent = '👑 보스 레이드 / 토벌';
-    } else if (targetType === 'pvp') {
-      targetLabel.textContent = '⚔️ PvP 대항전 (아레나)';
     } else {
       targetLabel.textContent = '🎯 챕터 일반 사냥';
     }
@@ -5192,7 +5359,9 @@ function initWorkflowStepper() {
   $('wfStep2Box')?.addEventListener('click', () => activateTab('specup'));
   $('wfStep3Box')?.addEventListener('click', () => activateTab('cube'));
 
-  $('targetType')?.addEventListener('change', () => updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'character'));
+  ['targetType', 'stageMode', 'stageChapter', 'stageSelect', 'trialTargetSub'].forEach(id => {
+    $(id)?.addEventListener('change', () => updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'character'));
+  });
   $('buildPresetSelect')?.addEventListener('change', () => updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'character'));
   $('presetSelect')?.addEventListener('change', () => updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'character'));
 }
@@ -5302,10 +5471,12 @@ function bind() {
         }
         if (['stageMode', 'stageChapter'].includes(el.id)) {
           if (el.id === 'stageMode') fillStageChapters(); else fillStages();
-        } else if (el.id === 'stageSelect') {
+        } else if (el.id === 'stageSelect' || el.id === 'trialTargetSub') {
           applyStageTarget();
           renderStageInfo();
         }
+        updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'character');
+        optimizeContent();
         renderCombat();
       });
     });
@@ -5416,18 +5587,14 @@ function bind() {
     optimizeContent();
   });
   $('contentTarget')?.addEventListener('input', optimizeContent);
-  $('stageMode')?.addEventListener('change', () => {
-    fillStageChapters();
-    optimizeContent();
-  });
-  $('stageChapter')?.addEventListener('change', () => {
-    fillStages();
-    optimizeContent();
-  });
-  $('stageSelect')?.addEventListener('change', () => {
-    renderStageInfo();
+  $('trialTargetSub')?.addEventListener('change', () => {
     applyStageTarget();
+    renderStageInfo();
     optimizeContent();
+    renderCombat();
+  });
+  $('goToCombatFromContentBtn')?.addEventListener('click', () => {
+    activateTab('combat');
   });
 
   // Drawer OCR Button

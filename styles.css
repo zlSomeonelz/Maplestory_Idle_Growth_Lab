@@ -2392,4 +2392,35 @@ footer {
   }
 }
 
+/* Stage Picker & Monster Database Integration in Combat Panel */
+.stage-picker-box {
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+#stageInfo {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+#stageInfo strong {
+  color: var(--ink);
+}
+
+#contentLinkedStageBox {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+
 
