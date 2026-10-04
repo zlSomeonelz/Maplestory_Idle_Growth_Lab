@@ -5607,10 +5607,10 @@ function initEquipOcr() {
 
         // 2. Prepare canvas for OCR
         const ocrCanvas = document.createElement('canvas');
-        const cropX = isWide ? Math.round(img.width * 0.48) : 0;
-        const cropY = isWide ? Math.round(img.height * 0.06) : 0;
-        const cropW = isWide ? Math.round(img.width * 0.44) : img.width;
-        const cropH = isWide ? Math.round(img.height * 0.74) : img.height;
+        const cropX = isWide ? Math.round(img.width * 0.59) : 0;
+        const cropY = isWide ? Math.round(img.height * 0.05) : 0;
+        const cropW = isWide ? Math.round(img.width * 0.38) : img.width;
+        const cropH = isWide ? Math.round(img.height * 0.72) : img.height;
 
         const scale = 1.5;
         ocrCanvas.width = Math.round(cropW * scale);

@@ -172,6 +172,31 @@ assert.equal(heroCloakRes.additionalLines[1].stat, 'NONE', 'LUK 3% must be NONE 
 assert.equal(heroCloakRes.additionalLines[2].stat, 'subStatPct', 'DEX 3% must be subStatPct for Hero');
 assert.equal(heroCloakRes.additionalLines[2].value, 3);
 
+// 3D. Decimal Percentages & Leaked Equipment Stats Prevention
+assert.equal(parsePotentialLine('뎀 5.7%', 'LUK').stat, 'NONE', 'Decimal percent must be NONE (잡옵)');
+assert.equal(parsePotentialLine('보스 몬스터 데미지 5.7%', 'LUK').stat, 'NONE', 'Decimal percent must be NONE (잡옵)');
+assert.equal(parsePotentialLine('크리티컬 데미지 6.2%', 'LUK').stat, 'NONE', 'Decimal percent must be NONE (잡옵)');
+
+const leakedSecOcrText = `
+망토 슬롯 강화 효과
+잠재 옵션 유니크
+LUK 9%
+INT 6%
+최대 HP 15%
+에디셔널 잠재 옵션 노말
+STR 3%
+LUK 3%
+DEX 3%
+뎀 5.7%
+크리티컬 데미지 6.2%
+`;
+const leakedRes = parseEquipmentOcrText(leakedSecOcrText, 12, 'LUK');
+assert.equal(leakedRes.additionalLines.length, 3);
+assert.equal(leakedRes.additionalLines[0].stat, 'NONE'); // STR 3%
+assert.equal(leakedRes.additionalLines[1].stat, 'mainStatPct'); // LUK 3%
+assert.equal(leakedRes.additionalLines[2].stat, 'subStatPct'); // DEX 3%
+assert.ok(!leakedRes.additionalLines.some(l => l.raw?.includes('5.7%')), '5.7% must not be in additionalLines');
+
 // 4. Yellow Star Pixel Counter Test
 const width = 100;
 const height = 10;

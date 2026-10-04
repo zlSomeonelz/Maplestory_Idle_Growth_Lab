@@ -80,6 +80,11 @@ export function parsePotentialLine(line, jobMainStat = 'LUK', jobSubStat = null)
     return { stat: 'NONE', value: 0, raw: trimmed, display: `${statName} ${val}% (잡옵)` };
   }
 
+  // 2.5 Guard against decimal percentages (Cube potentials NEVER have decimals; decimals like 5.7% or 6.2% are base/equipped stats)
+  if (/\b\d+\.\d+\s*%/.test(trimmed)) {
+    return { stat: 'NONE', value: 0, raw: trimmed, display: '잡옵' };
+  }
+
   // 3. Other Combat & Utility Stats
   const pctPatterns = [
     { stat: 'critDamage', re: /(?:크리티컬\s*데미지|크뎀)\s*([0-9.]+)\s*%/i, label: '크뎀' },
@@ -302,10 +307,12 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
     const parsedLines = [];
     for (const line of lines) {
       if (parsedLines.length >= 3) break;
-      if (/강화\s*효과|상세보기|장착\s*효과|자동\s*분해|일괄\s*분해|슬롯/.test(line)) continue;
+      if (/강화\s*효과|상세보기|장착\s*효과|자동\s*분해|일괄\s*분해|슬롯|보스\s*몬스터/.test(line)) continue;
       if (/^(?:잠재\s*[옵점][션선]?|[점잠]재\s*옵션|옵션|에디셔널)/.test(line)) continue;
+      if (/\b\d+\.\d+\s*%/.test(line)) continue; // Cube potentials never contain decimal numbers; decimals are base stats
       if (!line.includes('%') && /공격력\s+[0-9,]+/.test(line)) continue;
       if (!line.includes('%') && /최대\s*HP\s+[0-9,]+/.test(line)) continue;
+      if (!line.includes('%') && /방어력\s+[0-9,]+/.test(line)) continue;
 
       const isCandidate = /(?:LUK|STR|DEX|PEX|INT|HP|MP|공격력|마력|크리티컬|데미지|보스|방어|최대|[0-9.]+%\s*)/i.test(line);
       if (!isCandidate) continue;
