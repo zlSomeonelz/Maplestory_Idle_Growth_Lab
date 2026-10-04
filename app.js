@@ -3740,15 +3740,29 @@ function initOcrModal() {
   const dropZone = $('ocrModalDrop');
   const statusEl = $('ocrModalStatus');
   const resultsEl = $('ocrModalResults');
-  if (!modal) return;
+
+  // Direct On-Page OCR elements for iPad & Mobile
+  const pageFileInput = $('pageOcrFile');
+  const pageDropZone = $('pageOcrDrop');
+  const pageRunBtn = $('pageOcrRunBtn');
+  const pageClipBtn = $('pageOcrPasteBtn');
+  const pageClearBtn = $('pageOcrClearBtn');
+  const pageStatusEl = $('pageOcrStatus');
+  const pageResultsEl = $('pageOcrResults');
+  const pageApplyBtn = $('pageOcrApplyBtn');
 
   openBtns.forEach(btn => btn?.addEventListener('click', () => {
-    if (typeof modal.showModal === 'function') modal.showModal(); else modal.setAttribute('open', 'true');
-    dropZone?.focus();
+    if (modal) {
+      if (typeof modal.showModal === 'function') modal.showModal();
+      else modal.setAttribute('open', 'true');
+    }
   }));
 
   closeBtn?.addEventListener('click', () => {
-    if (typeof modal.close === 'function') modal.close(); else modal.removeAttribute('open');
+    if (modal) {
+      if (typeof modal.close === 'function') modal.close();
+      else modal.removeAttribute('open');
+    }
   });
 
   function parseKoreanNumber(str) {
@@ -4168,21 +4182,27 @@ function initOcrModal() {
     });
   }
 
+  function updateOcrStatus(text) {
+    if (statusEl) statusEl.textContent = text;
+    if (pageStatusEl) pageStatusEl.textContent = text;
+  }
+
   async function processFiles(files) {
     if (!files || !files.length) return;
     if (typeof window.Tesseract === 'undefined') {
-      if (statusEl) statusEl.textContent = 'Tesseract OCR 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도하세요.';
+      updateOcrStatus('Tesseract OCR 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도하세요.');
       return;
     }
     const fileArray = Array.from(files).filter(f => f.type.startsWith('image/') || f instanceof Blob);
     if (!fileArray.length) {
-      if (statusEl) statusEl.textContent = '이미지 파일이 선택되지 않았습니다.';
+      updateOcrStatus('이미지 파일이 선택되지 않았습니다.');
       return;
     }
 
-    if (statusEl) statusEl.textContent = `총 ${fileArray.length}개 이미지 분석 진행 중… 잠시만 기다려주세요.`;
+    updateOcrStatus(`총 ${fileArray.length}개 이미지 분석 진행 중… 잠시만 기다려주세요.`);
     pendingOcrStats = {};
     if (resultsEl) resultsEl.innerHTML = '';
+    if (pageResultsEl) pageResultsEl.innerHTML = '';
 
     try {
       const worker = await window.Tesseract.createWorker('kor+eng');
@@ -4192,7 +4212,7 @@ function initOcrModal() {
 
       for (const file of fileArray) {
         processedCount++;
-        if (statusEl) statusEl.textContent = `OCR 분석 중… (${processedCount}/${fileArray.length} 이미지 처리 완료)`;
+        updateOcrStatus(`OCR 분석 중… (${processedCount}/${fileArray.length} 이미지 처리 완료)`);
 
         const { canvas, isCropped } = await preprocessImageFile(file);
         let text = '';
@@ -4233,29 +4253,31 @@ function initOcrModal() {
       const displayStats = Object.entries(pendingOcrStats).filter(([k]) => !k.startsWith('_'));
       const foundCount = displayStats.length;
       if (foundCount === 0) {
-        if (statusEl) statusEl.textContent = `총 ${fileArray.length}개 이미지에서 스탯 수치를 감지하지 못했습니다. 글자가 선명한 스탯 팝업 스크린샷을 사용하세요.`;
+        updateOcrStatus(`총 ${fileArray.length}개 이미지에서 스탯 수치를 감지하지 못했습니다. 글자가 선명한 스탯 팝업 스크린샷을 사용하세요.`);
       } else {
-        if (statusEl) statusEl.textContent = `총 ${fileArray.length}개 이미지 분석 완료! ${foundCount}개 스탯 항목을 수집했습니다. 확인 후 적용을 누르세요.`;
-        if (resultsEl) {
-          const guideHtml = `
-            <div style="grid-column: 1 / -1; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--ink); line-height: 1.6; margin-bottom: 6px;">
-              💡 <strong>스탯 추출 안내</strong><br>
-              • 메인 스탯 창의 수치는 <strong>총 합산치</strong>이므로, 이 스크린샷에서는 절대 수치인 <strong>공격력(+)</strong>과 <strong>주스탯(+)</strong>을 알 수 없어 자동 제외됩니다.<br>
-              • <strong>공격력(+)</strong>과 <strong>주스탯(+)</strong> 및 %를 등록하시려면, 인게임에서 공격력/주스탯을 터치했을 때 나오는 <strong>'상세 팝업 스크린샷'</strong>을 함께 등록해 주세요.<br>
-              • 스탯 창은 스크롤 방식이므로, <strong>스크롤을 아래로 내린 하단 스크린샷</strong>을 함께 올리시면 보공, 방관, 최종뎀 등도 일괄 등록됩니다.
-            </div>
-          `;
-          resultsEl.innerHTML = guideHtml + displayStats.map(([field, val]) => {
-            const label = STAT_LABELS[field] || field;
-            return `<div class="stat-row" style="border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fff;display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:12px;font-weight:700;color:var(--ink);">${label}</span>
-              <input data-ocr-field="${field}" type="number" step="0.01" value="${val}" style="width:110px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;text-align:right;font-weight:800;">
-            </div>`;
-          }).join('');
-        }
+        updateOcrStatus(`총 ${fileArray.length}개 이미지 분석 완료! ${foundCount}개 스탯 항목을 수집했습니다. 확인 후 적용을 누르세요.`);
+        const guideHtml = `
+          <div style="grid-column: 1 / -1; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--ink); line-height: 1.6; margin-bottom: 6px;">
+            💡 <strong>스탯 추출 안내</strong><br>
+            • 메인 스탯 창의 수치는 <strong>총 합산치</strong>이므로, 이 스크린샷에서는 절대 수치인 <strong>공격력(+)</strong>과 <strong>주스탯(+)</strong>을 알 수 없어 자동 제외됩니다.<br>
+            • <strong>공격력(+)</strong>과 <strong>주스탯(+)</strong> 및 %를 등록하시려면, 인게임에서 공격력/주스탯을 터치했을 때 나오는 <strong>'상세 팝업 스크린샷'</strong>을 함께 등록해 주세요.<br>
+            • 스탯 창은 스크롤 방식이므로, <strong>스크롤을 아래로 내린 하단 스크린샷</strong>을 함께 올리시면 보공, 방관, 최종뎀 등도 일괄 등록됩니다.
+          </div>
+        `;
+        const itemsHtml = displayStats.map(([field, val]) => {
+          const label = STAT_LABELS[field] || field;
+          return `<div class="stat-row" style="border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fff;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:12px;font-weight:700;color:var(--ink);">${label}</span>
+            <input data-ocr-field="${field}" type="number" step="0.01" value="${val}" style="width:110px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;text-align:right;font-weight:800;">
+          </div>`;
+        }).join('');
+
+        if (resultsEl) resultsEl.innerHTML = guideHtml + itemsHtml;
+        if (pageResultsEl) pageResultsEl.innerHTML = guideHtml + itemsHtml;
+        if (pageApplyBtn) pageApplyBtn.style.display = 'block';
       }
     } catch (err) {
-      if (statusEl) statusEl.textContent = 'OCR 분석 중 오류가 발생했습니다: ' + err.message;
+      updateOcrStatus('OCR 분석 중 오류가 발생했습니다: ' + err.message);
     }
   }
 
@@ -4285,18 +4307,17 @@ function initOcrModal() {
     const files = extractImageFiles(e);
     if (files.length > 0) {
       e.preventDefault();
-      if (typeof modal.showModal === 'function' && !modal.open) modal.showModal();
-      else modal.setAttribute('open', 'true');
       processFiles(files);
     }
   }
 
   window.addEventListener('paste', handlePaste);
   document.addEventListener('paste', handlePaste);
-  modal.addEventListener('paste', handlePaste);
+  modal?.addEventListener('paste', handlePaste);
   dropZone?.addEventListener('paste', handlePaste);
+  pageDropZone?.addEventListener('paste', handlePaste);
 
-  [dropZone, modal].filter(Boolean).forEach(el => {
+  [dropZone, pageDropZone, modal].filter(Boolean).forEach(el => {
     el.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); });
     el.addEventListener('drop', e => {
       e.preventDefault(); e.stopPropagation();
@@ -4305,7 +4326,23 @@ function initOcrModal() {
     });
   });
 
-  clipBtn?.addEventListener('click', async () => {
+  // Touch & Click propagation safety for file inputs
+  fileInput?.addEventListener('click', e => e.stopPropagation());
+  pageFileInput?.addEventListener('click', e => e.stopPropagation());
+
+  dropZone?.addEventListener('click', e => {
+    if (e.target !== fileInput && !e.target.closest('label[for="ocrModalFile"]')) {
+      fileInput?.click();
+    }
+  });
+
+  pageDropZone?.addEventListener('click', e => {
+    if (e.target !== pageFileInput && !e.target.closest('label[for="pageOcrFile"]')) {
+      pageFileInput?.click();
+    }
+  });
+
+  const handleClipboardRead = async (targetStatus) => {
     try {
       if (navigator.clipboard && navigator.clipboard.read) {
         const items = await navigator.clipboard.read();
@@ -4326,21 +4363,59 @@ function initOcrModal() {
     } catch (err) {
       console.warn('Async Clipboard API read failed:', err);
     }
-    if (statusEl) statusEl.textContent = '클립보드 이미지를 읽는 중입니다. Ctrl+V 키를 누르시면 즉시 분석됩니다.';
+    if (targetStatus) targetStatus.textContent = '클립보드 이미지를 읽는 중입니다. Ctrl+V 키를 누르시거나 사진 보관함에서 선택해 주세요.';
+  };
+
+  clipBtn?.addEventListener('click', () => handleClipboardRead(statusEl));
+  pageClipBtn?.addEventListener('click', () => handleClipboardRead(pageStatusEl));
+
+  runBtn?.addEventListener('click', () => {
+    if (fileInput?.files && fileInput.files.length) processFiles(fileInput.files);
+    else fileInput?.click();
+  });
+  pageRunBtn?.addEventListener('click', () => {
+    if (pageFileInput?.files && pageFileInput.files.length) processFiles(pageFileInput.files);
+    else pageFileInput?.click();
   });
 
-  runBtn?.addEventListener('click', () => processFiles(fileInput?.files));
-  fileInput?.addEventListener('change', e => processFiles(e.target.files));
-  applyBtn?.addEventListener('click', () => {
-    resultsEl?.querySelectorAll('[data-ocr-field]').forEach(input => {
+  fileInput?.addEventListener('change', e => {
+    if (e.target.files && e.target.files.length) processFiles(e.target.files);
+  });
+  pageFileInput?.addEventListener('change', e => {
+    if (e.target.files && e.target.files.length) processFiles(e.target.files);
+  });
+
+  pageClearBtn?.addEventListener('click', () => {
+    pendingOcrStats = {};
+    if (pageFileInput) pageFileInput.value = '';
+    if (pageResultsEl) pageResultsEl.innerHTML = '';
+    if (pageApplyBtn) pageApplyBtn.style.display = 'none';
+    if (pageStatusEl) pageStatusEl.textContent = '사진 보관함에서 게임 스크린샷을 추가해 주세요.';
+  });
+
+  const applyOcrValues = (sourceContainer) => {
+    const targetInputs = (sourceContainer || resultsEl || pageResultsEl)?.querySelectorAll('[data-ocr-field]');
+    targetInputs?.forEach(input => {
       const field = input.dataset.ocrField;
       const val = Number(input.value);
       if ($(field) && Number.isFinite(val)) $(field).value = val;
     });
     renderCompanionEffect();
     renderCombat();
-    if (typeof modal.close === 'function') modal.close(); else modal.removeAttribute('open');
     setStatus('OCR 스탯 수치가 캐릭터 폼에 적용되었습니다.', 'good');
+  };
+
+  applyBtn?.addEventListener('click', () => {
+    applyOcrValues(resultsEl);
+    if (modal) {
+      if (typeof modal.close === 'function') modal.close();
+      else modal.removeAttribute('open');
+    }
+  });
+
+  pageApplyBtn?.addEventListener('click', () => {
+    applyOcrValues(pageResultsEl);
+    if (pageStatusEl) pageStatusEl.textContent = '✅ 캐릭터 폼에 성공적으로 적용되었습니다! 상단 탭에서 전투 결과를 확인하세요.';
   });
 }
 

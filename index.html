@@ -955,17 +955,70 @@
       </section>
 
 
-      <!-- TAB 5: OCR Tool Drawers -->
+      <!-- TAB 5: OCR Tool Drawers & Direct Mobile Scanner -->
       <section class="tab-panel" data-panel="inventory">
+        <!-- Direct High-Precision Mobile & Tablet OCR Suite Card -->
+        <section class="card" style="margin-bottom:16px;">
+          <div class="section-heading">
+            <div>
+              <span class="step">📸</span>
+              <h2>스크린샷 스탯 자동 분석 (아이패드 &amp; 모바일 직접 지원)</h2>
+            </div>
+            <span class="badge official" style="background:#6366f1;color:#fff;">Canvas 고정밀 전처리</span>
+          </div>
+          <p class="hint">
+            메이플 키우기 게임 화면의 <strong>기본 스탯 창</strong> 및 <strong>공격력/주스탯 상세 팝업</strong> 스크린샷을 등록하면
+            40여 개 스탯을 자동으로 읽어 캐릭터 계산기에 즉시 반영합니다.
+          </p>
+
+          <!-- Direct Photo Picker Drop/Touch Box -->
+          <label class="drop" id="pageOcrDrop" for="pageOcrFile" style="display:block;cursor:pointer;border:2px dashed #6366f1;border-radius:14px;padding:26px 16px;text-align:center;background:#f8faff;transition:all .2s;margin-bottom:12px;">
+            <div style="font-size:36px;margin-bottom:6px;">📸</div>
+            <strong style="display:block;font-size:16px;color:var(--ink);margin-bottom:6px;">
+              아이패드 사진 보관함에서 스크린샷 선택하기
+            </strong>
+            <span class="hint" style="display:block;margin:0 0 12px;font-size:12px;">
+              터치하여 사진 보관함에서 선택하거나, PC에서는 드래그 또는 어디서든 Ctrl+V로 붙여넣기 가능 (여러 장 동시 선택 지원)
+            </span>
+            <span class="button primary" style="pointer-events:none;display:inline-flex;align-items:center;gap:6px;padding:10px 22px;font-size:14px;border-radius:10px;box-shadow:0 4px 12px rgba(99,102,241,0.25);">
+              📁 사진 보관함 / 스크린샷 선택 (터치)
+            </span>
+            <input type="file" id="pageOcrFile" accept="image/*" multiple style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);padding:0;margin:-1px;">
+          </label>
+
+          <!-- Action Buttons -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+            <button type="button" class="button primary" id="pageOcrRunBtn">🔍 일괄 OCR 분석 실행</button>
+            <button type="button" class="button secondary" id="pageOcrPasteBtn">📋 클립보드 붙여넣기</button>
+            <button type="button" class="button ghost" id="pageOcrClearBtn">초기화</button>
+          </div>
+
+          <!-- Status Strip -->
+          <div class="status-strip" id="pageOcrStatus" style="font-size:13px;padding:10px 14px;background:#f1f5f9;border-radius:8px;">
+            사진 보관함에서 게임 스크린샷을 추가해 주세요.
+          </div>
+
+          <!-- Results Area -->
+          <div id="pageOcrResults" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:8px;margin-top:12px;max-height:420px;overflow-y:auto;"></div>
+
+          <!-- Apply to Calculator -->
+          <div style="margin-top:14px;display:flex;justify-content:flex-end;">
+            <button type="button" class="button primary full" id="pageOcrApplyBtn" style="padding:14px;font-size:15px;display:none;">
+              ✅ 추출된 스탯을 캐릭터 폼에 자동 반영하기
+            </button>
+          </div>
+        </section>
+
+        <!-- Secondary Advanced Tool Drawers (Iframe tools preserved) -->
         <section class="card">
           <div class="section-heading">
-            <div><h2>입력 도구 서랍</h2></div>
-            <button class="button primary" id="openOcrFromDrawerBtn">📸 다중 스크린샷 직접 분석기 열기</button>
+            <div><h2>고급 입력 서랍 (동료 &amp; 프리셋 OCR)</h2></div>
+            <button class="button secondary" id="openOcrFromDrawerBtn">📸 모달로 열기</button>
           </div>
-          <p class="hint">상세 스탯, 동료 보유 현황, 프리셋 화면을 각각 읽어 계산기에 안전하게 연동합니다.</p>
+          <p class="hint">동료 보유 현황 및 프리셋 화면을 각각 읽어 계산기에 안전하게 연동합니다.</p>
 
-          <details class="tool-drawer" id="statToolDrawer" open>
-            <summary>캐릭터 상세 스탯 OCR</summary>
+          <details class="tool-drawer" id="statToolDrawer">
+            <summary>캐릭터 상세 스탯 원문 OCR (보조 도구)</summary>
             <div class="tool-body">
               <p class="hint">예상 능력치 화면과 공격력·주스탯 상세 팝업을 읽어 40여 개 스탯을 자동 수집합니다.</p>
               <iframe class="tool-frame" style="height:1180px;" loading="lazy" src="stat-ocr.html" title="캐릭터 상세 스탯 OCR"></iframe>
@@ -995,15 +1048,16 @@
     <dialog class="ocr-modal card" id="ocrModal">
       <div class="ocr-modal-content">
         <div class="section-heading">
-          <div><span class="step">📸</span><h3>스크린샷 스탯 자동 분석 (Canvas 전처리 + 다중 배치)</h3></div>
+          <div><span class="step">📸</span><h3>스크린샷 스탯 자동 분석 (아이패드 &amp; 모바일 터치 지원)</h3></div>
           <button type="button" class="button ghost" id="closeOcrModalBtn" style="padding:4px 8px;font-size:12px;">닫기</button>
         </div>
-        <p class="hint">게임 스탯 창 / 팝업 스크린샷 여러 장을 동시에 끌어다 놓거나 클립보드(Ctrl+V)로 붙여넣으면 한 번에 인식합니다.</p>
-        <div class="drop" id="ocrModalDrop" style="border:2px dashed var(--line);border-radius:12px;padding:24px;text-align:center;background:#f8fafc;cursor:pointer;" tabindex="0">
-          <p style="margin:0;font-weight:700;color:var(--ink);">📷 이미지들을 여기에 드래그하거나 클릭하여 파일 선택</p>
-          <span style="font-size:12px;color:var(--muted);display:block;margin-top:4px;">어디서든 Ctrl+V 키로 클립보드 스크린샷 즉시 붙여넣기 지원</span>
-          <input type="file" id="ocrModalFile" accept="image/*" multiple style="display:none;">
-        </div>
+        <p class="hint">게임 스탯 창 / 팝업 스크린샷 여러 장을 동시에 선택하거나 클립보드(Ctrl+V)로 붙여넣으면 한 번에 인식합니다.</p>
+        <label class="drop" id="ocrModalDrop" for="ocrModalFile" style="display:block;border:2px dashed var(--line);border-radius:12px;padding:24px 16px;text-align:center;background:#f8fafc;cursor:pointer;" tabindex="0">
+          <p style="margin:0 0 6px;font-weight:700;color:var(--ink);">📷 사진 보관함에서 스크린샷 선택 (터치)</p>
+          <span style="font-size:12px;color:var(--muted);display:block;margin-bottom:10px;">드래그 앤 드롭 또는 어디서든 Ctrl+V 즉시 붙여넣기 지원</span>
+          <span class="button primary" style="pointer-events:none;display:inline-flex;align-items:center;gap:6px;padding:8px 18px;font-size:13px;border-radius:8px;">📁 사진 보관함 열기</span>
+          <input type="file" id="ocrModalFile" accept="image/*" multiple style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);padding:0;margin:-1px;">
+        </label>
         <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
           <button type="button" class="button secondary" id="ocrPasteClipboardBtn">📋 클립보드에서 붙여넣기</button>
           <button type="button" class="button primary" id="runOcrModalBtn">🔍 일괄 OCR 분석 실행</button>
