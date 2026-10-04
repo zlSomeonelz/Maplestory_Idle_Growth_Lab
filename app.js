@@ -4772,6 +4772,24 @@ const DEFAULT_SPECUP_EQUIPMENT_PRESETS = {
   ]
 };
 
+const CANONICAL_SLOT_NAMES = {
+  hat: '모자',
+  top: '상의',
+  bottom: '하의',
+  glove: '장갑',
+  shoes: '신발',
+  cape: '망토',
+  shoulder: '어깨장식',
+  belt: '벨트',
+  necklace: '목걸이',
+  earring: '귀고리',
+  ring1: '반지',
+  ring2: '반지2',
+  eye: '눈 장식',
+  face: '얼굴 장식',
+  pocket: '포켓'
+};
+
 let specupEquipments = parseLocalJson(SPECUP_STORE_KEY, DEFAULT_SPECUP_EQUIPMENT_PRESETS[120]);
 // Exclude weapon
 specupEquipments = specupEquipments.filter(e => e.id !== 'weapon' && e.slotType !== 'weapon');
@@ -4780,6 +4798,9 @@ if (specupEquipments.length < 15) {
   try { localStorage.setItem(SPECUP_STORE_KEY, JSON.stringify(specupEquipments)); } catch (_) {}
 }
 specupEquipments.forEach(eq => {
+  if (CANONICAL_SLOT_NAMES[eq.id]) {
+    eq.name = CANONICAL_SLOT_NAMES[eq.id];
+  }
   if (!Array.isArray(eq.potentialLines) || eq.potentialLines.length === 0) {
     eq.potentialLines = generateDefaultLines(eq.slotType, eq.cubeGrade, eq.cubeValidLines);
   }
@@ -4819,7 +4840,7 @@ function renderSpecupEquipTable() {
     return `
       <tr>
         <td style="font-weight:700;">
-          <input type="text" class="table-input" data-eq-id="${escapeHtml(eq.id)}" data-field="name" value="${escapeHtml(eq.name)}" style="width:105px;">
+          <input type="text" class="table-input" data-eq-id="${escapeHtml(eq.id)}" data-field="name" value="${escapeHtml(CANONICAL_SLOT_NAMES[eq.id] || eq.name)}" style="width:105px;background:#f8fafc;font-weight:700;" readonly title="고정 슬롯명">
         </td>
         <td>
           <span class="badge" style="font-size:11px;background:#eef2f6;color:#334155;border:1px solid #cbd5e1;">${eq.slotType === 'armor' ? '방어구' : eq.slotType === 'glove' ? '장갑' : '장신구'}</span>
@@ -5468,7 +5489,8 @@ function initEquipOcr() {
         if (parsed.slotId) {
           const targetEq = specupEquipments.find(e => e.id === parsed.slotId);
           if (targetEq) {
-            if (parsed.itemName) targetEq.name = parsed.itemName;
+            if (CANONICAL_SLOT_NAMES[targetEq.id]) targetEq.name = CANONICAL_SLOT_NAMES[targetEq.id];
+            if (parsed.itemName) targetEq.detectedItemName = parsed.itemName;
             if (typeof parsed.currentStar === 'number') targetEq.currentStar = parsed.currentStar;
             if (parsed.grade) targetEq.cubeGrade = parsed.grade;
             if (parsed.potentialLines && parsed.potentialLines.length) {
@@ -5491,7 +5513,7 @@ function initEquipOcr() {
               card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
               card.innerHTML = `
                 <div style="display:flex;justify-content:space-between;align-items:center;">
-                  <strong style="color:#0b7a58;font-size:13px;">✅ [${escapeHtml(parsed.slotName)}] ${escapeHtml(targetEq.name)}</strong>
+                  <strong style="color:#0b7a58;font-size:13px;">✅ [${escapeHtml(parsed.slotName || targetEq.name)}] 슬롯</strong>
                   <span class="badge" style="background:#10b981;color:#fff;font-size:10px;">⭐ ${targetEq.currentStar}성</span>
                 </div>
                 <div style="font-size:11.5px;color:var(--ink);margin-top:4px;">
