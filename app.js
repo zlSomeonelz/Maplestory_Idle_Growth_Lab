@@ -2176,6 +2176,7 @@ function readInputs(extra = {}) {
     masteries: { main80k: 0, sub25k: 0 },
     target,
     job,
+    jobKey: $('job')?.value || 'nightWalker',
     level: n('level') || 100
   };
 
@@ -3245,19 +3246,33 @@ function renderInGamePreferredSettings(slotType, grade, targetRootId, jobKey = n
 
   if (targetRootId === 'modalPreferredSettingsRoot') {
     root.innerHTML = `
-      <div style="background:#eef2ff;border:1px solid #c7d2fe;padding:8px 10px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-        <span style="font-weight:800;color:#3730a3;font-size:12px;">● 변환 등급업 모드: <strong>${settings.tierUpMode}</strong></span>
-        <span style="color:#4b5563;font-size:11px;">${escapeHtml(settings.tierUpReason)}</span>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:8px;margin-bottom:8px;">
+        <div style="background:${settings.tierUpMode?.includes('ON') ? '#ecfdf5' : '#f8fafc'};border:1px solid ${settings.tierUpMode?.includes('ON') ? '#a7f3d0' : '#cbd5e1'};padding:8px 10px;border-radius:6px;display:flex;flex-direction:column;gap:3px;">
+          <strong style="color:${settings.tierUpMode?.includes('ON') ? '#065f46' : '#334155'};font-size:12px;">
+            ${settings.tierUpMode?.includes('ON') ? '✅ 등급 상승 시 중단: [ 켜기 (ON) ]' : '⏹️ 등급 상승 시 중단: [ 끄기 (OFF) ]'}
+          </strong>
+          <span style="color:#64748b;font-size:10.5px;line-height:1.3;">${escapeHtml(settings.tierUpReason)}</span>
+        </div>
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;padding:8px 10px;border-radius:6px;display:flex;flex-direction:column;gap:4px;">
+          <strong style="color:#1e40af;font-size:11.5px;">💡 인게임 체크박스에서 꼭 켜야 할 핵심 옵션:</strong>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;">
+            ${(settings.primaryRecommendedOptions || []).map(opt => `
+              <span style="background:#2563eb;color:#fff;font-weight:700;font-size:11px;padding:2px 7px;border-radius:12px;">
+                ☑️ ${escapeHtml(opt)}
+              </span>
+            `).join('')}
+          </div>
+        </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:8px;">
-        ${settings.presets.map(p => `
-          <div style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:4px;">
+        ${settings.presets.map((p, pIdx) => `
+          <div style="background:#fff;border:1.5px solid ${pIdx === 1 ? '#4338ca' : '#cbd5e1'};border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:4px;">
             <div style="font-weight:800;font-size:11.5px;color:#1e293b;display:flex;justify-content:space-between;align-items:center;">
-              <span style="color:#4f46d9;">${p.title.split(':')[0]} (${escapeHtml(p.minCount)})</span>
-              <span style="background:#f1f5f9;color:#64748b;font-size:10px;padding:1px 5px;border-radius:4px;">${p.options.length}개</span>
+              <span style="color:${pIdx === 1 ? '#4338ca' : '#1e293b'};">${p.title.split(':')[0]} (${escapeHtml(p.minCount)})</span>
+              <span style="background:${pIdx === 1 ? '#eef2ff' : '#f1f5f9'};color:${pIdx === 1 ? '#4338ca' : '#64748b'};font-size:10px;padding:1px 5px;border-radius:4px;">${p.options.length}개</span>
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:3px;margin:2px 0;">
-              ${p.options.map(opt => `<span style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:1px 5px;font-size:10.5px;color:#334155;font-weight:600;">👍 ${escapeHtml(opt)}</span>`).join('')}
+              ${p.options.map(opt => `<span style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:1px 5px;font-size:10.5px;color:#334155;font-weight:600;">☑️ ${escapeHtml(opt)}</span>`).join('')}
             </div>
             <div style="font-size:10.5px;color:#64748b;line-height:1.2;">${escapeHtml(p.description)}</div>
           </div>
@@ -4919,15 +4934,16 @@ function renderMekiCubeLeaderboard() {
   container.innerHTML = ranked.map((rec, idx) => {
     const linesSummary = formatLineSummary(rec.currentLines);
     const target = rec.target || {};
-    const pref = rec.preferredSettings;
-    const prefBadge = pref ? `선호옵: [조건① ${pref.presets[0]?.minCount} / 조건② ${pref.presets[1]?.minCount}] (등급업: ${pref.tierUpMode})` : '';
+    const pref = rec.preferredSettings || {};
+    const isTopItem = idx === 0;
+
     return `
-      <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;">
+      <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
           <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-weight:900;color:var(--primary-dark);font-size:13px;">#${idx + 1}</span>
-            <strong style="font-size:13.5px;color:var(--ink);">${escapeHtml(rec.equipmentName)}</strong>
-            <span class="badge" style="background:${rec.badgeColor};color:#fff;font-size:11px;padding:2px 6px;border-radius:4px;">${rec.verdictLabel}</span>
+            <span style="font-weight:900;color:var(--primary-dark);font-size:14px;">#${idx + 1}</span>
+            <strong style="font-size:14px;color:var(--ink);">${escapeHtml(rec.equipmentName)}</strong>
+            <span class="badge" style="background:${rec.badgeColor};color:#fff;font-size:11px;padding:2px 7px;border-radius:4px;font-weight:700;">${rec.verdictLabel}</span>
             <small style="color:var(--muted);font-size:11px;">(${CUBE_GRADE_NAMES[rec.cubeGrade] || rec.cubeGrade} · ${escapeHtml(linesSummary)})</small>
           </div>
           <div style="display:flex;gap:6px;align-items:center;">
@@ -4935,16 +4951,89 @@ function renderMekiCubeLeaderboard() {
             <button type="button" class="button ghost goto-cube-tab-btn" data-eq-id="${escapeHtml(rec.equipmentId)}" style="font-size:11.5px;padding:3px 8px;">🎲 큐브 탭에서 시뮬</button>
           </div>
         </div>
+
         <div style="font-size:12px;color:#475467;line-height:1.4;">
           ${escapeHtml(rec.reason)}
         </div>
-        <div style="display:flex;gap:12px;font-size:11.5px;background:#f8fafc;padding:6px 8px;border-radius:6px;flex-wrap:wrap;align-items:center;">
+
+        <div style="display:flex;gap:12px;font-size:11.5px;background:#f8fafc;padding:7px 10px;border-radius:6px;flex-wrap:wrap;align-items:center;">
           <span>🎯 목표: <strong>${escapeHtml(target.description || '—')}</strong></span>
           <span>기대 비용: <strong>${target.cost > 0 ? fmt(target.cost) + ' 메소' : '0'}</strong></span>
           <span>예상 딜 상승: <strong style="color:#0b7a58;">+${(target.dpsGainPct || 0).toFixed(2)}% (+${fmt(target.dpsDelta || 0)} DPS)</strong></span>
           <span>가성비: <strong style="color:var(--primary-dark);">${(target.roiPerMillion || 0) > 0 ? '+' + (target.roiPerMillion).toFixed(4) + '% / 100만 메소' : '—'}</strong></span>
-          ${prefBadge ? `<span style="color:#4f46d9;font-weight:700;">🎮 ${escapeHtml(prefBadge)}</span>` : ''}
         </div>
+
+        <!-- 🎮 선호 옵션 설정 안내 (토글 형식) -->
+        <details class="cube-pref-toggle" ${isTopItem ? 'open' : ''} style="margin-top:2px;border:1.5px solid #c7d2fe;border-radius:8px;background:#f8faff;overflow:hidden;">
+          <summary style="padding:10px 12px;font-size:12.5px;font-weight:700;color:#3730a3;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:#eef2ff;user-select:none;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span>🎮 <strong>인게임 선호옵 설정 가이드</strong>: 어떤 옵션을 켤까?</span>
+              <span class="badge" style="background:#4338ca;color:#fff;font-size:11px;padding:2px 7px;font-weight:700;">☑️ 켤 옵션: ${escapeHtml(pref.coreOptionsSummary || '주스탯%')}</span>
+              <span class="badge" style="background:${pref.tierUpMode?.includes('ON') ? '#059669' : '#64748b'};color:#fff;font-size:11px;padding:2px 7px;font-weight:700;">등급업: ${escapeHtml(pref.tierUpMode || 'OFF')}</span>
+            </div>
+            <span style="font-size:11.5px;color:#4f46e5;font-weight:600;white-space:nowrap;margin-left:8px;">설정값 상세 접기/펼치기 ▾</span>
+          </summary>
+
+          <div style="padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:#fff;border-top:1px solid #c7d2fe;font-size:12px;">
+            <!-- 1. 등급 상승 모드 & 핵심 체크 옵션 배너 -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:8px;">
+              <div style="background:${pref.tierUpMode?.includes('ON') ? '#ecfdf5' : '#f8fafc'};border:1px solid ${pref.tierUpMode?.includes('ON') ? '#a7f3d0' : '#e2e8f0'};padding:9px 12px;border-radius:6px;display:flex;flex-direction:column;gap:3px;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <strong style="color:${pref.tierUpMode?.includes('ON') ? '#065f46' : '#334155'};font-size:12.5px;">
+                    ${pref.tierUpMode?.includes('ON') ? '✅ 등급 상승 시 중단: [ 켜기 (ON) ]' : '⏹️ 등급 상승 시 중단: [ 끄기 (OFF) ]'}
+                  </strong>
+                </div>
+                <span style="font-size:11px;color:#64748b;line-height:1.35;">${escapeHtml(pref.tierUpReason || '')}</span>
+              </div>
+
+              <div style="background:#eff6ff;border:1px solid #bfdbfe;padding:9px 12px;border-radius:6px;display:flex;flex-direction:column;gap:5px;">
+                <strong style="color:#1e40af;font-size:12px;">💡 인게임 체크박스에서 꼭 켜야 할 핵심 옵션:</strong>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                  ${(pref.primaryRecommendedOptions || []).map(opt => `
+                    <span style="background:#2563eb;color:#fff;font-weight:800;font-size:11.5px;padding:3px 9px;border-radius:12px;display:inline-flex;align-items:center;gap:3px;box-shadow:0 1px 2px rgba(37,99,235,0.2);">
+                      ☑️ ${escapeHtml(opt)}
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. 인게임 조건 ① / 조건 ② / 조건 ③ 프리셋 카드 -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));gap:8px;">
+              ${(pref.presets || []).map((p, pIdx) => `
+                <div style="background:#fafafa;border:1.5px solid ${pIdx === 1 ? '#4338ca' : '#e2e8f0'};border-radius:7px;padding:10px;display:flex;flex-direction:column;gap:6px;box-shadow:${pIdx === 1 ? '0 0 0 1px #4338ca inset' : 'none'};">
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <strong style="font-size:12px;color:${pIdx === 1 ? '#4338ca' : '#1e293b'};">
+                      ${escapeHtml(p.title.split(':')[0])}
+                    </strong>
+                    <span class="badge" style="background:${pIdx === 1 ? '#4338ca' : '#64748b'};color:#fff;font-size:10px;padding:2px 6px;">
+                      최소 ${escapeHtml(p.minCount)}
+                    </span>
+                  </div>
+                  <div style="font-size:11px;font-weight:700;color:#475467;">
+                    ${escapeHtml(p.title.split(':')[1] || '')}
+                  </div>
+                  <div style="display:flex;flex-wrap:wrap;gap:4px;margin:2px 0;">
+                    ${p.options.map(opt => `
+                      <span style="background:#fff;border:1px solid #cbd5e1;border-radius:4px;padding:2px 6px;font-size:10.5px;color:#334155;font-weight:600;">
+                        ☑️ ${escapeHtml(opt)}
+                      </span>
+                    `).join('')}
+                  </div>
+                  <div style="font-size:10.5px;color:#64748b;line-height:1.35;margin-top:auto;">
+                    ${escapeHtml(p.description)}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- 3. 사용 안내 문구 -->
+            <div style="background:#f1f5f9;padding:7px 12px;border-radius:6px;font-size:11px;color:#475467;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+              <span>💬 <strong>조작법</strong>: 인게임 [잠재능력] → [자동 변경 설정] 창에서 위 조건대로 체크박스를 켜고 돌리시면 원하는 유효 옵션 등장 시 즉시 자동 중단됩니다.</span>
+              <span style="color:#6366f1;font-weight:700;">직업: ${escapeHtml(pref.mainStat || 'LUK')} 주스탯 적용 중</span>
+            </div>
+          </div>
+        </details>
       </div>
     `;
   }).join('');

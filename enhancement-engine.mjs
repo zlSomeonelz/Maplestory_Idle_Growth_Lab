@@ -432,7 +432,13 @@ export function recommendCubeAction(equip, playerStats = {}, combatRules = {}, e
     badgeColor,
     reason,
     target: chosenTarget,
-    preferredSettings: getInGamePreferredCubeSettings(slotType, grade, playerStats.job || 'hero')
+    preferredSettings: getInGamePreferredCubeSettings(
+      (equip.id === 'hat' || equip.name === '모자') ? 'hat' : (equip.id === 'glove' || equip.name === '장갑') ? 'glove' : slotType,
+      grade,
+      playerStats.jobKey || (typeof playerStats.job === 'string' ? playerStats.job : 'nightWalker'),
+      enhancementRules?.jobStats || null,
+      typeof playerStats.job === 'object' ? playerStats.job : null
+    )
   };
 }
 
@@ -440,11 +446,15 @@ export function recommendCubeAction(equip, playerStats = {}, combatRules = {}, e
  * Generates exact in-game "선호 옵션 설정" (Auto-Cube Stop Conditions: 3 Presets & Tier-up mode)
  * matching the official Maple Idle in-game UI.
  */
-export function getInGamePreferredCubeSettings(slotType = 'weapon', grade = 'epic', jobKey = 'hero', jobStats = null) {
+export function getInGamePreferredCubeSettings(slotType = 'weapon', grade = 'epic', jobKey = 'hero', jobStats = null, directJobObj = null) {
   let mainStat = 'STR';
-  if (jobStats?.jobs?.[jobKey]?.main?.[0]) {
+  if (directJobObj?.main?.[0]) {
+    mainStat = directJobObj.main[0];
+  } else if (typeof jobKey === 'object' && jobKey !== null && jobKey.main?.[0]) {
+    mainStat = jobKey.main[0];
+  } else if (jobStats?.jobs?.[jobKey]?.main?.[0]) {
     mainStat = jobStats.jobs[jobKey].main[0];
-  } else {
+  } else if (typeof jobKey === 'string') {
     if (['nightLord', 'shadower', 'nightWalker'].includes(jobKey)) mainStat = 'LUK';
     else if (['bowmaster', 'sniper', 'captain', 'windBreaker'].includes(jobKey)) mainStat = 'DEX';
     else if (['archMageIceLightning', 'archMageFirePoison', 'bishop'].includes(jobKey)) mainStat = 'INT';
@@ -452,7 +462,7 @@ export function getInGamePreferredCubeSettings(slotType = 'weapon', grade = 'epi
   }
 
   const isWeapon = slotType === 'weapon' || ['weapon', 'subWeapon', 'emblem'].includes(slotType);
-  const isGlove = slotType === 'glove' || slotType === 'gloves';
+  const isGlove = slotType === 'glove' || slotType === 'gloves' || slotType === '장갑';
   const isHat = slotType === 'hat' || slotType === '모자' || slotType === '투구';
   const isTierUpNeeded = grade === 'rare' || (isGlove && grade === 'epic');
 
@@ -461,8 +471,14 @@ export function getInGamePreferredCubeSettings(slotType = 'weapon', grade = 'epi
   let preset1 = {};
   let preset2 = {};
   let preset3 = {};
+  let primaryRecommendedOptions = [];
+  let coreOptionsSummary = '';
+  let slotLabel = '일반 장비';
 
   if (isWeapon) {
+    slotLabel = '무기 / 보조무기 / 엠블렘';
+    primaryRecommendedOptions = ['공격력%', '보스 몬스터 데미지%', '데미지%'];
+    coreOptionsSummary = '공% · 보공% · 데미지%';
     preset1 = {
       index: 1,
       title: '조건 ①: 3줄 극옵 대박 즉시 스톱',
@@ -485,6 +501,9 @@ export function getInGamePreferredCubeSettings(slotType = 'weapon', grade = 'epi
       description: '공%/보공 1줄과 데미지/주스탯이 떴을 때 임시로 멈추고 메소 소모를 방지합니다.'
     };
   } else if (isGlove) {
+    slotLabel = '장갑';
+    primaryRecommendedOptions = ['크리티컬 데미지%', '공격력%', `${mainStat}%`];
+    coreOptionsSummary = `크뎀% · 공% · ${mainStat}%`;
     preset1 = {
       index: 1,
       title: '조건 ①: 3줄 극옵 대박 즉시 스톱',
@@ -507,6 +526,9 @@ export function getInGamePreferredCubeSettings(slotType = 'weapon', grade = 'epi
       description: '장갑은 크리티컬 데미지 1줄만으로도 다른 부위 2~3줄 이상의 딜 상승을 보입니다.'
     };
   } else if (isHat) {
+    slotLabel = '모자';
+    primaryRecommendedOptions = ['스킬 재사용 대기시간 감소', `${mainStat}%`, '데미지%', '최대 데미지 배율'];
+    coreOptionsSummary = `스킬 쿨감 · ${mainStat}% · 데미지%`;
     preset1 = {
       index: 1,
       title: '조건 ①: 3줄 극옵 대박 즉시 스톱',
@@ -530,6 +552,9 @@ export function getInGamePreferredCubeSettings(slotType = 'weapon', grade = 'epi
     };
   } else {
     // 일반 방어구 및 장신구
+    slotLabel = slotType === 'accessory' ? '장신구' : '방어구';
+    primaryRecommendedOptions = [`${mainStat}%`, '데미지%', '최대 데미지 배율'];
+    coreOptionsSummary = `${mainStat}% · 데미지% · 최대뎀`;
     preset1 = {
       index: 1,
       title: '조건 ①: 3줄 극옵 대박 즉시 스톱',
@@ -555,12 +580,15 @@ export function getInGamePreferredCubeSettings(slotType = 'weapon', grade = 'epi
 
   return {
     slotType,
+    slotLabel,
     grade,
     mainStat,
     tierUpMode,
     tierUpReason: isTierUpNeeded
-      ? (isGlove ? '장갑은 유니크 등급 이상에서 크리티컬 데미지%가 등장하므로 등급업 시 무조건 정지해야 합니다.' : '상위 등급 승급 시 옵션 수치 상한이 크게 올라가므로 등급업 모드를 켜두세요.')
-      : '이미 상위 등급이므로 목표 옵션 달성에 집중하여 등급업 모드를 끄는 것을 권장합니다.',
+      ? (isGlove ? '장갑은 유니크 등급 이상에서 [크리티컬 데미지%]가 등장하므로 등급 상승 시 무조건 정지(ON)해야 합니다.' : '상위 등급 승급 시 옵션 수치 상한이 크게 올라가므로 등급 상승 시 정지(ON)를 켜두세요.')
+      : '이미 목표 등급이므로 불필요한 등급업 대기 없이 목표 옵션 달성 즉시 멈추도록 등급 상승 모드를 끄는 것(OFF)을 권장합니다.',
+    primaryRecommendedOptions,
+    coreOptionsSummary,
     presets: [preset1, preset2, preset3]
   };
 }

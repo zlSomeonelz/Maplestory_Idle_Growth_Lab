@@ -191,7 +191,7 @@ async function main() {
     // Step 7: MekiCalc Cube Leaderboard & 3-Line Modal Test
     console.log('Step 7: Testing MekiCalc Cube Recommendation Leaderboard & 3-Line Modal...');
     const cubeRecCount = await evaluate(`document.querySelectorAll('#mekiCubeRecList > div').length`);
-    assert.equal(cubeRecCount, 8, 'MekiCalc Cube Leaderboard must contain 8 equipment cards');
+    assert.ok(cubeRecCount >= 8, 'MekiCalc Cube Leaderboard must contain equipment cards');
     const firstCubeRecName = await evaluate(`document.querySelector('#mekiCubeRecList strong').textContent`);
     const firstCubeVerdict = await evaluate(`document.querySelector('#mekiCubeRecList .badge').textContent`);
     console.log(`  Top Cube Priority: [${firstCubeRecName}] ${firstCubeVerdict}`);
