@@ -5075,6 +5075,9 @@ function activateTab(tabName) {
     renderStatEfficiencies();
   } else if (tabName === 'combat') {
     renderCombat();
+  } else if (tabName === 'character') {
+    renderJobStatMapping();
+    renderJobSkills();
   }
 }
 
@@ -5083,7 +5086,7 @@ function updateWorkflowStepper(tabName) {
   const step2 = $('wfStep2Box');
   const step3 = $('wfStep3Box');
 
-  const isStep1 = ['combat', 'character', 'companion', 'content'].includes(tabName);
+  const isStep1 = ['character', 'combat', 'companion', 'content'].includes(tabName);
   const isStep2 = tabName === 'specup';
   const isStep3 = ['cube', 'efficiency'].includes(tabName);
 
@@ -5110,13 +5113,13 @@ function updateWorkflowStepper(tabName) {
 }
 
 function initWorkflowStepper() {
-  $('wfStep1Box')?.addEventListener('click', () => activateTab('combat'));
+  $('wfStep1Box')?.addEventListener('click', () => activateTab('character'));
   $('wfStep2Box')?.addEventListener('click', () => activateTab('specup'));
   $('wfStep3Box')?.addEventListener('click', () => activateTab('cube'));
 
-  $('targetType')?.addEventListener('change', () => updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'combat'));
-  $('buildPresetSelect')?.addEventListener('change', () => updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'combat'));
-  $('presetSelect')?.addEventListener('change', () => updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'combat'));
+  $('targetType')?.addEventListener('change', () => updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'character'));
+  $('buildPresetSelect')?.addEventListener('change', () => updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'character'));
+  $('presetSelect')?.addEventListener('change', () => updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'character'));
 }
 
 

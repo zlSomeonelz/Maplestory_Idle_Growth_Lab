@@ -101,11 +101,11 @@
       <!-- 3-Step Interactive Bar -->
       <div class="workflow-steps-grid">
         <!-- Step 1 Button -->
-        <div class="wf-step-box active" id="wfStep1Box" data-goto-tab="combat">
+        <div class="wf-step-box active" id="wfStep1Box" data-goto-tab="character">
           <div class="wf-step-num">STEP 1</div>
           <div class="wf-step-content">
-            <strong class="wf-step-title">🎯 목표 콘텐츠 &amp; 프리셋</strong>
-            <span class="wf-step-desc">보스/사냥/PvP 목표 &amp; 7인 동료 라인업</span>
+            <strong class="wf-step-title">📊 캐릭터 스펙 &amp; 목표</strong>
+            <span class="wf-step-desc">기본 스탯/직업 설정 &amp; 목표 콘텐츠/프리셋</span>
           </div>
           <span class="wf-step-arrow">→</span>
         </div>
@@ -133,8 +133,8 @@
 
     <!-- Navigation Tabs -->
     <nav class="tabs" aria-label="기능 선택" id="mainTabs">
-      <button class="tab active" data-tab="combat">⚔️ 실전 전투 시뮬레이션</button>
-      <button class="tab" data-tab="character">📊 캐릭터 스펙 &amp; 스탯</button>
+      <button class="tab active" data-tab="character">📊 캐릭터 스펙 &amp; 스탯</button>
+      <button class="tab" data-tab="combat">⚔️ 실전 전투 시뮬레이션</button>
       <button class="tab" data-tab="efficiency">📈 스탯 성장 효율 (v4)</button>
       <button class="tab" data-tab="specup">💰 재화 스펙업 최적화</button>
       <button class="tab" data-tab="cube">🧊 큐브 &amp; 잠재능력</button>
@@ -144,8 +144,93 @@
     </nav>
 
     <main>
-      <!-- TAB 1: Combat Simulation & DPS Results (MekiCalc-Style Full Width) -->
-      <section class="tab-panel active" data-panel="combat">
+      <!-- TAB 1: Character Specs & Stats Setup (Dedicated Full-Width Tab) -->
+      <section class="tab-panel active" data-panel="character">
+        <form class="card" id="characterForm">
+          <div class="section-heading">
+            <div><span class="step">01</span><h2>캐릭터 기본 스탯 설정</h2></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" class="button secondary" id="openOcrInFormBtn" style="padding:6px 12px;font-size:12px;">📸 OCR 입력</button>
+              <button type="button" class="button primary" id="goToCombatFromCharBtn" style="padding:6px 12px;font-size:12px;">⚔️ 전투 결과 보기</button>
+            </div>
+          </div>
+          <p class="hint">
+            게임 스탯 창의 수치를 직접 입력하거나 스크린샷 OCR로 자동 분석합니다.
+            입력된 모든 수치는 전투 시뮬레이션, 스탯 성장 효율, 스펙업 로드맵에 실시간 자동 반영됩니다.
+          </p>
+
+          <div class="fields compact">
+            <label>직업<select id="job"><option value="">직업 선택</option></select></label>
+            <label>레벨<input id="level" type="number" min="1" value="100"></label>
+            <label>공격력(+)<input id="attackFlat" type="number" min="0" step="0.01" value="1000"></label>
+            <label>공격력%<input id="attackPct" type="number" min="0" step="0.01" value="0"></label>
+            <label>최대 HP<input id="maxHp" type="number" min="0" step="1" value="0"></label>
+            <label>캐릭터 방어력<input id="playerDefense" type="number" min="0" step="1" value="0"></label>
+            <label>최대 MP<input id="maxMp" type="number" min="0" step="1" value="500"></label>
+            <label>회피<input id="evasion" type="number" min="0" step="0.01" value="0"></label>
+            <label>주스탯(+)<input id="mainStat" type="number" min="0" step="0.01" value="1000"></label>
+            <label>주스탯%<input id="mainStatPct" type="number" min="0" step="0.01" value="0"></label>
+            <label>부스탯(+)<input id="subStat" type="number" min="0" step="0.01" value="400"></label>
+            <label>데미지%<input id="damage" type="number" step="0.01" value="0"></label>
+            <label>데미지 증폭%<input id="damageAmp" type="number" step="0.01" value="0"></label>
+            <label>최종 데미지%<input id="finalDamage" type="number" step="0.01" value="0"></label>
+            <label>크리티컬 확률%<input id="critRate" type="number" min="0" max="100" step="0.01" value="0"></label>
+            <label>크리티컬 데미지%<input id="critDamage" type="number" step="0.01" value="0"></label>
+            <label>최소 데미지 배율%<input id="minDamage" type="number" step="0.01" value="65"></label>
+            <label>최대 데미지 배율%<input id="maxDamage" type="number" step="0.01" value="100"></label>
+            <label>마스터리·기타 증가%<input id="mastery" type="number" step="0.01" value="0"></label>
+            <label>스킬 계수%<input id="skillCoefficient" type="number" min="0" step="0.01" value="100"></label>
+            <label>기본 공격 간격(초)<input id="attackInterval" type="number" min="0.01" step="0.01" value="1"></label>
+            <label>공격 속도%<input id="attackSpeed" type="number" min="0" step="0.01" value="0"></label>
+          </div>
+
+          <details class="companion-box" style="margin-top:14px;">
+            <summary class="companion-heading"><strong>직업별 주·부 스탯 입력</strong><span class="badge official">공식 직업 매핑</span></summary>
+            <div class="fields compact">
+              <label>스탯 계산 방식<select id="statInputMode"><option value="aggregate">주·부 스탯 합산값 직접 입력</option><option value="job">직업별 원시 스탯으로 계산</option></select></label>
+            </div>
+            <div class="formula-note" id="jobStatMapping">직업을 선택하면 주·부 스탯 매핑을 표시합니다.</div>
+            <div class="fields compact">
+              <label>STR<input id="statSTR" type="number" min="0" step="0.01" value="0"></label>
+              <label>DEX<input id="statDEX" type="number" min="0" step="0.01" value="0"></label>
+              <label>INT<input id="statINT" type="number" min="0" step="0.01" value="0"></label>
+              <label>LUK<input id="statLUK" type="number" min="0" step="0.01" value="0"></label>
+            </div>
+          </details>
+
+          <details class="companion-box" open style="margin-top:14px;">
+            <summary class="companion-heading"><strong>전투력 보조 능력치</strong><span class="badge official">공식 전투력 식</span></summary>
+            <div class="fields compact">
+              <label>명중<input id="accuracy" type="number" min="0" step="0.01" value="100"></label>
+              <label>방어 관통력%<input id="defPen" type="number" min="0" max="100" step="0.01" value="0"></label>
+              <label>보스 몬스터 데미지%<input id="bossDamage" type="number" step="0.01" value="0"></label>
+              <label>일반 몬스터 데미지%<input id="normalDamage" type="number" step="0.01" value="0"></label>
+              <label>기본 공격 데미지%<input id="basicDamage" type="number" step="0.01" value="0"></label>
+              <label>스킬 데미지%<input id="skillDamage" type="number" step="0.01" value="0"></label>
+              <label>상태이상 데미지%<input id="statusDamage" type="number" step="0.01" value="0"></label>
+              <label>받는 피해 감소%<input id="dmgReduction" type="number" step="0.01" value="0"></label>
+              <label>동료 소환 지속시간 증가%<input id="companionDuration" type="number" step="0.01" value="0"></label>
+              <label>버프 지속시간 증가%<input id="buffDuration" type="number" step="0.01" value="0"></label>
+              <label>디버프 내성%<input id="debuffResist" type="number" step="0.01" value="0"></label>
+              <label>기본 공격 대상 수 증가<input id="extraTargets" type="number" min="0" step="1" value="0"></label>
+              <label>스킬 쿨타임 감소%<input id="cooldownReductionPct" type="number" min="0" max="80" step="0.01" value="0"></label>
+              <label>스킬 쿨타임 감소(초)<input id="cooldownReductionSec" type="number" min="0" step="0.01" value="0"></label>
+              <label>1차 스킬 레벨<input id="skillLevel1" type="number" min="1" step="1" value="1"></label>
+              <label>2차 스킬 레벨<input id="skillLevel2" type="number" min="1" step="1" value="1"></label>
+              <label>3차 스킬 레벨<input id="skillLevel3" type="number" min="1" step="1" value="1"></label>
+              <label>4차 스킬 레벨<input id="skillLevel4" type="number" min="0" step="1" value="0"></label>
+              <label>1레벨당 주스탯<input id="mainStatPerLevel1" type="number" min="0" step="0.01" value="10"></label>
+            </div>
+          </details>
+
+          <button type="button" class="button primary full" id="charApplyAndCombatBtn" style="margin-top:16px;font-size:16px;padding:14px;">
+            ⚔️ 스탯 적용 및 실전 전투 계산 결과 확인하기
+          </button>
+        </form>
+      </section>
+
+      <!-- TAB 2: Combat Simulation & DPS Results (MekiCalc-Style Full Width) -->
+      <section class="tab-panel" data-panel="combat">
         <!-- Target Settings Card -->
         <form class="card" id="targetForm">
           <div class="section-heading">
@@ -272,91 +357,6 @@
           </div>
           <div id="specUpGuideContent"></div>
         </section>
-      </section>
-
-      <!-- TAB 2: Character Specs & Stats Setup (Dedicated Full-Width Tab) -->
-      <section class="tab-panel" data-panel="character">
-        <form class="card" id="characterForm">
-          <div class="section-heading">
-            <div><span class="step">01</span><h2>캐릭터 기본 스탯 설정</h2></div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button type="button" class="button secondary" id="openOcrInFormBtn" style="padding:6px 12px;font-size:12px;">📸 OCR 입력</button>
-              <button type="button" class="button primary" id="goToCombatFromCharBtn" style="padding:6px 12px;font-size:12px;">⚔️ 전투 결과 보기</button>
-            </div>
-          </div>
-          <p class="hint">
-            게임 스탯 창의 수치를 직접 입력하거나 스크린샷 OCR로 자동 분석합니다.
-            입력된 모든 수치는 전투 시뮬레이션, 스탯 성장 효율, 스펙업 로드맵에 실시간 자동 반영됩니다.
-          </p>
-
-          <div class="fields compact">
-            <label>직업<select id="job"><option value="">직업 선택</option></select></label>
-            <label>레벨<input id="level" type="number" min="1" value="100"></label>
-            <label>공격력(+)<input id="attackFlat" type="number" min="0" step="0.01" value="1000"></label>
-            <label>공격력%<input id="attackPct" type="number" min="0" step="0.01" value="0"></label>
-            <label>최대 HP<input id="maxHp" type="number" min="0" step="1" value="0"></label>
-            <label>캐릭터 방어력<input id="playerDefense" type="number" min="0" step="1" value="0"></label>
-            <label>최대 MP<input id="maxMp" type="number" min="0" step="1" value="500"></label>
-            <label>회피<input id="evasion" type="number" min="0" step="0.01" value="0"></label>
-            <label>주스탯(+)<input id="mainStat" type="number" min="0" step="0.01" value="1000"></label>
-            <label>주스탯%<input id="mainStatPct" type="number" min="0" step="0.01" value="0"></label>
-            <label>부스탯(+)<input id="subStat" type="number" min="0" step="0.01" value="400"></label>
-            <label>데미지%<input id="damage" type="number" step="0.01" value="0"></label>
-            <label>데미지 증폭%<input id="damageAmp" type="number" step="0.01" value="0"></label>
-            <label>최종 데미지%<input id="finalDamage" type="number" step="0.01" value="0"></label>
-            <label>크리티컬 확률%<input id="critRate" type="number" min="0" max="100" step="0.01" value="0"></label>
-            <label>크리티컬 데미지%<input id="critDamage" type="number" step="0.01" value="0"></label>
-            <label>최소 데미지 배율%<input id="minDamage" type="number" step="0.01" value="65"></label>
-            <label>최대 데미지 배율%<input id="maxDamage" type="number" step="0.01" value="100"></label>
-            <label>마스터리·기타 증가%<input id="mastery" type="number" step="0.01" value="0"></label>
-            <label>스킬 계수%<input id="skillCoefficient" type="number" min="0" step="0.01" value="100"></label>
-            <label>기본 공격 간격(초)<input id="attackInterval" type="number" min="0.01" step="0.01" value="1"></label>
-            <label>공격 속도%<input id="attackSpeed" type="number" min="0" step="0.01" value="0"></label>
-          </div>
-
-          <details class="companion-box" style="margin-top:14px;">
-            <summary class="companion-heading"><strong>직업별 주·부 스탯 입력</strong><span class="badge official">공식 직업 매핑</span></summary>
-            <div class="fields compact">
-              <label>스탯 계산 방식<select id="statInputMode"><option value="aggregate">주·부 스탯 합산값 직접 입력</option><option value="job">직업별 원시 스탯으로 계산</option></select></label>
-            </div>
-            <div class="formula-note" id="jobStatMapping">직업을 선택하면 주·부 스탯 매핑을 표시합니다.</div>
-            <div class="fields compact">
-              <label>STR<input id="statSTR" type="number" min="0" step="0.01" value="0"></label>
-              <label>DEX<input id="statDEX" type="number" min="0" step="0.01" value="0"></label>
-              <label>INT<input id="statINT" type="number" min="0" step="0.01" value="0"></label>
-              <label>LUK<input id="statLUK" type="number" min="0" step="0.01" value="0"></label>
-            </div>
-          </details>
-
-          <details class="companion-box" open style="margin-top:14px;">
-            <summary class="companion-heading"><strong>전투력 보조 능력치</strong><span class="badge official">공식 전투력 식</span></summary>
-            <div class="fields compact">
-              <label>명중<input id="accuracy" type="number" min="0" step="0.01" value="100"></label>
-              <label>방어 관통력%<input id="defPen" type="number" min="0" max="100" step="0.01" value="0"></label>
-              <label>보스 몬스터 데미지%<input id="bossDamage" type="number" step="0.01" value="0"></label>
-              <label>일반 몬스터 데미지%<input id="normalDamage" type="number" step="0.01" value="0"></label>
-              <label>기본 공격 데미지%<input id="basicDamage" type="number" step="0.01" value="0"></label>
-              <label>스킬 데미지%<input id="skillDamage" type="number" step="0.01" value="0"></label>
-              <label>상태이상 데미지%<input id="statusDamage" type="number" step="0.01" value="0"></label>
-              <label>받는 피해 감소%<input id="dmgReduction" type="number" step="0.01" value="0"></label>
-              <label>동료 소환 지속시간 증가%<input id="companionDuration" type="number" step="0.01" value="0"></label>
-              <label>버프 지속시간 증가%<input id="buffDuration" type="number" step="0.01" value="0"></label>
-              <label>디버프 내성%<input id="debuffResist" type="number" step="0.01" value="0"></label>
-              <label>기본 공격 대상 수 증가<input id="extraTargets" type="number" min="0" step="1" value="0"></label>
-              <label>스킬 쿨타임 감소%<input id="cooldownReductionPct" type="number" min="0" max="80" step="0.01" value="0"></label>
-              <label>스킬 쿨타임 감소(초)<input id="cooldownReductionSec" type="number" min="0" step="0.01" value="0"></label>
-              <label>1차 스킬 레벨<input id="skillLevel1" type="number" min="1" step="1" value="1"></label>
-              <label>2차 스킬 레벨<input id="skillLevel2" type="number" min="1" step="1" value="1"></label>
-              <label>3차 스킬 레벨<input id="skillLevel3" type="number" min="1" step="1" value="1"></label>
-              <label>4차 스킬 레벨<input id="skillLevel4" type="number" min="0" step="1" value="0"></label>
-              <label>1레벨당 주스탯<input id="mainStatPerLevel1" type="number" min="0" step="0.01" value="10"></label>
-            </div>
-          </details>
-
-          <button type="button" class="button primary full" id="charApplyAndCombatBtn" style="margin-top:16px;font-size:16px;padding:14px;">
-            ⚔️ 스탯 적용 및 실전 전투 계산 결과 확인하기
-          </button>
-        </form>
       </section>
 
       <!-- TAB 3: Stat Efficiencies v4 (MekiCalc-Style Stat Comparison Dedicated Tab) -->
