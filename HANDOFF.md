@@ -2,7 +2,7 @@
 
 > 이 문서는 Antigravity 또는 다른 개발 에이전트가 저장소를 바로 이어받을 수 있도록 현재 구현된 계산 알고리즘, 데이터 구조, 검증 상태, 남은 작업을 정리한 문서다.
 >
-> 기준 커밋: `af8d063` (브랜치 `feat/resource-specup-optimizer`)
+> 기준 커밋: `7191185` (브랜치 `feat/resource-specup-optimizer`)
 > 저장소: <https://github.com/zlSomeonelz/Maplestory_Idle_Growth_Lab>  
 > 공개 사이트: <https://zlsomeonelz.github.io/Maplestory_Idle_Growth_Lab/>
 
@@ -581,6 +581,11 @@ OCR 관련 페이지와 캐시는 존재한다.
 
 ### P2. UI·배포 품질
 - [x] iPad / 태블릿 가로·세로 모드 반응형 최적화 완료 (모든 탭 가로 오버플로우 0px 검증)
+- [x] 큰 수치 한국어식 끊어읽기 단위(경, 조, 억, 만) 포맷터(`formatKoreanUnit`) 구현 및 전역 `fmt()` 연동
+  - 1만 미만: 기존 일반 숫자 표시 (예: `915.75`, `1,000`, `3,640`)
+  - 1만 이상: 한국어 단위 축약 (예: `1.78만`, `5,000만 메소`, `286.44억 DPS`, `2.01조`)
+  - 전투 분석 결과 히어로 카드 및 세부 지표에 정밀 정수 툴팁(`title`) 및 서브텍스트(`정밀 35,306 · ...`) 병행 표기
+  - 엔드게임 고스펙 및 스펙업 최적화 로드맵 테스트(`scratch/test-korean-units.mjs`) 검증 완료
 - [x] 터치 환경 친화적 최소 42px 탭 타겟 및 부드러운 가로 스크롤링 지원
 - [x] 장비 스펙업 테이블 반응형 컨테이너(`.table-responsive`) 및 터치 최적화 인풋
 - iPad Safari 실제 입력 테스트 및 PWA 홈 화면 추가 지원
