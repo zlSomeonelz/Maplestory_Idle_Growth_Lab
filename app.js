@@ -4688,18 +4688,24 @@ function formatLineSummary(lines) {
   const valid = lines.filter(l => l && l.stat && l.stat !== 'NONE' && Number(l.value) > 0);
   if (!valid.length) return '잡옵 3줄 (0줄 유효)';
   return valid.map(l => {
+    if (l.display) {
+      return l.display.replace(/\s*\(잡옵\)/g, '').trim();
+    }
     if (l.stat === 'attackPct') return `공 ${l.value}%`;
     if (l.stat === 'bossDamage') return `보공 ${l.value}%`;
     if (l.stat === 'critDamage') return `크뎀 ${l.value}%`;
     if (l.stat === 'critRate') return `크확 ${l.value}%`;
     if (l.stat === 'mainStatPct') return `주스탯 ${l.value}%`;
     if (l.stat === 'subStatPct') return `부스탯 ${l.value}%`;
+    if (l.stat === 'allStatPct') return `올스탯 ${l.value}%`;
     if (l.stat === 'damage') return `뎀 ${l.value}%`;
     if (l.stat === 'maxHpPct') return `HP ${l.value}%`;
     if (l.stat === 'defPen') return `방관 ${l.value}%`;
     if (l.stat === 'cooldownReduction') return `쿨감 ${l.value}초`;
     if (l.stat === 'attackFlat') return `공 +${l.value}`;
     if (l.stat === 'mainStat') return `주스탯 +${l.value}`;
+    if (l.stat === 'subStat') return `부스탯 +${l.value}`;
+    if (l.stat === 'allStat') return `올스탯 +${l.value}`;
     if (l.stat === 'maxHp') return `HP +${l.value}`;
     return `${l.stat} +${l.value}`;
   }).join(' / ');
@@ -5416,6 +5422,48 @@ function initEquipOcr() {
   const clearBtn = $('equipOcrClearBtn');
   const statusEl = $('equipOcrStatus');
   const resultsEl = $('equipOcrResults');
+  const jobSelect = $('equipOcrJobSelect');
+  const jobHint = $('equipOcrJobHint');
+
+  function syncJobSelector() {
+    if (!jobSelect) return;
+    const currentJobKey = $('job')?.value || 'nightWalker';
+    const jobs = DATA.jobStats?.jobs || {};
+    
+    if (!jobSelect.options.length) {
+      jobSelect.innerHTML = Object.keys(jobs).map(k => {
+        const name = JOB_NAMES[k] || k;
+        const main = jobs[k]?.main?.[0] || 'LUK';
+        const sub = jobs[k]?.sub?.[0] || 'DEX';
+        return `<option value="${k}">${name} (주: ${main} · 부: ${sub})</option>`;
+      }).join('');
+    }
+    jobSelect.value = currentJobKey;
+    const activeStat = jobs[currentJobKey] || { main: ['LUK'], sub: ['DEX'] };
+    if (jobHint) {
+      jobHint.textContent = `(주스탯: ${activeStat.main[0]} · 부스탯: ${activeStat.sub[0]})`;
+    }
+  }
+
+  syncJobSelector();
+
+  jobSelect?.addEventListener('change', () => {
+    const newJob = jobSelect.value;
+    if ($('job') && $('job').value !== newJob) {
+      $('job').value = newJob;
+      $('job').dispatchEvent(new Event('change'));
+    }
+    const jobs = DATA.jobStats?.jobs || {};
+    const activeStat = jobs[newJob] || { main: ['LUK'], sub: ['DEX'] };
+    if (jobHint) {
+      jobHint.textContent = `(주스탯: ${activeStat.main[0]} · 부스탯: ${activeStat.sub[0]})`;
+    }
+    updateStatus(`주스탯 판정 기준이 [${JOB_NAMES[newJob] || newJob} (주: ${activeStat.main[0]})]로 설정되었습니다.`);
+  });
+
+  $('job')?.addEventListener('change', () => {
+    syncJobSelector();
+  });
 
   let selectedFiles = [];
 
@@ -5577,11 +5625,13 @@ function initEquipOcr() {
         const res = await worker.recognize(ocrInput);
         const text = res.data?.text || '';
 
-        const jobKey = $('job')?.value || 'nightWalker';
-        const jobStatConfig = DATA.jobStats?.jobs?.[jobKey] || { main: ['LUK'] };
+        const jobKey = $('equipOcrJobSelect')?.value || $('job')?.value || 'nightWalker';
+        const jobStatConfig = DATA.jobStats?.jobs?.[jobKey] || { main: ['LUK'], sub: ['DEX'] };
         const jobMainStat = jobStatConfig.main?.[0] || 'LUK';
+        const jobSubStat = jobStatConfig.sub?.[0] || 'DEX';
+        const jobNameKr = JOB_NAMES[jobKey] || jobKey;
 
-        const parsed = parseEquipmentOcrText(text, detectedStars, jobMainStat);
+        const parsed = parseEquipmentOcrText(text, detectedStars, jobMainStat, jobSubStat);
         if (parsed.slotId) {
           const targetEq = specupEquipments.find(e => e.id === parsed.slotId);
           if (targetEq) {
@@ -5615,7 +5665,10 @@ function initEquipOcr() {
               card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
               card.innerHTML = `
                 <div style="display:flex;justify-content:space-between;align-items:center;">
-                  <strong style="color:#0b7a58;font-size:13px;">✅ [${escapeHtml(parsed.slotName || targetEq.name)}] 슬롯</strong>
+                  <div>
+                    <strong style="color:#0b7a58;font-size:13px;">✅ [${escapeHtml(parsed.slotName || targetEq.name)}] 슬롯</strong>
+                    <span style="font-size:10px;color:#4f46e5;font-weight:700;margin-left:5px;background:#eef2ff;padding:2px 6px;border-radius:4px;">${escapeHtml(jobNameKr)} (${jobMainStat})</span>
+                  </div>
                   <span class="badge" style="background:#10b981;color:#fff;font-size:10px;">⭐ ${targetEq.currentStar}성</span>
                 </div>
                 <div style="font-size:11.5px;color:var(--ink);margin-top:4px;">

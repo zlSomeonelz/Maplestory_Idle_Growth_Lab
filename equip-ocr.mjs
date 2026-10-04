@@ -46,7 +46,7 @@ export const GRADE_KOREAN = {
 /**
  * Maps potential option text to engine stat key
  */
-export function parsePotentialLine(line, jobMainStat = 'LUK') {
+export function parsePotentialLine(line, jobMainStat = 'LUK', jobSubStat = null) {
   if (!line || typeof line !== 'string') return { stat: 'NONE', value: 0 };
   const trimmed = line.trim();
 
@@ -57,21 +57,26 @@ export function parsePotentialLine(line, jobMainStat = 'LUK') {
     return { stat: 'maxHpPct', value: val, raw: trimmed, display: `HP ${val}%` };
   }
 
-  // 2. Specific Stat Names (STR, DEX, INT, LUK, 주스탯) with percentage or OCR symbol variants (%, ×, x, X, etc.)
+  // 2. Specific Stat Names (STR, DEX, INT, LUK, 주스탯, 올스탯) with percentage or OCR symbol variants (%, ×, x, X, etc.)
   const statMatch = trimmed.match(/(?:^|[\s|:·•\-])(STR|DEX|PEX|INT|LUK|주스탯|부스탯|올스탯)[,\s]*([0-9.]+)\s*(?:%|[×xX]|o\/o|\/o)/i);
   if (statMatch) {
     let statName = statMatch[1].toUpperCase();
     if (statName === 'PEX') statName = 'DEX';
     const val = Number(statMatch[2]);
     const normalizedMain = (jobMainStat || 'LUK').toUpperCase();
-    if (statName === '주스탯' || statName === '올스탯' || statName === normalizedMain) {
+    const subStatMap = { 'LUK': 'DEX', 'STR': 'DEX', 'DEX': 'STR', 'INT': 'LUK' };
+    const normalizedSub = (jobSubStat || subStatMap[normalizedMain] || 'DEX').toUpperCase();
+
+    if (statName === '올스탯') {
+      return { stat: 'allStatPct', value: val, raw: trimmed, display: `올스탯 ${val}%` };
+    }
+    if (statName === '주스탯' || statName === normalizedMain) {
       return { stat: 'mainStatPct', value: val, raw: trimmed, display: `${statName} ${val}%` };
     }
-    const subStatMap = { 'LUK': 'DEX', 'STR': 'DEX', 'DEX': 'STR', 'INT': 'LUK' };
-    if (statName === '부스탯' || statName === subStatMap[normalizedMain]) {
+    if (statName === '부스탯' || statName === normalizedSub) {
       return { stat: 'subStatPct', value: val, raw: trimmed, display: `${statName} ${val}%` };
     }
-    // Off-stat is 잡옵 for damage calculation
+    // Off-stat is 잡옵 for this job's damage calculation
     return { stat: 'NONE', value: 0, raw: trimmed, display: `${statName} ${val}% (잡옵)` };
   }
 
@@ -104,11 +109,16 @@ export function parsePotentialLine(line, jobMainStat = 'LUK') {
       if (statName === 'PEX') statName = 'DEX';
       const val = Number(flatStatMatch[2].replace(/,/g, ''));
       const normalizedMain = (jobMainStat || 'LUK').toUpperCase();
-      if (statName === '주스탯' || statName === '올스탯' || statName === normalizedMain) {
+      const subStatMap = { 'LUK': 'DEX', 'STR': 'DEX', 'DEX': 'STR', 'INT': 'LUK' };
+      const normalizedSub = (jobSubStat || subStatMap[normalizedMain] || 'DEX').toUpperCase();
+
+      if (statName === '올스탯') {
+        return { stat: 'allStat', value: val, raw: trimmed, display: `올스탯(+) ${val}` };
+      }
+      if (statName === '주스탯' || statName === normalizedMain) {
         return { stat: 'mainStat', value: val, raw: trimmed, display: `${statName}(+) ${val}` };
       }
-      const subStatMap = { 'LUK': 'DEX', 'STR': 'DEX', 'DEX': 'STR', 'INT': 'LUK' };
-      if (statName === '부스탯' || statName === subStatMap[normalizedMain]) {
+      if (statName === '부스탯' || statName === normalizedSub) {
         return { stat: 'subStat', value: val, raw: trimmed, display: `${statName}(+) ${val}` };
       }
       return { stat: 'NONE', value: 0, raw: trimmed, display: `${statName}(+) ${val} (잡옵)` };
@@ -136,7 +146,7 @@ export function parsePotentialLine(line, jobMainStat = 'LUK') {
  * Parses OCR extracted text from an equipment modal popup,
  * extracting both 윗잠 (잠재 옵션) and 밑잠 (에디셔널 잠재 옵션).
  */
-export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK') {
+export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK', jobSubStat = null) {
   if (!text || typeof text !== 'string') {
     return { error: '텍스트가 없습니다.' };
   }
@@ -300,7 +310,7 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
       const isCandidate = /(?:LUK|STR|DEX|PEX|INT|HP|MP|공격력|마력|크리티컬|데미지|보스|방어|최대|[0-9.]+%\s*)/i.test(line);
       if (!isCandidate) continue;
 
-      const parsed = parsePotentialLine(line, jobMainStat);
+      const parsed = parsePotentialLine(line, jobMainStat, jobSubStat);
       parsedLines.push(parsed);
     }
     while (parsedLines.length < 3) {

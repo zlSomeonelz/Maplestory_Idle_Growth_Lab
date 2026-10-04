@@ -31,6 +31,22 @@ const pot3 = parsePotentialLine('데미지 12%', 'LUK');
 assert.equal(pot3.stat, 'damage');
 assert.equal(pot3.value, 12);
 
+// 1B. Cross-Job Stat Intelligence Tests (Hero / Bowmaster / Bishop / Night Walker)
+const heroLuk = parsePotentialLine('LUK 9%', 'STR', 'DEX');
+assert.equal(heroLuk.stat, 'NONE', 'For STR job (Hero), LUK 9% must be NONE (잡옵)');
+
+const heroStr = parsePotentialLine('STR 9%', 'STR', 'DEX');
+assert.equal(heroStr.stat, 'mainStatPct', 'For STR job (Hero), STR 9% must be mainStatPct');
+
+const heroDex = parsePotentialLine('DEX 3%', 'STR', 'DEX');
+assert.equal(heroDex.stat, 'subStatPct', 'For STR job (Hero), DEX 3% must be subStatPct');
+
+const bowmasterDex = parsePotentialLine('DEX 9%', 'DEX', 'STR');
+assert.equal(bowmasterDex.stat, 'mainStatPct', 'For DEX job (Bowmaster), DEX 9% must be mainStatPct');
+
+const bishopInt = parsePotentialLine('INT 9%', 'INT', 'LUK');
+assert.equal(bishopInt.stat, 'mainStatPct', 'For INT job (Bishop), INT 9% must be mainStatPct');
+
 // 2. Real In-Game Modal OCR Text Test (Zakum Helmet)
 const realOcrText = `
 모자슬롯강화효과
@@ -144,6 +160,17 @@ assert.equal(cloakRes.additionalLines[1].stat, 'mainStatPct'); // LUK 3%
 assert.equal(cloakRes.additionalLines[1].value, 3);
 assert.equal(cloakRes.additionalLines[2].stat, 'subStatPct');  // DEX 3%
 assert.equal(cloakRes.additionalLines[2].value, 3);
+
+// 3C. Dual Potential Test on STR Job (Hero) - LUK must NOT be main stat!
+const heroCloakRes = parseEquipmentOcrText(cloakOcrText, 12, 'STR', 'DEX');
+assert.equal(heroCloakRes.potentialLines[0].stat, 'NONE', 'LUK 9% must be NONE (잡옵) for Hero');
+assert.equal(heroCloakRes.potentialLines[1].stat, 'NONE', 'INT 6% must be NONE (잡옵) for Hero');
+assert.equal(heroCloakRes.potentialLines[2].stat, 'maxHpPct');
+assert.equal(heroCloakRes.additionalLines[0].stat, 'mainStatPct', 'STR 3% must be mainStatPct for Hero');
+assert.equal(heroCloakRes.additionalLines[0].value, 3);
+assert.equal(heroCloakRes.additionalLines[1].stat, 'NONE', 'LUK 3% must be NONE (잡옵) for Hero');
+assert.equal(heroCloakRes.additionalLines[2].stat, 'subStatPct', 'DEX 3% must be subStatPct for Hero');
+assert.equal(heroCloakRes.additionalLines[2].value, 3);
 
 // 4. Yellow Star Pixel Counter Test
 const width = 100;

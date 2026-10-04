@@ -545,6 +545,14 @@
             부위(모자, 장갑 등), 성급(⭐), 잠재 등급 및 3줄 옵션이 아래 15개 슬롯 테이블에 즉시 자동 반영됩니다. (여러 장 일괄 업로드 가능)
           </p>
 
+          <!-- Job Selection Bar for OCR Evaluation -->
+          <div style="display:flex;align-items:center;gap:10px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;padding:9px 14px;margin-bottom:12px;flex-wrap:wrap;">
+            <span style="font-size:12.5px;font-weight:700;color:#3730a3;">🎯 주스탯 판정 기준 직업:</span>
+            <select id="equipOcrJobSelect" style="font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:6px;border:1px solid #6366f1;background:#fff;color:#1e1b4b;min-width:200px;cursor:pointer;">
+            </select>
+            <span id="equipOcrJobHint" style="font-size:12px;color:#4338ca;font-weight:600;">(주스탯: LUK · 부스탯: DEX)</span>
+          </div>
+
           <label class="drop" id="equipOcrDropZone" for="equipOcrFileInput" style="display:block;cursor:pointer;border:2px dashed #6366f1;border-radius:12px;padding:22px 16px;text-align:center;background:#fff;transition:all .2s;margin-bottom:10px;">
             <div style="font-size:28px;margin-bottom:6px;">📸 📥</div>
             <strong style="color:var(--primary-dark);font-size:14px;">여기를 클릭하여 장비 스크린샷 선택</strong>
