@@ -357,16 +357,25 @@ export function recommendCubeAction(equip, playerStats = {}, combatRules = {}, e
   const isGloveSlot = slotType === 'glove' || slotType === 'gloves';
   if (linesCount >= 2 || (isGloveSlot && hasCritDamage && grade !== 'rare') || (slotType === 'weapon' && hasHighAttack && grade !== 'rare')) {
     verdict = 'STOP';
-    verdictLabel = '🛑 스톱 (졸업 권장)';
+    verdictLabel = '✅ 유효 확보 (타 부위 우선)';
     badgeColor = '#0b7a58';
-    reason = '현재 옵션이 2줄 유효 이상이거나 핵심 극옵(크뎀/공보공)을 확보한 가성비 종결 상태입니다. 3줄 극옵 도전은 비용 대비 효율이 급감하므로 즉시 스톱하고 스타포스/주문서에 자원을 투자하세요.';
-    chosenTarget = {
+    reason = grade === 'legendary'
+      ? '현재 유효 2~3줄을 확보하여 최상위 스펙 라인을 달성했습니다. 다른 부위 스펙업(스타포스/주문서/타 부위 잠재)을 우선 완료한 후 추후 종결 3줄을 노리세요.'
+      : '현재 유효 2줄 이상을 확보하여 현 등급 가성비를 달성했습니다. 잡옵 부위 리롤이나 스타포스를 먼저 완료한 후 추후 상위 등급(레전더리)으로 계속 스펙업을 이어가세요.';
+    chosenTarget = grade === 'legendary' ? {
       type: 'reroll',
-      description: '3줄 극옵 도전 (비권장)',
+      description: '3줄 극옵 종결 도전 (타 부위 완료 후)',
       cost: expectedRerollCost,
       dpsDelta: rerollDpsDelta,
       dpsGainPct: rerollGainPct,
       roiPerMillion: rerollRoi
+    } : {
+      type: 'tier_up',
+      description: `${nextGrade} 등급업 도전 (타 부위 완료 후)`,
+      cost: tierUpCost,
+      dpsDelta: tierUpDpsDelta,
+      dpsGainPct: tierUpGainPct,
+      roiPerMillion: tierUpRoi
     };
   } else if (linesCount === 0) {
     verdict = 'REROLL';
@@ -488,7 +497,7 @@ export function getInGamePreferredCubeSettings(slotType = 'weapon', grade = 'epi
     };
     preset2 = {
       index: 2,
-      title: '조건 ②: 2줄 유효 가성비 종결 (핵심 권장)',
+      title: '조건 ②: 2줄 유효 실전 목표 (핵심 권장)',
       minCount: '2개 이상',
       options: ['공격력%', '보스 몬스터 데미지%'],
       description: '공%+공%, 공%+보공%, 보공%+보공% 2줄 유효를 뽑아 실전 가성비를 극대화합니다.'
@@ -513,10 +522,10 @@ export function getInGamePreferredCubeSettings(slotType = 'weapon', grade = 'epi
     };
     preset2 = {
       index: 2,
-      title: '조건 ②: 크뎀 포함 2줄 종결 (고스펙 목표)',
+      title: '조건 ②: 크뎀 포함 2줄 실전 목표 (고스펙 권장)',
       minCount: '2개 이상',
       options: ['크리티컬 데미지%', '공격력%', `${mainStat}%`],
-      description: '크뎀 1줄 + 공%/주스탯 1줄로 장갑 잠재능력 최고 가성비를 달성합니다.'
+      description: '크뎀 1줄 + 공%/주스탯 1줄로 장갑 잠재능력 실전 최고 효율을 달성합니다.'
     };
     preset3 = {
       index: 3,
@@ -564,7 +573,7 @@ export function getInGamePreferredCubeSettings(slotType = 'weapon', grade = 'epi
     };
     preset2 = {
       index: 2,
-      title: '조건 ②: 주스탯 2줄 준종결 (가성비 권장)',
+      title: '조건 ②: 주스탯 2줄 실전 완성 (가성비 권장)',
       minCount: '2개 이상',
       options: [`${mainStat}%`, '데미지%', '최대 데미지 배율'],
       description: '주스탯% 2줄 또는 주스탯%+데미지% 유효 2줄에서 멈춥니다.'
