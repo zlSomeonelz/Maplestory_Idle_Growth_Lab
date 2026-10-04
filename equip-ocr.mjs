@@ -124,7 +124,15 @@ export function parseEquipmentOcrText(text, starCount = null) {
     // If line mentions equipment keywords, exclude UI headers
     if (/투구|모자|상의|하의|장갑|신발|망토|벨트|목걸이|귀고리|반지|견장|팬던트|눈\s*장식|얼굴\s*장식|포켓/.test(line)) {
       if (!/강화|효과|슬롯|장착중|장착|잠재|옵션|분해|스킬|활성화/.test(line)) {
-        const cleaned = line.replace(/^(최상급|상급|중급|하급|유니크|에픽|레어|레전더리|미스틱)\s*/g, '').trim();
+        if (/자[쿰룸]의?\s*투구/.test(line)) {
+          result.itemName = '자쿰의 투구';
+          break;
+        }
+        let cleaned = line
+          .replace(/\[.*?\]/g, '') // remove bracket noise like [if Rio] or [2777 sassy gf]
+          .replace(/[a-zA-Z0-9_\-\.\:\;\|\\\/]/g, '') // remove alphanumeric and symbol noise
+          .replace(/^(최상급|상급|중급|하급|유니크|에픽|레어|레전더리|미스틱)\s*/g, '')
+          .trim();
         if (cleaned.length >= 2) {
           result.itemName = cleaned;
           break;
