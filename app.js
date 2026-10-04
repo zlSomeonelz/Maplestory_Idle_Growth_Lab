@@ -122,7 +122,42 @@ const $ = id => document.getElementById(id);
 const n = id => Number($(id)?.value || 0);
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const pct = v => 1 + Number(v || 0) / 100;
-const fmt = v => Number.isFinite(v) ? v.toLocaleString('ko-KR', { maximumFractionDigits: 2 }) : '—';
+function formatKoreanUnit(v, maxDecimals = 2) {
+  if (!Number.isFinite(v)) return '—';
+  const sign = v < 0 ? '-' : '';
+  const abs = Math.abs(v);
+
+  if (abs < 10000) {
+    return sign + abs.toLocaleString('ko-KR', { maximumFractionDigits: maxDecimals });
+  }
+
+  const units = [
+    { value: 1e16, unit: '경' },
+    { value: 1e12, unit: '조' },
+    { value: 1e8, unit: '억' },
+    { value: 1e4, unit: '만' }
+  ];
+
+  for (let i = 0; i < units.length; i++) {
+    const { value, unit } = units[i];
+    if (abs >= value) {
+      const scaled = abs / value;
+      const formatted = scaled.toLocaleString('ko-KR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: maxDecimals
+      });
+      if (formatted === '10,000' && i > 0) {
+        return `${sign}1${units[i - 1].unit}`;
+      }
+      return `${sign}${formatted}${unit}`;
+    }
+  }
+
+  return sign + abs.toLocaleString('ko-KR', { maximumFractionDigits: maxDecimals });
+}
+
+const fmt = (v, maxDecimals = 2) => formatKoreanUnit(v, maxDecimals);
+const fmtRaw = (v, maxDecimals = 2) => Number.isFinite(v) ? v.toLocaleString('ko-KR', { maximumFractionDigits: maxDecimals }) : '—';
 const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function setStatus(text, kind = '') {
@@ -1867,7 +1902,7 @@ function officialModelSummary(type) {
     parts.push('스테이지 방어력·회피 데이터 없음');
   }
   if (hp !== null && model.value > 0) {
-    parts.push(`${mode === 'farm' ? '일반' : '보스'} HP ${Math.round(hp).toLocaleString()} · 단일 타격당 약 ${Math.round(model.value).toLocaleString()} (필요 타격 약 ${(hp / model.value).toFixed(1)}회)`);
+    parts.push(`${mode === 'farm' ? '일반' : '보스'} HP ${fmt(hp)} · 단일 타격당 약 ${fmt(model.value)} (필요 타격 약 ${(hp / model.value).toFixed(1)}회)`);
   }
   return `공식 기본 피해 모델: ${parts.join(' · ')}`;
 }
@@ -1885,8 +1920,8 @@ function officialCycleSummary(type) {
   const attacks = Math.max(0, Math.floor(cooldown / interval));
   const dps = (skill + basic * attacks) / cooldown;
   const hp = stageHpAverage(selectedStageRow(), mode);
-  const clear = hp !== null && dps > 0 ? ` · HP ${Math.round(hp).toLocaleString()} 기준 예상 ${(hp / dps).toFixed(1)}초` : '';
-  return `주기 참고 DPS ${Math.round(dps).toLocaleString()}${clear} · 쿨타임 동안 기본 공격 ${attacks}회 + 스킬 1회 · 스킬 계수 ${coefficient}`;
+  const clear = hp !== null && dps > 0 ? ` · HP ${fmt(hp)} 기준 예상 ${(hp / dps).toFixed(1)}초` : '';
+  return `주기 참고 DPS ${fmt(dps)}${clear} · 쿨타임 동안 기본 공격 ${attacks}회 + 스킬 1회 · 스킬 계수 ${coefficient}`;
 }
 
 function optimizeContent() {
@@ -2775,12 +2810,27 @@ function renderCombat() {
     $('heroDefBadge').textContent = `🛡️ 방어 감쇄율 ${(r.defenseFactor * 100).toFixed(2)}% (관통 ${pen.toFixed(1)}%)`;
   }
 
-  if ($('avgDamage')) $('avgDamage').textContent = fmt(r.average);
+  if ($('avgDamage')) {
+    $('avgDamage').textContent = fmt(r.average);
+    $('avgDamage').title = `정밀 수치: ${Math.round(r.average).toLocaleString('ko-KR')}`;
+  }
   if ($('damageRange')) $('damageRange').textContent = `최소 ${fmt(r.min)} · 최대 ${fmt(r.max)}`;
-  if ($('dps')) $('dps').textContent = fmt(r.dps);
-  if ($('dpsNote')) $('dpsNote').textContent = `공속 점감 후 ${r.effectiveAttackSpeed.toFixed(2)}% · 보정 ×${r.speedFactor.toFixed(3)} · 간격 ${n('attackInterval')}초${$('targetType')?.value === 'pvp' ? ` · PvP 레벨 보정 ×${r.levelAdjustment.toFixed(4)}` : ''}`;
-  if ($('combatPower')) $('combatPower').textContent = fmt(power.power);
-  if ($('combatPowerNote')) $('combatPowerNote').textContent = power.provisional ? `공식식 적용 · 미입력 보조 능력치 ${power.missingInputs.length}개는 0 처리` : '공식식 적용';
+  if ($('dps')) {
+    $('dps').textContent = fmt(r.dps);
+    $('dps').title = `정밀 DPS: ${Math.round(r.dps).toLocaleString('ko-KR')}`;
+  }
+  if ($('dpsNote')) {
+    const rawDpsStr = r.dps >= 10000 ? `정밀 ${Math.round(r.dps).toLocaleString('ko-KR')} · ` : '';
+    $('dpsNote').textContent = `${rawDpsStr}공속 점감 후 ${r.effectiveAttackSpeed.toFixed(2)}% · 보정 ×${r.speedFactor.toFixed(3)} · 간격 ${n('attackInterval')}초${$('targetType')?.value === 'pvp' ? ` · PvP 레벨 보정 ×${r.levelAdjustment.toFixed(4)}` : ''}`;
+  }
+  if ($('combatPower')) {
+    $('combatPower').textContent = fmt(power.power);
+    $('combatPower').title = `정밀 종합 전투력: ${Math.round(power.power).toLocaleString('ko-KR')}`;
+  }
+  if ($('combatPowerNote')) {
+    const rawPowerStr = power.power >= 10000 ? `정밀 ${Math.round(power.power).toLocaleString('ko-KR')} · ` : '';
+    $('combatPowerNote').textContent = `${rawPowerStr}${power.provisional ? `공식식 적용 · 미입력 보조 능력치 ${power.missingInputs.length}개는 0 처리` : '공식식 적용'}`;
+  }
   if ($('defenseFactor')) $('defenseFactor').textContent = (r.defenseFactor * 100).toFixed(2) + '%';
   if ($('defenseNote')) $('defenseNote').textContent = `관통 점감 후 ${r.effectiveDefPen.toFixed(2)}% · 방어력 ${fmt(n('targetDefense'))} → ${fmt(r.afterDef)}`;
   if ($('combatBreakdown')) {
