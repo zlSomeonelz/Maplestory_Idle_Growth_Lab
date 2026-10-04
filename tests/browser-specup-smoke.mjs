@@ -125,24 +125,24 @@ async function main() {
     // Step 2: Verify Equipment Table
     console.log('Step 2: Checking equipment table rows...');
     const rowCount = await evaluate(`document.querySelectorAll('#specupEquipTableBody tr').length`);
-    assert.equal(rowCount, 8, 'Must have 8 equipment rows rendered');
+    assert.equal(rowCount, 15, 'Must have 15 equipment rows rendered');
     const firstEqName = await evaluate(`document.querySelector('#specupEquipTableBody tr input[data-field="name"]').value`);
-    assert.ok(firstEqName.includes('앱솔랩스'), 'Default preset should be 120 Absolab');
-    console.log(`  -> 8 equipment rows verified. First item: "${firstEqName}"`);
+    assert.ok(firstEqName.includes('모자'), 'Default preset should include 모자');
+    console.log(`  -> 15 equipment rows verified. First item: "${firstEqName}"`);
 
     // Step 3: Test Presets Switching
-    console.log('Step 3: Testing 100제 / 140제 / 120제 preset buttons...');
+    console.log('Step 3: Testing 입문 / 종결 / 표준 preset buttons...');
     await evaluate(`document.getElementById('specupPreset100Btn').click()`);
     const name100 = await evaluate(`document.querySelector('#specupEquipTableBody tr input[data-field="name"]').value`);
-    assert.ok(name100.includes('파프니르'), '100제 preset must populate Fafnir equipment');
+    assert.ok(name100.includes('모자'), '입문 preset must populate equipment');
 
     await evaluate(`document.getElementById('specupPreset140Btn').click()`);
     const name140 = await evaluate(`document.querySelector('#specupEquipTableBody tr input[data-field="name"]').value`);
-    assert.ok(name140.includes('아케인셰이드'), '140제 preset must populate Arcane Shade equipment');
+    assert.ok(name140.includes('모자'), '종결 preset must populate equipment');
 
     await evaluate(`document.getElementById('specupPreset120Btn').click()`);
     const name120 = await evaluate(`document.querySelector('#specupEquipTableBody tr input[data-field="name"]').value`);
-    assert.ok(name120.includes('앱솔랩스'), '120제 preset restored Absolab equipment');
+    assert.ok(name120.includes('모자'), '표준 preset restored equipment');
     console.log('  -> Preset switching works seamlessly.');
 
     // Step 4: Standalone Starforce Calculator Test
@@ -156,17 +156,6 @@ async function main() {
     assert.ok(sfResultHtml.includes('기대 소모 메소'), 'SF result must display expected meso');
     assert.ok(sfResultHtml.includes('기대 시도 횟수'), 'SF result must display expected attempts');
     console.log('  -> Standalone Starforce Calculator rendered expected costs properly.');
-
-    // Step 5: Standalone Scroll Calculator Test
-    console.log('Step 5: Testing Standalone Scroll Calculator...');
-    await evaluate(`(() => {
-      document.getElementById('scrollStandaloneSuccess').value = 8;
-      document.getElementById('runScrollStandaloneBtn').click();
-    })()`);
-    const scrollResultHtml = await evaluate(`document.getElementById('scrollStandaloneResult').innerHTML`);
-    assert.ok(scrollResultHtml.includes('기대 주문서 소모량'), 'Scroll result must display expected scrolls');
-    assert.ok(scrollResultHtml.includes('순백'), 'Scroll result must display clean slate recovery info');
-    console.log('  -> Standalone Scroll Calculator rendered expectations properly.');
 
     // Step 6: Full Portfolio Spec-Up Optimizer Execution
     console.log('Step 6: Executing Full Portfolio Spec-Up Optimizer...');

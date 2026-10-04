@@ -4814,28 +4814,16 @@ function renderSpecupEquipTable() {
     return `
       <tr>
         <td style="font-weight:700;">
-          <input type="text" class="table-input" data-eq-id="${escapeHtml(eq.id)}" data-field="name" value="${escapeHtml(eq.name)}" style="width:115px;">
+          <input type="text" class="table-input" data-eq-id="${escapeHtml(eq.id)}" data-field="name" value="${escapeHtml(eq.name)}" style="width:105px;">
         </td>
         <td>
-          <select class="table-select" data-eq-id="${escapeHtml(eq.id)}" data-field="itemLevel">
-            <option value="100" ${eq.itemLevel === 100 ? 'selected' : ''}>100제</option>
-            <option value="120" ${eq.itemLevel === 120 ? 'selected' : ''}>120제</option>
-            <option value="140" ${eq.itemLevel === 140 ? 'selected' : ''}>140제</option>
-            <option value="160" ${eq.itemLevel === 160 ? 'selected' : ''}>160제</option>
-          </select>
+          <span class="badge" style="font-size:11px;background:#eef2f6;color:#334155;border:1px solid #cbd5e1;">${eq.slotType === 'armor' ? '방어구' : eq.slotType === 'glove' ? '장갑' : '장신구'}</span>
         </td>
         <td>
           <div style="display:flex;align-items:center;gap:3px;">
             <input type="number" class="table-input" min="0" max="30" data-eq-id="${escapeHtml(eq.id)}" data-field="currentStar" value="${eq.currentStar}" style="width:48px;">
             <span style="color:var(--muted);font-weight:700;">/</span>
             <input type="number" class="table-input" min="5" max="30" data-eq-id="${escapeHtml(eq.id)}" data-field="maxStar" value="${eq.maxStar}" style="width:48px;">
-          </div>
-        </td>
-        <td>
-          <div style="display:flex;align-items:center;gap:3px;">
-            <input type="number" class="table-input" min="0" max="15" data-eq-id="${escapeHtml(eq.id)}" data-field="scrollSlotsUsed" value="${eq.scrollSlotsUsed}" style="width:48px;">
-            <span style="color:var(--muted);font-weight:700;">/</span>
-            <input type="number" class="table-input" min="1" max="15" data-eq-id="${escapeHtml(eq.id)}" data-field="scrollSlotsTotal" value="${eq.scrollSlotsTotal}" style="width:48px;">
           </div>
         </td>
         <td>
@@ -4851,7 +4839,7 @@ function renderSpecupEquipTable() {
             <span class="badge" style="background:${rec.badgeColor};color:#fff;font-size:11px;padding:3px 7px;">${rec.verdictLabel}</span>
             <button type="button" class="button secondary edit-cube-line-btn" data-eq-id="${escapeHtml(eq.id)}" style="font-size:11.5px;padding:3px 8px;min-height:30px;">✏️ 3줄 편집</button>
           </div>
-          <div style="font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;" title="${escapeHtml(linesSummary)}">
+          <div style="font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;" title="${escapeHtml(linesSummary)}">
             ${escapeHtml(linesSummary)}
           </div>
         </td>
@@ -5115,7 +5103,8 @@ function applySpecupPreset(level) {
     specupEquipments = JSON.parse(JSON.stringify(preset));
     localStorage.setItem(SPECUP_STORE_KEY, JSON.stringify(specupEquipments));
     renderSpecupEquipTable();
-    setStatus(`${level}제 장비 프리셋이 적용되었습니다.`, 'good');
+    const presetName = level === 100 ? '입문 (8성 · 레어)' : level === 120 ? '표준 (10성 · 에픽)' : '종결 (15성 · 유니크)';
+    setStatus(`${presetName} 장비 프리셋이 적용되었습니다.`, 'good');
   }
 }
 

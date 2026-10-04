@@ -106,9 +106,9 @@ assert.ok(dpsHighCritGain > dpsLowCritGain, 'Adding Crit Damage must yield highe
 
 // 5. Spec-Up Portfolio Optimizer (Greedy Frontier)
 const equips = [
-  { name: '앱솔랩스 무기', slotType: 'weapon', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 8, scrollSlotsUsed: 4, cubeGrade: 'unique' },
-  { name: '앱솔랩스 장갑', slotType: 'glove', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 5, cubeGrade: 'epic' },
-  { name: '앱솔랩스 하의', slotType: 'armor', itemLevel: 120, currentStar: 8, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 7, cubeGrade: 'rare' }
+  { name: '무기', slotType: 'weapon', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 8, scrollSlotsUsed: 4, cubeGrade: 'unique' },
+  { name: '장갑', slotType: 'glove', itemLevel: 120, currentStar: 10, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 5, cubeGrade: 'epic' },
+  { name: '하의', slotType: 'armor', itemLevel: 120, currentStar: 8, maxStar: 15, scrollSlotsTotal: 7, scrollSlotsUsed: 7, cubeGrade: 'rare' }
 ];
 
 const roadmap = optimizeSpecUpPath({
@@ -235,7 +235,7 @@ assert.equal(statsFallback.attackPct, 9);
 // 8.2A REROLL for 0-line item (garbage lines)
 const eqGarbage = {
   id: 'hat',
-  name: '앱솔랩스 모자',
+  name: '모자',
   slotType: 'armor',
   cubeGrade: 'epic',
   cubeValidLines: 0,
@@ -252,7 +252,7 @@ assert.ok(recGarbage.target.roiPerMillion > 0, 'Reroll on 0-line item must yield
 // 8.2B TIER_UP for rare item
 const eqRare = {
   id: 'cape',
-  name: '앱솔랩스 망토',
+  name: '망토',
   slotType: 'armor',
   cubeGrade: 'rare',
   cubeValidLines: 1
@@ -263,7 +263,7 @@ assert.equal(recRare.verdict, 'TIER_UP', 'Rare item must recommend TIER_UP');
 // 8.2C STOP for 2-line unique weapon
 const eqFinished = {
   id: 'weapon',
-  name: '앱솔랩스 무기',
+  name: '무기',
   slotType: 'weapon',
   cubeGrade: 'unique',
   cubeValidLines: 2,
@@ -279,7 +279,7 @@ assert.equal(recFinished.verdict, 'STOP', '2-line unique weapon must have STOP v
 // 8.2D STOP for unique glove with crit damage
 const eqGlove = {
   id: 'glove',
-  name: '앱솔랩스 장갑',
+  name: '장갑',
   slotType: 'glove',
   cubeGrade: 'unique',
   cubeValidLines: 1,

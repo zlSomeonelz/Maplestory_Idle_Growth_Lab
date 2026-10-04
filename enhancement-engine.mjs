@@ -681,40 +681,8 @@ export function optimizeSpecUpPath({
       }
     }
 
-    // 2. Scroll Enhancement Candidates (Fill 1 scroll slot)
-    for (const eq of equips) {
-      const slotsLeft = eq.scrollSlotsTotal - eq.scrollSlotsUsed;
-      if (slotsLeft > 0) {
-        // Evaluate 70% and 30% scroll choices
-        for (const scrollKey of ['scroll70', 'scroll30']) {
-          const scRes = calculateScrollEnhancement(1, 1, scrollKey, {
-            slotType: eq.slotType,
-            rules: enhancementRules
-          });
-
-          if (scRes.totalCost > 0 && scRes.totalCost <= budgetRemaining) {
-            const testInputs = applyStatGains(currentStats, scRes.statGains);
-            const testDpsRes = calculateDamage(testInputs, combatRules);
-            const testDpsVal = getEffectiveDPS(testDpsRes);
-            const dpsDelta = Math.max(0, testDpsVal - currentDps);
-            const dpsGainPct = (dpsDelta / currentDps) * 100;
-            const roi = scRes.totalCost > 0 ? (dpsGainPct / (scRes.totalCost / 10000)) : 0;
-
-            candidates.push({
-              type: 'scroll',
-              equipment: eq,
-              scrollKey,
-              cost: scRes.totalCost,
-              statGains: scRes.statGains,
-              dpsDelta,
-              dpsGainPct,
-              roi,
-              description: `[${eq.name}] ${scRes.scrollName} 작 (남은 ${slotsLeft}슬롯 중 1슬롯)`
-            });
-          }
-        }
-      }
-    }
+    // 2. Note: MapleStory Idle enhancement strictly consists of Starforce & Cube Potential (no scrolls).
+    // Scroll candidates are omitted to reflect pure MapleStory Idle system mechanics.
 
     // 3. Cube Potential Candidates (Reroll for valid lines or Tier up)
     for (const eq of equips) {
