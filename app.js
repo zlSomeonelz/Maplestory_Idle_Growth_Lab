@@ -5059,6 +5059,10 @@ function activateTab(tabName) {
     const isActive = p.dataset.panel === tabName;
     p.classList.toggle('active', isActive);
   });
+
+  // Sync Workflow Stepper Bar active state
+  updateWorkflowStepper(tabName);
+
   if (tabName === 'content') {
     renderContentGuide();
     optimizeContent();
@@ -5073,6 +5077,48 @@ function activateTab(tabName) {
     renderCombat();
   }
 }
+
+function updateWorkflowStepper(tabName) {
+  const step1 = $('wfStep1Box');
+  const step2 = $('wfStep2Box');
+  const step3 = $('wfStep3Box');
+
+  const isStep1 = ['combat', 'character', 'companion', 'content'].includes(tabName);
+  const isStep2 = tabName === 'specup';
+  const isStep3 = ['cube', 'efficiency'].includes(tabName);
+
+  if (step1) step1.classList.toggle('active', isStep1);
+  if (step2) step2.classList.toggle('active', isStep2);
+  if (step3) step3.classList.toggle('active', isStep3);
+
+  // Update Active Target Label
+  const targetLabel = $('wfActiveTargetLabel');
+  if (targetLabel) {
+    const targetType = $('targetType')?.value;
+    const stageMode = $('stageMode')?.value;
+    const presetName = $('buildPresetSelect')?.value || $('presetSelect')?.value;
+    if (presetName) {
+      targetLabel.textContent = `🎯 ${presetName}`;
+    } else if (targetType === 'boss') {
+      targetLabel.textContent = '👑 보스 레이드 / 토벌';
+    } else if (targetType === 'pvp') {
+      targetLabel.textContent = '⚔️ PvP 대항전 (아레나)';
+    } else {
+      targetLabel.textContent = '🎯 챕터 일반 사냥';
+    }
+  }
+}
+
+function initWorkflowStepper() {
+  $('wfStep1Box')?.addEventListener('click', () => activateTab('combat'));
+  $('wfStep2Box')?.addEventListener('click', () => activateTab('specup'));
+  $('wfStep3Box')?.addEventListener('click', () => activateTab('cube'));
+
+  $('targetType')?.addEventListener('change', () => updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'combat'));
+  $('buildPresetSelect')?.addEventListener('change', () => updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'combat'));
+  $('presetSelect')?.addEventListener('change', () => updateWorkflowStepper(document.querySelector('.tab.active')?.dataset.tab || 'combat'));
+}
+
 
 function renderAll() {
   renderJobStatMapping();
@@ -5321,6 +5367,7 @@ renderOptionRows();
 renderProfileSelect();
 bind();
 initMekiCubeSystem();
+initWorkflowStepper();
 loadData();
 renderAll();
 

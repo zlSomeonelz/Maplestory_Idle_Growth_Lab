@@ -85,8 +85,51 @@
       </div>
     </section>
 
-    <!-- Content Target Preset Binding -->
-    <section class="card content-preset-card" id="contentPresetRoot" aria-labelledby="contentPresetHeading"></section>
+    <!-- Goal-Driven 3-Step Workflow Navigator Bar -->
+    <section class="card workflow-stepper-card" id="workflowStepperCard" style="background:#ffffff;border:1.5px solid #6366f1;border-radius:14px;padding:14px 18px;margin-bottom:14px;box-shadow:0 3px 12px rgba(99,102,241,0.08);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:18px;">🗺️</span>
+          <strong style="font-size:15px;color:var(--ink);">목표 중심 3단계 올인원 육성 워크플로우</strong>
+          <span class="badge official" style="background:#6366f1;color:#fff;font-size:11px;">MekiCalc Guide</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);">
+          현재 목표: <strong id="wfActiveTargetLabel" style="color:#4f46d9;">🎯 챕터 보스 레이드</strong>
+        </div>
+      </div>
+
+      <!-- 3-Step Interactive Bar -->
+      <div class="workflow-steps-grid">
+        <!-- Step 1 Button -->
+        <div class="wf-step-box active" id="wfStep1Box" data-goto-tab="combat">
+          <div class="wf-step-num">STEP 1</div>
+          <div class="wf-step-content">
+            <strong class="wf-step-title">🎯 목표 콘텐츠 &amp; 프리셋</strong>
+            <span class="wf-step-desc">보스/사냥/PvP 목표 &amp; 7인 동료 라인업</span>
+          </div>
+          <span class="wf-step-arrow">→</span>
+        </div>
+
+        <!-- Step 2 Button -->
+        <div class="wf-step-box" id="wfStep2Box" data-goto-tab="specup">
+          <div class="wf-step-num">STEP 2</div>
+          <div class="wf-step-content">
+            <strong class="wf-step-title">⚔️ 15개 장비 슬롯 현황</strong>
+            <span class="wf-step-desc">스타포스 성급, 주문서 완작, 윗잠/아랫잠</span>
+          </div>
+          <span class="wf-step-arrow">→</span>
+        </div>
+
+        <!-- Step 3 Button -->
+        <div class="wf-step-box" id="wfStep3Box" data-goto-tab="cube">
+          <div class="wf-step-num">STEP 3</div>
+          <div class="wf-step-content">
+            <strong class="wf-step-title">🚀 최적화 &amp; 큐브 강화</strong>
+            <span class="wf-step-desc">MekiCalc 80% 큐브 추천 &amp; 재화 로드맵</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- Navigation Tabs -->
     <nav class="tabs" aria-label="기능 선택" id="mainTabs">

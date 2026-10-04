@@ -2286,3 +2286,100 @@ footer {
   }
 }
 
+/* ==========================================================================
+   Goal-Driven 3-Step Workflow Navigator Styling
+   ========================================================================== */
+
+.workflow-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.wf-step-box {
+  background: #f8fafc;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  user-select: none;
+}
+
+.wf-step-box:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.wf-step-box.active {
+  background: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 3px 10px rgba(79, 70, 229, 0.14);
+}
+
+.wf-step-num {
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--muted);
+  background: #e2e8f0;
+  padding: 3px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.wf-step-box.active .wf-step-num {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.wf-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.wf-step-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wf-step-box.active .wf-step-title {
+  color: var(--primary-dark);
+}
+
+.wf-step-desc {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wf-step-arrow {
+  color: #94a3b8;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .workflow-steps-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .wf-step-arrow {
+    display: none;
+  }
+}
+
+
