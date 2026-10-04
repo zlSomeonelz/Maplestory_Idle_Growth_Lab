@@ -1,6 +1,7 @@
 import { calculateCombatPower, calculateDamage, calculatePvpDamage, calculateStatEfficiencies, cubeTargetSummary, probabilitySummary } from './engine.mjs';
 import { buildSkillModels, optimizeLoadout, simulateLoadout, DEFAULT_UNKNOWN_COOLDOWN, LOADOUT_SKILL_SLOTS } from './skill-optimizer.mjs';
 import { calculateStarforcePath, calculateScrollEnhancement, optimizeSpecUpPath, STARFORCE_MAX, recommendCubeAction, rankAllEquipmentCubes, getEquipmentCubeStats, getInGamePreferredCubeSettings, calculateCubeImprovementProbability, parseOfficialPotentialOption, convertLinesToStats, calculateConfidenceAttempts } from './enhancement-engine.mjs';
+import { parseEquipmentOcrText, countYellowStarsFromPixels, GRADE_KOREAN } from './equip-ocr.mjs';
 'use strict';
 
 const STORE = 'maple-growth-lab-mvp-v1';
@@ -5249,8 +5250,248 @@ function handleRunSpecupOptimizer() {
   `).join('');
 }
 
+function loadHtmlImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = (e) => {
+      URL.revokeObjectURL(url);
+      reject(e);
+    };
+    img.src = url;
+  });
+}
+
+function initEquipOcr() {
+  const fileInput = $('equipOcrFileInput');
+  const dropZone = $('equipOcrDropZone');
+  const runBtn = $('equipOcrRunBtn');
+  const pasteBtn = $('equipOcrPasteBtn');
+  const clearBtn = $('equipOcrClearBtn');
+  const statusEl = $('equipOcrStatus');
+  const resultsEl = $('equipOcrResults');
+
+  let selectedFiles = [];
+
+  function updateStatus(text, type = 'info') {
+    if (!statusEl) return;
+    statusEl.textContent = text;
+    statusEl.style.color = type === 'good' ? '#0b7a58' : type === 'warn' ? '#b45309' : '#334155';
+    statusEl.style.background = type === 'good' ? '#ecfdf5' : type === 'warn' ? '#fffbeb' : '#f1f5f9';
+  }
+
+  function addFiles(files) {
+    const valid = Array.from(files).filter(f => f.type.startsWith('image/') || f instanceof Blob);
+    if (!valid.length) return;
+    selectedFiles = [...selectedFiles, ...valid];
+    updateStatus(`총 ${selectedFiles.length}장의 장비 스크린샷이 대기 중입니다. [🔍 분석 실행]을 눌러 자동 등록하세요.`, 'info');
+  }
+
+  fileInput?.addEventListener('change', () => {
+    if (fileInput.files?.length) addFiles(fileInput.files);
+  });
+
+  dropZone?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--primary)';
+    dropZone.style.background = '#eef2ff';
+  });
+
+  dropZone?.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = '#6366f1';
+    dropZone.style.background = '#fff';
+  });
+
+  dropZone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = '#6366f1';
+    dropZone.style.background = '#fff';
+    if (e.dataTransfer?.files?.length) {
+      addFiles(e.dataTransfer.files);
+      processEquipFiles(e.dataTransfer.files);
+    }
+  });
+
+  pasteBtn?.addEventListener('click', async () => {
+    try {
+      if (navigator.clipboard?.read) {
+        const items = await navigator.clipboard.read();
+        const blobs = [];
+        for (const item of items) {
+          for (const type of item.types) {
+            if (type.startsWith('image/')) {
+              blobs.push(await item.getType(type));
+            }
+          }
+        }
+        if (blobs.length) {
+          addFiles(blobs);
+          await processEquipFiles(blobs);
+          return;
+        }
+      }
+      updateStatus('클립보드에 이미지가 없습니다. 장비 화면 캡처 후 [Ctrl + V] 또는 붙여넣기를 누르세요.', 'warn');
+    } catch (_) {
+      updateStatus('화면에서 직접 [Ctrl + V]를 눌러 스크린샷을 붙여넣으세요.', 'warn');
+    }
+  });
+
+  // Global paste handler when in specup tab
+  window.addEventListener('paste', async (e) => {
+    const activeTab = document.querySelector('.tab.active')?.dataset.tab;
+    if (activeTab !== 'specup') return;
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const files = [];
+    for (const item of items) {
+      if (item.type.indexOf('image') !== -1) {
+        const f = item.getAsFile();
+        if (f) files.push(f);
+      }
+    }
+    if (files.length) {
+      e.preventDefault();
+      addFiles(files);
+      await processEquipFiles(files);
+    }
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    selectedFiles = [];
+    if (fileInput) fileInput.value = '';
+    if (resultsEl) resultsEl.innerHTML = '';
+    updateStatus('초기화되었습니다. 장비 상세 팝업 스크린샷을 추가해주세요.');
+  });
+
+  runBtn?.addEventListener('click', () => {
+    if (!selectedFiles.length) {
+      updateStatus('분석할 이미지를 먼저 선택해주세요.', 'warn');
+      return;
+    }
+    processEquipFiles(selectedFiles);
+  });
+
+  async function processEquipFiles(filesToProcess) {
+    if (!filesToProcess || !filesToProcess.length) return;
+    if (typeof window.Tesseract === 'undefined') {
+      updateStatus('Tesseract OCR 엔진을 불러오는 중입니다. 잠시 후 다시 시도하세요.', 'warn');
+      return;
+    }
+
+    updateStatus(`총 ${filesToProcess.length}장의 장비 스크린샷 OCR 분석 중… 잠시만 기다려주세요.`);
+    if (resultsEl) resultsEl.innerHTML = '';
+
+    try {
+      const worker = await window.Tesseract.createWorker('kor+eng');
+      let successCount = 0;
+
+      for (let i = 0; i < filesToProcess.length; i++) {
+        const file = filesToProcess[i];
+        updateStatus(`장비 OCR 분석 중… (${i + 1}/${filesToProcess.length})`);
+
+        const img = await loadHtmlImage(file);
+        const isWide = img.width / img.height > 1.3;
+
+        // 1. Starforce yellow pixel detection
+        let detectedStars = null;
+        try {
+          const starCanvas = document.createElement('canvas');
+          const sx = isWide ? Math.round(img.width * 0.33) : Math.round(img.width * 0.05);
+          const sy = isWide ? Math.round(img.height * 0.08) : Math.round(img.height * 0.02);
+          const sw = isWide ? Math.round(img.width * 0.26) : Math.round(img.width * 0.90);
+          const sh = isWide ? Math.round(img.height * 0.10) : Math.round(img.height * 0.15);
+          starCanvas.width = Math.max(10, sw);
+          starCanvas.height = Math.max(10, sh);
+          const sCtx = starCanvas.getContext('2d');
+          sCtx.drawImage(img, sx, sy, sw, sh, 0, 0, starCanvas.width, starCanvas.height);
+          const imgData = sCtx.getImageData(0, 0, starCanvas.width, starCanvas.height);
+          const stars = countYellowStarsFromPixels(imgData.data, starCanvas.width, starCanvas.height);
+          if (stars > 0) detectedStars = stars;
+        } catch (e) {
+          console.warn('Star peak count skipped:', e);
+        }
+
+        // 2. Prepare canvas for OCR
+        const ocrCanvas = document.createElement('canvas');
+        const cropX = isWide ? Math.round(img.width * 0.28) : 0;
+        const cropY = isWide ? Math.round(img.height * 0.06) : 0;
+        const cropW = isWide ? Math.round(img.width * 0.64) : img.width;
+        const cropH = isWide ? Math.round(img.height * 0.86) : img.height;
+
+        const scale = 1.5;
+        ocrCanvas.width = Math.round(cropW * scale);
+        ocrCanvas.height = Math.round(cropH * scale);
+        const ctx = ocrCanvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, ocrCanvas.width, ocrCanvas.height);
+
+        let ocrInput = ocrCanvas;
+        try { ocrInput = ocrCanvas.toDataURL('image/png'); } catch (_) {}
+
+        const res = await worker.recognize(ocrInput);
+        const text = res.data?.text || '';
+
+        const parsed = parseEquipmentOcrText(text, detectedStars);
+        if (parsed.slotId) {
+          const targetEq = specupEquipments.find(e => e.id === parsed.slotId);
+          if (targetEq) {
+            if (parsed.itemName) targetEq.name = parsed.itemName;
+            if (typeof parsed.currentStar === 'number') targetEq.currentStar = parsed.currentStar;
+            if (parsed.grade) targetEq.cubeGrade = parsed.grade;
+            if (parsed.potentialLines && parsed.potentialLines.length) {
+              targetEq.potentialLines = parsed.potentialLines;
+              targetEq.cubeValidLines = parsed.potentialLines.filter(l => l && l.stat !== 'NONE' && l.value > 0).length;
+            }
+            successCount++;
+
+            if (resultsEl) {
+              const card = document.createElement('div');
+              card.style.background = '#fff';
+              card.style.border = '1px solid #10b981';
+              card.style.borderRadius = '8px';
+              card.style.padding = '8px 12px';
+              card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+              card.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <strong style="color:#0b7a58;font-size:13px;">✅ [${escapeHtml(parsed.slotName)}] ${escapeHtml(targetEq.name)}</strong>
+                  <span class="badge" style="background:#10b981;color:#fff;font-size:10px;">⭐ ${targetEq.currentStar}성</span>
+                </div>
+                <div style="font-size:11.5px;color:#475467;margin-top:4px;">
+                  등급: <strong>${GRADE_KOREAN[targetEq.cubeGrade] || targetEq.cubeGrade}</strong> · ${formatLineSummary(targetEq.potentialLines)}
+                </div>
+              `;
+              resultsEl.appendChild(card);
+            }
+          }
+        }
+      }
+
+      await worker.terminate();
+
+      if (successCount > 0) {
+        localStorage.setItem(SPECUP_STORE_KEY, JSON.stringify(specupEquipments));
+        renderSpecupEquipTable();
+        renderMekiCubeLeaderboard();
+        renderCubeEquipmentLoader();
+        updateStatus(`🎉 총 ${successCount}개 장비 슬롯이 스크린샷에서 15개 슬롯 테이블로 즉시 자동 등록되었습니다!`, 'good');
+        setStatus(`장비 스크린샷 ${successCount}건이 해당 슬롯에 자동 적용되었습니다.`, 'good');
+      } else {
+        updateStatus('장비 텍스트를 감지하지 못했습니다. 장비 상세 팝업이 선명하게 열린 스크린샷을 사용하세요.', 'warn');
+      }
+    } catch (err) {
+      console.error('Equip OCR error:', err);
+      updateStatus('OCR 처리 중 오류가 발생했습니다. 잠시 후 다시 시도하세요.', 'warn');
+    }
+  }
+}
+
 function initSpecupTab() {
   initCubeEditModal();
+  initEquipOcr();
   renderSpecupEquipTable();
   $('specupPreset120Btn')?.addEventListener('click', () => applySpecupPreset(120));
   $('specupPreset100Btn')?.addEventListener('click', () => applySpecupPreset(100));

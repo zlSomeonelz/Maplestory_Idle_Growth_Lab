@@ -38,6 +38,7 @@ const requiredIds = [
   'openOcrFromDrawerBtn', 'statToolDrawer', 'companionToolDrawer', 'presetToolDrawer',
   'ocrModal', 'closeOcrModalBtn', 'ocrModalDrop', 'ocrModalFile', 'ocrPasteClipboardBtn',
   'runOcrModalBtn', 'ocrModalStatus', 'ocrModalResults', 'applyOcrModalBtn',
+  'equipOcrDropZone', 'equipOcrFileInput', 'equipOcrRunBtn', 'equipOcrPasteBtn', 'equipOcrClearBtn', 'equipOcrStatus', 'equipOcrResults',
   'saveQuick', 'resetAll'
 ];
 

@@ -532,6 +532,40 @@
           </div>
         </section>
 
+        <!-- Equipment Screenshot OCR Dropzone Card -->
+        <section class="card" style="margin-top:14px;border:2px solid #6366f1;background:#fbfbfe;">
+          <div class="section-heading">
+            <div>
+              <span class="step">📸</span>
+              <h3>장비 스크린샷 OCR 자동 등록 (15개 슬롯 자동 매칭)</h3>
+            </div>
+            <span class="badge" style="background:#4f46e5;color:#fff;">원클릭 자동 세팅</span>
+          </div>
+          <p class="hint" style="margin-bottom:12px;">
+            인게임 장비창에서 장비를 탭했을 때 뜨는 <strong>상세 팝업 화면(자쿰의 투구, 잠재 옵션 등)</strong>을 캡처하여 붙여넣으세요.<br>
+            부위(모자, 장갑 등), 성급(⭐), 잠재 등급 및 3줄 옵션이 아래 15개 슬롯 테이블에 즉시 자동 반영됩니다. (여러 장 일괄 업로드 가능)
+          </p>
+
+          <label class="drop" id="equipOcrDropZone" for="equipOcrFileInput" style="display:block;cursor:pointer;border:2px dashed #6366f1;border-radius:12px;padding:22px 16px;text-align:center;background:#fff;transition:all .2s;margin-bottom:10px;">
+            <div style="font-size:28px;margin-bottom:6px;">📸 📥</div>
+            <strong style="color:var(--primary-dark);font-size:14px;">여기를 클릭하여 장비 스크린샷 선택</strong>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">또는 이미지를 여기로 드래그하거나 [Ctrl + V]로 붙여넣으세요</div>
+            <input type="file" id="equipOcrFileInput" accept="image/*" multiple style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);padding:0;margin:-1px;">
+          </label>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button type="button" class="button primary" id="equipOcrRunBtn">🔍 스크린샷 OCR 분석 실행</button>
+            <button type="button" class="button secondary" id="equipOcrPasteBtn">📋 클립보드 붙여넣기 (Ctrl+V)</button>
+            <button type="button" class="button ghost" id="equipOcrClearBtn">초기화</button>
+          </div>
+
+          <div class="status-strip" id="equipOcrStatus" style="margin-top:10px;font-size:12px;padding:8px 12px;background:#f1f5f9;border-radius:8px;">
+            장비 팝업 스크린샷을 추가해주세요.
+          </div>
+
+          <div id="equipOcrResults" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:8px;margin-top:10px;"></div>
+        </section>
+
         <!-- Equipment Status Card (Full Width - 100% Responsive) -->
         <section class="card" style="margin-top:14px;">
           <div class="section-heading">
