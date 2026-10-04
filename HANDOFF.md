@@ -2,7 +2,7 @@
 
 > 이 문서는 Antigravity 또는 다른 개발 에이전트가 저장소를 바로 이어받을 수 있도록 현재 구현된 계산 알고리즘, 데이터 구조, 검증 상태, 남은 작업을 정리한 문서다.
 >
-> 기준 커밋: `7191185` (브랜치 `feat/resource-specup-optimizer`)
+> 기준 커밋: `49070c7` (브랜치 `feat/resource-specup-optimizer`)
 > 저장소: <https://github.com/zlSomeonelz/Maplestory_Idle_Growth_Lab>  
 > 공개 사이트: <https://zlsomeonelz.github.io/Maplestory_Idle_Growth_Lab/>
 
@@ -588,6 +588,9 @@ OCR 관련 페이지와 캐시는 존재한다.
   - 엔드게임 고스펙 및 스펙업 최적화 로드맵 테스트(`scratch/test-korean-units.mjs`) 검증 완료
 - [x] 터치 환경 친화적 최소 42px 탭 타겟 및 부드러운 가로 스크롤링 지원
 - [x] 장비 스펙업 테이블 반응형 컨테이너(`.table-responsive`) 및 터치 최적화 인풋
+- [x] 메이플 키우기 인게임 메커니즘 반영: '장비 슬롯 강화' 7개 부위(모자, 한벌옷, 장갑, 신발, 망토, 벨트, 견장) 정립 및 무기 제외(패스)
+  - 무기는 소환(뽑기) 시스템 및 '무기 강화석' 독립 재화 육성이므로 메소 최적화 포트폴리오에서 제외
+  - 방어구·장신구 7개 슬롯 기반 스타포스, 주문서, 슬롯 잠재 포트폴리오 로드맵 정밀 계산
 - iPad Safari 실제 입력 테스트 및 PWA 홈 화면 추가 지원
 - 데이터 로딩 실패 시 파일별 오류 표시
 - 공식 데이터 업데이트 시 갱신일 자동 표시
