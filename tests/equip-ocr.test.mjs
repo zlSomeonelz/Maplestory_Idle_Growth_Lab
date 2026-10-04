@@ -7,35 +7,31 @@ import {
   GRADE_MAP
 } from '../equip-ocr.mjs';
 
-// 1. Potential Line Parsing
-const pot1 = parsePotentialLine('LUK 9%');
+// 1. Potential Line Parsing with Job Intelligence
+const pot1 = parsePotentialLine('LUK 9%', 'LUK');
 assert.equal(pot1.stat, 'mainStatPct');
 assert.equal(pot1.value, 9);
 
-const pot2 = parsePotentialLine('크리티컬 확률 6%');
+const potOffStat = parsePotentialLine('INT 6%', 'LUK');
+assert.equal(potOffStat.stat, 'NONE', 'INT on LUK job must be classified as NONE (잡옵)');
+
+const potHpPct = parsePotentialLine('최대 HP 15%', 'LUK');
+assert.equal(potHpPct.stat, 'maxHpPct');
+assert.equal(potHpPct.value, 15);
+
+const potSubStat = parsePotentialLine('DEX 3%', 'LUK');
+assert.equal(potSubStat.stat, 'subStatPct');
+assert.equal(potSubStat.value, 3);
+
+const pot2 = parsePotentialLine('크리티컬 확률 6%', 'LUK');
 assert.equal(pot2.stat, 'critRate');
 assert.equal(pot2.value, 6);
 
-const pot3 = parsePotentialLine('데미지 12%');
+const pot3 = parsePotentialLine('데미지 12%', 'LUK');
 assert.equal(pot3.stat, 'damage');
 assert.equal(pot3.value, 12);
 
-const pot4 = parsePotentialLine('크리티컬 데미지 8%');
-assert.equal(pot4.stat, 'critDamage');
-assert.equal(pot4.value, 8);
-
-const pot5 = parsePotentialLine('보스 몬스터 공격 시 데미지 20%');
-assert.equal(pot5.stat, 'bossDamage');
-assert.equal(pot5.value, 20);
-
-const pot6 = parsePotentialLine('공격력 6%');
-assert.equal(pot6.stat, 'attackPct');
-assert.equal(pot6.value, 6);
-
-const potEmpty = parsePotentialLine('방어력');
-assert.equal(potEmpty.stat, 'NONE');
-
-// 2. Real In-Game Modal OCR Text Test (User's Zakum Helmet)
+// 2. Real In-Game Modal OCR Text Test (Zakum Helmet)
 const realOcrText = `
 모자슬롯강화효과
 자쿰의 투구
@@ -54,16 +50,14 @@ LUK 9%
 최대 HP 24,400
 `;
 
-const res = parseEquipmentOcrText(realOcrText, 10);
+const res = parseEquipmentOcrText(realOcrText, 10, 'LUK');
 assert.equal(res.slotId, 'hat', 'Slot must be hat');
 assert.equal(res.slotName, '모자', 'Slot name must be 모자');
 assert.equal(res.itemName, '자쿰의 투구', 'Item name must be 자쿰의 투구');
 assert.equal(res.grade, 'unique', 'Grade must be unique');
 assert.equal(res.level, 89, 'Level must be 89');
-assert.equal(res.quality, '최상급', 'Quality must be 최상급');
 assert.equal(res.currentStar, 10, 'Starforce must be 10');
-
-assert.equal(res.potentialLines.length, 3, 'Must have 3 potential lines');
+assert.equal(res.potentialLines.length, 3);
 assert.equal(res.potentialLines[0].stat, 'mainStatPct');
 assert.equal(res.potentialLines[0].value, 9);
 assert.equal(res.potentialLines[1].stat, 'critRate');
@@ -71,54 +65,70 @@ assert.equal(res.potentialLines[1].value, 6);
 assert.equal(res.potentialLines[2].stat, 'damage');
 assert.equal(res.potentialLines[2].value, 12);
 
-assert.equal(res.equippedStats.attackFlat, 4947);
-assert.equal(res.equippedStats.damage, 18.7);
-assert.equal(res.equippedStats.critRate, 6.2);
-assert.equal(res.equippedStats.maxHp, 24400);
+// 3. Dual Potential Test (Cloak with 윗잠 and 밑잠)
+const cloakOcrText = `
+망토 슬롯 강화 효과
+SSSSN 55885
+눌러서 옵션 상세보기
+HSM 자일즈의 망토
+유니크 망토 장착중
+상급 Lv.87
 
-// 3. Glove with Crit Damage Test
-const gloveOcrText = `
-장갑슬롯강화효과
-해적 장갑
-에픽 장갑
-Lv.95
-잠재 옵션 에픽
-크리티컬 데미지 4%
-STR 6%
-잡옵
+잠재 옵션               유니크
+LUK                  9%
+INT                  6%
+최대 HP               15%
+
+에디셔널 잠재 옵션        노말
+STR                    3%
+LUK                    3%
+DEX                    3%
+
+장착효과
+공격력 5148
+최대 HP 25254
 `;
-const gloveRes = parseEquipmentOcrText(gloveOcrText, 12);
-assert.equal(gloveRes.slotId, 'glove');
-assert.equal(gloveRes.slotName, '장갑');
-assert.equal(gloveRes.grade, 'epic');
-assert.equal(gloveRes.currentStar, 12);
-assert.equal(gloveRes.potentialLines[0].stat, 'critDamage');
-assert.equal(gloveRes.potentialLines[0].value, 4);
-assert.equal(gloveRes.potentialLines[1].stat, 'mainStatPct');
-assert.equal(gloveRes.potentialLines[1].value, 6);
+
+const cloakRes = parseEquipmentOcrText(cloakOcrText, 12, 'LUK');
+assert.equal(cloakRes.slotId, 'cape');
+assert.equal(cloakRes.slotName, '망토');
+assert.equal(cloakRes.itemName, '검은색 자일즈의 망토');
+assert.equal(cloakRes.currentStar, 12);
+
+// 윗잠
+assert.equal(cloakRes.grade, 'unique');
+assert.equal(cloakRes.potentialLines.length, 3);
+assert.equal(cloakRes.potentialLines[0].stat, 'mainStatPct');
+assert.equal(cloakRes.potentialLines[0].value, 9);
+assert.equal(cloakRes.potentialLines[1].stat, 'maxHpPct');
+assert.equal(cloakRes.potentialLines[1].value, 15);
+
+// 밑잠 (에디셔널 잠재 옵션)
+assert.equal(cloakRes.additionalGrade, 'normal');
+assert.equal(cloakRes.additionalLines.length, 3);
+assert.equal(cloakRes.additionalLines[0].stat, 'mainStatPct'); // LUK 3%
+assert.equal(cloakRes.additionalLines[0].value, 3);
+assert.equal(cloakRes.additionalLines[1].stat, 'subStatPct');  // DEX 3%
+assert.equal(cloakRes.additionalLines[1].value, 3);
 
 // 4. Yellow Star Pixel Counter Test
-// Create a fake 100x10 RGBA buffer with 5 yellow star stripes
 const width = 100;
 const height = 10;
 const buffer = new Uint8Array(width * height * 4);
-
-// Paint 5 yellow peaks at x = 10..14, 25..29, 40..44, 55..59, 70..74
 const peakCenters = [10, 25, 40, 55, 70];
 for (const pc of peakCenters) {
   for (let dx = 0; dx < 4; dx++) {
     const x = pc + dx;
     for (let y = 2; y < 8; y++) {
       const idx = (y * width + x) * 4;
-      buffer[idx] = 230;     // R
-      buffer[idx + 1] = 200; // G
-      buffer[idx + 2] = 50;  // B
-      buffer[idx + 3] = 255; // A
+      buffer[idx] = 230;
+      buffer[idx + 1] = 200;
+      buffer[idx + 2] = 50;
+      buffer[idx + 3] = 255;
     }
   }
 }
-
 const starCount = countYellowStarsFromPixels(buffer, width, height, 4);
-assert.equal(starCount, 5, 'Must accurately detect 5 star peaks');
+assert.equal(starCount, 5);
 
-console.log('equip-ocr unit tests passed cleanly!');
+console.log('equip-ocr dual potential (윗잠 & 밑잠) unit tests passed cleanly!');

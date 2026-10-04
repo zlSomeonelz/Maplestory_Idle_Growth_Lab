@@ -1106,44 +1106,77 @@
         </div>
         <p class="hint" id="cubeEditModalHint">해당 장비 부위의 3슬롯 옵션을 선택하거나 프리셋을 적용하세요.</p>
 
-        <!-- Grade Selector -->
-        <div class="field" style="margin-bottom:12px;">
-          <label for="cubeEditGrade" style="font-weight:700;font-size:13px;margin-bottom:4px;display:block;">잠재 등급</label>
-          <select id="cubeEditGrade" style="width:100%;font-size:13px;padding:6px;">
-            <option value="rare">레어 (Rare)</option>
-            <option value="epic">에픽 (Epic)</option>
-            <option value="unique">유니크 (Unique)</option>
-            <option value="legendary">레전더리 (Legendary)</option>
-          </select>
-        </div>
-
-        <!-- Quick Presets -->
-        <div style="margin-bottom:14px;">
-          <span style="font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;">⚡ 빠른 프리셋 적용:</span>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button type="button" class="button secondary" id="cubePresetGarbageBtn" style="font-size:11.5px;padding:4px 8px;">잡옵 3줄 (0줄)</button>
-            <button type="button" class="button secondary" id="cubePreset1LineBtn" style="font-size:11.5px;padding:4px 8px;">1줄 유효 (기본작)</button>
-            <button type="button" class="button secondary" id="cubePreset2LineBtn" style="font-size:11.5px;padding:4px 8px;">2줄 유효 (준종결)</button>
-            <button type="button" class="button secondary" id="cubePreset3LineBtn" style="font-size:11.5px;padding:4px 8px;">3줄 극옵 (완결)</button>
+        <!-- Section A: 🔮 윗잠 (잠재 옵션) -->
+        <div style="background:#f8fafc;padding:12px;border-radius:10px;border:1px solid var(--line);margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <strong style="font-size:13px;color:#4f46e5;">🔮 윗잠 (잠재 옵션)</strong>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:12px;color:var(--muted);">등급:</span>
+              <select id="cubeEditGrade" style="font-size:12px;padding:3px 6px;">
+                <option value="rare">레어 (Rare)</option>
+                <option value="epic">에픽 (Epic)</option>
+                <option value="unique">유니크 (Unique)</option>
+                <option value="legendary">레전더리 (Legendary)</option>
+              </select>
+            </div>
+          </div>
+          <!-- Quick Presets -->
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">
+            <button type="button" class="button secondary" id="cubePresetGarbageBtn" style="font-size:11px;padding:2px 6px;">잡옵 0줄</button>
+            <button type="button" class="button secondary" id="cubePreset1LineBtn" style="font-size:11px;padding:2px 6px;">1줄 유효</button>
+            <button type="button" class="button secondary" id="cubePreset2LineBtn" style="font-size:11px;padding:2px 6px;">2줄 유효</button>
+            <button type="button" class="button secondary" id="cubePreset3LineBtn" style="font-size:11px;padding:2px 6px;">3줄 극옵</button>
+          </div>
+          <div style="display:grid;gap:6px;">
+            <div class="field" style="display:grid;grid-template-columns:70px 1fr 90px;gap:6px;align-items:center;">
+              <span style="font-weight:700;font-size:12px;">1번:</span>
+              <select id="cubeSlot1Stat" style="font-size:12px;padding:4px 6px;"></select>
+              <input id="cubeSlot1Value" type="number" step="0.1" style="font-size:12px;padding:4px 6px;" placeholder="수치">
+            </div>
+            <div class="field" style="display:grid;grid-template-columns:70px 1fr 90px;gap:6px;align-items:center;">
+              <span style="font-weight:700;font-size:12px;">2번:</span>
+              <select id="cubeSlot2Stat" style="font-size:12px;padding:4px 6px;"></select>
+              <input id="cubeSlot2Value" type="number" step="0.1" style="font-size:12px;padding:4px 6px;" placeholder="수치">
+            </div>
+            <div class="field" style="display:grid;grid-template-columns:70px 1fr 90px;gap:6px;align-items:center;">
+              <span style="font-weight:700;font-size:12px;">3번:</span>
+              <select id="cubeSlot3Stat" style="font-size:12px;padding:4px 6px;"></select>
+              <input id="cubeSlot3Value" type="number" step="0.1" style="font-size:12px;padding:4px 6px;" placeholder="수치">
+            </div>
           </div>
         </div>
 
-        <!-- 3 Slots Input Rows -->
-        <div style="display:grid;gap:10px;background:#f8fafc;padding:12px;border-radius:10px;border:1px solid var(--line);">
-          <div class="field" style="display:grid;grid-template-columns:80px 1fr 100px;gap:8px;align-items:center;">
-            <span style="font-weight:700;font-size:12.5px;">1번 슬롯:</span>
-            <select id="cubeSlot1Stat" style="font-size:12px;padding:4px 6px;"></select>
-            <input id="cubeSlot1Value" type="number" step="0.1" style="font-size:12px;padding:4px 6px;" placeholder="수치">
+        <!-- Section B: 💠 밑잠 (에디셔널 잠재 옵션) -->
+        <div style="background:#f0fdf4;padding:12px;border-radius:10px;border:1px solid #bbf7d0;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <strong style="font-size:13px;color:#0b7a58;">💠 밑잠 (에디셔널 잠재 옵션)</strong>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:12px;color:var(--muted);">등급:</span>
+              <select id="cubeEditAddGrade" style="font-size:12px;padding:3px 6px;">
+                <option value="normal">노말 (Normal)</option>
+                <option value="rare">레어 (Rare)</option>
+                <option value="epic">에픽 (Epic)</option>
+                <option value="unique">유니크 (Unique)</option>
+                <option value="legendary">레전더리 (Legendary)</option>
+              </select>
+            </div>
           </div>
-          <div class="field" style="display:grid;grid-template-columns:80px 1fr 100px;gap:8px;align-items:center;">
-            <span style="font-weight:700;font-size:12.5px;">2번 슬롯:</span>
-            <select id="cubeSlot2Stat" style="font-size:12px;padding:4px 6px;"></select>
-            <input id="cubeSlot2Value" type="number" step="0.1" style="font-size:12px;padding:4px 6px;" placeholder="수치">
-          </div>
-          <div class="field" style="display:grid;grid-template-columns:80px 1fr 100px;gap:8px;align-items:center;">
-            <span style="font-weight:700;font-size:12.5px;">3번 슬롯:</span>
-            <select id="cubeSlot3Stat" style="font-size:12px;padding:4px 6px;"></select>
-            <input id="cubeSlot3Value" type="number" step="0.1" style="font-size:12px;padding:4px 6px;" placeholder="수치">
+          <div style="display:grid;gap:6px;">
+            <div class="field" style="display:grid;grid-template-columns:70px 1fr 90px;gap:6px;align-items:center;">
+              <span style="font-weight:700;font-size:12px;">1번:</span>
+              <select id="cubeAddSlot1Stat" style="font-size:12px;padding:4px 6px;"></select>
+              <input id="cubeAddSlot1Value" type="number" step="0.1" style="font-size:12px;padding:4px 6px;" placeholder="수치">
+            </div>
+            <div class="field" style="display:grid;grid-template-columns:70px 1fr 90px;gap:6px;align-items:center;">
+              <span style="font-weight:700;font-size:12px;">2번:</span>
+              <select id="cubeAddSlot2Stat" style="font-size:12px;padding:4px 6px;"></select>
+              <input id="cubeAddSlot2Value" type="number" step="0.1" style="font-size:12px;padding:4px 6px;" placeholder="수치">
+            </div>
+            <div class="field" style="display:grid;grid-template-columns:70px 1fr 90px;gap:6px;align-items:center;">
+              <span style="font-weight:700;font-size:12px;">3번:</span>
+              <select id="cubeAddSlot3Stat" style="font-size:12px;padding:4px 6px;"></select>
+              <input id="cubeAddSlot3Value" type="number" step="0.1" style="font-size:12px;padding:4px 6px;" placeholder="수치">
+            </div>
           </div>
         </div>
 

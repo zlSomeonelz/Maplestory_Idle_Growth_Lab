@@ -20,6 +20,8 @@ export const SLOT_DEFINITIONS = [
 ];
 
 export const GRADE_MAP = {
+  '노말': 'normal',
+  'normal': 'normal',
   '레어': 'rare',
   'rare': 'rare',
   '에픽': 'epic',
@@ -33,6 +35,7 @@ export const GRADE_MAP = {
 };
 
 export const GRADE_KOREAN = {
+  normal: '노말',
   rare: '레어',
   epic: '에픽',
   unique: '유니크',
@@ -43,22 +46,46 @@ export const GRADE_KOREAN = {
 /**
  * Maps potential option text to engine stat key
  */
-export function parsePotentialLine(line) {
+export function parsePotentialLine(line, jobMainStat = 'LUK') {
   if (!line || typeof line !== 'string') return { stat: 'NONE', value: 0 };
   const trimmed = line.trim();
 
+  // 1. Check HP% first (to avoid conflict with flat HP or number 10 in OCR)
+  const hpPctMatch = trimmed.match(/(?:최대\s*HP|최대\s*1[0-9]|HP)\s*([0-9.]+)\s*%/i);
+  if (hpPctMatch) {
+    const val = Number(hpPctMatch[1]);
+    return { stat: 'maxHpPct', value: val, raw: trimmed, display: `HP ${val}%` };
+  }
+
+  // 2. Specific Stat Names (STR, DEX, INT, LUK, 주스탯)
+  const statMatch = trimmed.match(/(?:^|\s)(STR|DEX|INT|LUK|주스탯|부스탯|올스탯)\s*([0-9.]+)\s*%/i);
+  if (statMatch) {
+    const statName = statMatch[1].toUpperCase();
+    const val = Number(statMatch[2]);
+    const normalizedMain = (jobMainStat || 'LUK').toUpperCase();
+    if (statName === '주스탯' || statName === '올스탯' || statName === normalizedMain) {
+      return { stat: 'mainStatPct', value: val, raw: trimmed, display: `${statName} ${val}%` };
+    }
+    const subStatMap = { 'LUK': 'DEX', 'STR': 'DEX', 'DEX': 'STR', 'INT': 'LUK' };
+    if (statName === '부스탯' || statName === subStatMap[normalizedMain]) {
+      return { stat: 'subStatPct', value: val, raw: trimmed, display: `${statName} ${val}%` };
+    }
+    // Off-stat is 잡옵 for damage calculation
+    return { stat: 'NONE', value: 0, raw: trimmed, display: `${statName} ${val}% (잡옵)` };
+  }
+
+  // 3. Other Combat & Utility Stats
   const patterns = [
-    { stat: 'critDamage', re: /(?:크리티컬\s*데미지|크뎀)\s*([0-9.]+)\s*%/i },
-    { stat: 'critRate', re: /(?:크리티컬\s*확률|크확)\s*([0-9.]+)\s*%/i },
-    { stat: 'bossDamage', re: /(?:보스\s*몬스터\s*공격\s*시\s*데미지|보스\s*데미지|보스\s*공격력|보공)\s*([0-9.]+)\s*%/i },
-    { stat: 'attackPct', re: /(?:공격력|마력)\s*([0-9.]+)\s*%/i },
-    { stat: 'damage', re: /(?:데미지|뎀)\s*([0-9.]+)\s*%/i },
-    { stat: 'defPen', re: /(?:방어율\s*무시|방어력\s*관통|방무|방관)\s*([0-9.]+)\s*%/i },
-    { stat: 'cooldownReduction', re: /(?:스킬\s*재사용\s*대기시간\s*감소|재사용\s*대기시간)\s*([0-9.]+)\s*초?/i },
-    { stat: 'mainStatPct', re: /(?:STR|DEX|INT|LUK|주스탯|올스탯)\s*([0-9.]+)\s*%/i },
-    { stat: 'attackFlat', re: /(?:공격력|마력)\s*([0-9,]+)(?!%)/i },
-    { stat: 'mainStat', re: /(?:STR|DEX|INT|LUK|주스탯)\s*([0-9,]+)(?!%)/i },
-    { stat: 'maxHp', re: /(?:최대\s*HP|HP)\s*([0-9,]+)(?!%)/i }
+    { stat: 'critDamage', re: /(?:크리티컬\s*데미지|크뎀)\s*([0-9.]+)\s*%/i, label: '크뎀' },
+    { stat: 'critRate', re: /(?:크리티컬\s*확률|크확)\s*([0-9.]+)\s*%/i, label: '크확' },
+    { stat: 'bossDamage', re: /(?:보스\s*몬스터\s*공격\s*시\s*데미지|보스\s*데미지|보스\s*공격력|보공)\s*([0-9.]+)\s*%/i, label: '보공' },
+    { stat: 'attackPct', re: /(?:공격력|마력)\s*([0-9.]+)\s*%/i, label: '공%' },
+    { stat: 'damage', re: /(?:데미지|뎀)\s*([0-9.]+)\s*%/i, label: '데미지' },
+    { stat: 'defPen', re: /(?:방어율\s*무시|방어력\s*관통|방무|방관)\s*([0-9.]+)\s*%/i, label: '방관' },
+    { stat: 'cooldownReduction', re: /(?:스킬\s*재사용\s*대기시간\s*감소|재사용\s*대기시간)\s*([0-9.]+)\s*초?/i, label: '쿨감' },
+    { stat: 'attackFlat', re: /(?:공격력|마력)\s*([0-9,]+)(?!%)/i, label: '공(+)' },
+    { stat: 'mainStat', re: /(?:STR|DEX|INT|LUK|주스탯)\s*([0-9,]+)(?!%)/i, label: '주스탯(+)' },
+    { stat: 'maxHp', re: /(?:최대\s*HP|HP)\s*([0-9,]+)(?!%)/i, label: 'HP(+)' }
   ];
 
   for (const p of patterns) {
@@ -66,18 +93,19 @@ export function parsePotentialLine(line) {
     if (match) {
       const val = Number(match[1].replace(/,/g, ''));
       if (!isNaN(val) && val > 0) {
-        return { stat: p.stat, value: val, raw: trimmed };
+        return { stat: p.stat, value: val, raw: trimmed, display: `${p.label} ${val}%` };
       }
     }
   }
 
-  return { stat: 'NONE', value: 0, raw: trimmed };
+  return { stat: 'NONE', value: 0, raw: trimmed, display: '잡옵' };
 }
 
 /**
- * Parses OCR extracted text from an equipment modal popup
+ * Parses OCR extracted text from an equipment modal popup,
+ * extracting both 윗잠 (잠재 옵션) and 밑잠 (에디셔널 잠재 옵션).
  */
-export function parseEquipmentOcrText(text, starCount = null) {
+export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK') {
   if (!text || typeof text !== 'string') {
     return { error: '텍스트가 없습니다.' };
   }
@@ -93,13 +121,28 @@ export function parseEquipmentOcrText(text, starCount = null) {
     quality: null,
     currentStar: typeof starCount === 'number' ? starCount : null,
     potentialLines: [],
+    additionalGrade: 'normal',
+    additionalLines: [],
     equippedStats: {}
   };
 
-  // 1. Detect Grade
-  const gradeMatch = text.match(/(유니크|레전더리|에픽|레어|미스틱)/);
-  if (gradeMatch) {
-    result.grade = GRADE_MAP[gradeMatch[1]] || 'epic';
+  // 1. Split text into Main Potential (윗잠) and Additional Potential (밑잠)
+  const addSplit = text.split(/에디셔널\s*잠재\s*옵션/);
+  const mainSec = addSplit[0];
+  const addSec = addSplit[1] || '';
+
+  // 1A. Detect Main Potential Grade (윗잠)
+  const mainGradeMatch = mainSec.match(/(유니크|레전더리|에픽|레어|미스틱)/);
+  if (mainGradeMatch) {
+    result.grade = GRADE_MAP[mainGradeMatch[1]] || 'epic';
+  }
+
+  // 1B. Detect Additional Potential Grade (밑잠)
+  if (addSec) {
+    const addGradeMatch = addSec.match(/(노말|레어|에픽|유니크|레전더리)/);
+    if (addGradeMatch) {
+      result.additionalGrade = GRADE_MAP[addGradeMatch[1]] || 'normal';
+    }
   }
 
   // 2. Detect Slot
@@ -121,19 +164,27 @@ export function parseEquipmentOcrText(text, starCount = null) {
 
   // 3. Detect Item Name
   for (const line of lines) {
-    // If line mentions equipment keywords, exclude UI headers
     if (/투구|모자|상의|하의|장갑|신발|망토|벨트|목걸이|귀고리|반지|견장|팬던트|눈\s*장식|얼굴\s*장식|포켓/.test(line)) {
       if (!/강화|효과|슬롯|장착중|장착|잠재|옵션|분해|스킬|활성화/.test(line)) {
         if (/자[쿰룸]의?\s*투구/.test(line)) {
           result.itemName = '자쿰의 투구';
           break;
         }
+        if (/자일즈의?\s*망토/.test(line)) {
+          result.itemName = '검은색 자일즈의 망토';
+          break;
+        }
         let cleaned = line
-          .replace(/\[.*?\]/g, '') // remove bracket noise like [if Rio] or [2777 sassy gf]
-          .replace(/[a-zA-Z0-9_\-\.\:\;\|\\\/]/g, '') // remove alphanumeric and symbol noise
-          .replace(/^(최상급|상급|중급|하급|유니크|에픽|레어|레전더리|미스틱)\s*/g, '')
+          .replace(/\[.*?\]/g, '') // remove bracket noise
+          .replace(/[a-zA-Z0-9_\-\.\:\;\|\\\/]/g, '') // remove stray alphanumeric/symbol noise
+          .replace(/(최상급|상급|중급|하급|유니크|에픽|레어|레전더리|미스틱)/g, '')
           .trim();
-        if (cleaned.length >= 2) {
+        // Match specific weapon/armor suffix
+        const nameMatch = cleaned.match(/([가-힣\s]+(?:투구|모자|상의|하의|장갑|신발|망토|벨트|목걸이|귀고리|반지|견장|팬던트))/);
+        if (nameMatch && nameMatch[1].trim().length >= 2) {
+          result.itemName = nameMatch[1].trim();
+          break;
+        } else if (cleaned.length >= 2) {
           result.itemName = cleaned;
           break;
         }
@@ -160,37 +211,52 @@ export function parseEquipmentOcrText(text, starCount = null) {
     if (sfMatch) {
       result.currentStar = Math.min(30, Math.max(0, Number(sfMatch[1])));
     } else {
-      // Check for E ⭐10 pattern (Lv.89 E 10)
       const eSfMatch = text.match(/Lv\s*\.?\s*\d+\s*[A-Za-z]?\s*.*?(\d{1,2})/);
       if (eSfMatch && Number(eSfMatch[1]) <= 30) {
         result.currentStar = Number(eSfMatch[1]);
       } else {
-        result.currentStar = 10; // Default safe fallback
+        result.currentStar = 10;
       }
     }
   }
 
-  // 6. Detect Potential Lines (Look in '잠재 옵션' area or lines with percentages)
-  const potSec = text.includes('잠재 옵션') ? text.split('잠재 옵션')[1] : text;
+  // 6. Detect Main Potential Lines (윗잠 3줄)
+  const potSec = mainSec.includes('잠재 옵션') ? mainSec.split('잠재 옵션')[1] : mainSec;
   const potLinesRaw = potSec.split('\n').map(l => l.trim()).filter(Boolean);
 
   for (const line of potLinesRaw) {
     if (result.potentialLines.length >= 3) break;
-    // Stop if reaching equipped stats or game buttons
     if (/장착\s*효과|자동\s*분해|일괄\s*분해|강화/.test(line)) break;
 
-    const parsedLine = parsePotentialLine(line);
+    const parsedLine = parsePotentialLine(line, jobMainStat);
     if (parsedLine.stat !== 'NONE') {
       result.potentialLines.push(parsedLine);
     }
   }
 
-  // Ensure exactly 3 lines
   while (result.potentialLines.length < 3) {
     result.potentialLines.push({ stat: 'NONE', value: 0 });
   }
 
-  // 7. Detect Equipped Stats (공격력, 데미지, 크확, HP)
+  // 7. Detect Additional Potential Lines (밑잠 3줄)
+  if (addSec) {
+    const addLinesRaw = addSec.split('\n').map(l => l.trim()).filter(Boolean);
+    for (const line of addLinesRaw) {
+      if (result.additionalLines.length >= 3) break;
+      if (/장착\s*효과|자동\s*분해|일괄\s*분해|강화/.test(line)) break;
+
+      const parsedLine = parsePotentialLine(line, jobMainStat);
+      if (parsedLine.stat !== 'NONE') {
+        result.additionalLines.push(parsedLine);
+      }
+    }
+  }
+
+  while (result.additionalLines.length < 3) {
+    result.additionalLines.push({ stat: 'NONE', value: 0 });
+  }
+
+  // 8. Detect Equipped Stats (공격력, 데미지, 크확, HP)
   const equipSec = text.includes('장착') && text.includes('효과') ? text.split(/장착\s*효과/)[1] : text;
   if (equipSec) {
     const atkMatch = equipSec.match(/공격력\s*([0-9,]+)(?!%)/);

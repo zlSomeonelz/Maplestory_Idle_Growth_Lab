@@ -4783,6 +4783,10 @@ specupEquipments.forEach(eq => {
   if (!Array.isArray(eq.potentialLines) || eq.potentialLines.length === 0) {
     eq.potentialLines = generateDefaultLines(eq.slotType, eq.cubeGrade, eq.cubeValidLines);
   }
+  if (!Array.isArray(eq.additionalLines) || eq.additionalLines.length === 0) {
+    eq.additionalGrade = eq.additionalGrade || 'normal';
+    eq.additionalLines = [ { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 } ];
+  }
 });
 
 function formatStatGainsSummary(statGains) {
@@ -4840,8 +4844,11 @@ function renderSpecupEquipTable() {
             <span class="badge" style="background:${rec.badgeColor};color:#fff;font-size:11px;padding:3px 7px;">${rec.verdictLabel}</span>
             <button type="button" class="button secondary edit-cube-line-btn" data-eq-id="${escapeHtml(eq.id)}" style="font-size:11.5px;padding:3px 8px;min-height:30px;">✏️ 3줄 편집</button>
           </div>
-          <div style="font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;" title="${escapeHtml(linesSummary)}">
-            ${escapeHtml(linesSummary)}
+          <div style="font-size:11.5px;color:var(--ink);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;" title="윗잠: ${escapeHtml(linesSummary)}">
+            🔮 윗: <span style="font-weight:700;color:#4f46e5;">${CUBE_GRADE_NAMES[eq.cubeGrade] || eq.cubeGrade}</span> (${escapeHtml(linesSummary)})
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;" title="밑잠: ${escapeHtml(formatLineSummary(eq.additionalLines || []))}">
+            💠 밑: <span style="font-weight:700;color:#0b7a58;">${GRADE_KOREAN[eq.additionalGrade] || '노말'}</span> (${escapeHtml(formatLineSummary(eq.additionalLines || []))})
           </div>
         </td>
       </tr>
@@ -4931,11 +4938,12 @@ function renderMekiCubeLeaderboard() {
 
 let currentEditingEquipId = null;
 
-function applyLinesToModalInputs(lines) {
+function applyLinesToModalInputs(lines, isAdditional = false) {
+  const prefix = isAdditional ? 'cubeAddSlot' : 'cubeSlot';
   [1, 2, 3].forEach((slotNum, idx) => {
     const line = lines[idx] || { stat: 'NONE', value: 0 };
-    const statEl = $(`cubeSlot${slotNum}Stat`);
-    const valEl = $(`cubeSlot${slotNum}Value`);
+    const statEl = $(`${prefix}${slotNum}Stat`);
+    const valEl = $(`${prefix}${slotNum}Value`);
     if (statEl) statEl.value = line.stat || 'NONE';
     if (valEl) valEl.value = Number(line.value) || 0;
   });
@@ -4949,14 +4957,20 @@ function openCubeEditModal(eqId) {
   const modal = $('cubeLineEditModal');
   if (!modal) return;
 
-  if ($('cubeEditModalTitle')) $('cubeEditModalTitle').textContent = `[${eq.name}] 3줄 잠재능력 설정`;
+  if ($('cubeEditModalTitle')) $('cubeEditModalTitle').textContent = `[${eq.name}] 잠재 & 에디셔널 3줄 설정`;
   if ($('cubeEditGrade')) $('cubeEditGrade').value = eq.cubeGrade || 'epic';
+  if ($('cubeEditAddGrade')) $('cubeEditAddGrade').value = eq.additionalGrade || 'normal';
 
   const lines = (Array.isArray(eq.potentialLines) && eq.potentialLines.length > 0)
     ? eq.potentialLines
     : generateDefaultLines(eq.slotType, eq.cubeGrade, eq.cubeValidLines);
 
-  applyLinesToModalInputs(lines);
+  const addLines = (Array.isArray(eq.additionalLines) && eq.additionalLines.length > 0)
+    ? eq.additionalLines
+    : [ { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 } ];
+
+  applyLinesToModalInputs(lines, false);
+  applyLinesToModalInputs(addLines, true);
 
   // Render in-game preferred settings preview inside modal
   const jobKey = $('job')?.value || 'nightWalker';
@@ -4970,7 +4984,7 @@ function initCubeEditModal() {
   if (!modal) return;
 
   const statOptionsHtml = CUBE_LINE_STATS.map(([k, lbl]) => `<option value="${k}">${lbl}</option>`).join('');
-  ['cubeSlot1Stat', 'cubeSlot2Stat', 'cubeSlot3Stat'].forEach(id => {
+  ['cubeSlot1Stat', 'cubeSlot2Stat', 'cubeSlot3Stat', 'cubeAddSlot1Stat', 'cubeAddSlot2Stat', 'cubeAddSlot3Stat'].forEach(id => {
     const sel = $(id);
     if (sel) sel.innerHTML = statOptionsHtml;
   });
@@ -4995,34 +5009,35 @@ function initCubeEditModal() {
       { stat: 'NONE', value: 0 },
       { stat: 'NONE', value: 0 },
       { stat: 'NONE', value: 0 }
-    ]);
+    ], false);
   });
 
   $('cubePreset1LineBtn')?.addEventListener('click', () => {
     const eq = specupEquipments.find(e => e.id === currentEditingEquipId);
     const grade = $('cubeEditGrade')?.value || 'epic';
     const lines = generateDefaultLines(eq?.slotType || 'armor', grade, 1);
-    applyLinesToModalInputs(lines);
+    applyLinesToModalInputs(lines, false);
   });
 
   $('cubePreset2LineBtn')?.addEventListener('click', () => {
     const eq = specupEquipments.find(e => e.id === currentEditingEquipId);
     const grade = $('cubeEditGrade')?.value || 'unique';
     const lines = generateDefaultLines(eq?.slotType || 'armor', grade, 2);
-    applyLinesToModalInputs(lines);
+    applyLinesToModalInputs(lines, false);
   });
 
   $('cubePreset3LineBtn')?.addEventListener('click', () => {
     const eq = specupEquipments.find(e => e.id === currentEditingEquipId);
     const grade = $('cubeEditGrade')?.value || 'legendary';
     const lines = generateDefaultLines(eq?.slotType || 'armor', grade, 3);
-    applyLinesToModalInputs(lines);
+    applyLinesToModalInputs(lines, false);
   });
 
   $('saveCubeEditBtn')?.addEventListener('click', () => {
     const eq = specupEquipments.find(e => e.id === currentEditingEquipId);
     if (!eq) return;
 
+    // Save 윗잠
     eq.cubeGrade = $('cubeEditGrade')?.value || 'epic';
     const lines = [1, 2, 3].map(i => {
       const stat = $(`cubeSlot${i}Stat`)?.value || 'NONE';
@@ -5032,13 +5047,23 @@ function initCubeEditModal() {
     eq.potentialLines = lines;
     eq.cubeValidLines = lines.filter(l => l.stat !== 'NONE' && l.value > 0).length;
 
+    // Save 밑잠 (에디셔널)
+    eq.additionalGrade = $('cubeEditAddGrade')?.value || 'normal';
+    const addLines = [1, 2, 3].map(i => {
+      const stat = $(`cubeAddSlot${i}Stat`)?.value || 'NONE';
+      const val = Number($(`cubeAddSlot${i}Value`)?.value || 0);
+      return { stat, value: val };
+    });
+    eq.additionalLines = addLines;
+    eq.additionalValidLines = addLines.filter(l => l.stat !== 'NONE' && l.value > 0).length;
+
     localStorage.setItem(SPECUP_STORE_KEY, JSON.stringify(specupEquipments));
     renderSpecupEquipTable();
     renderMekiCubeLeaderboard();
     renderCubeEquipmentLoader();
 
     closeModal();
-    setStatus(`[${eq.name}] 3줄 잠재능력 설정이 저장되었습니다.`, 'good');
+    setStatus(`[${eq.name}] 잠재 & 에디셔널 설정이 저장되었습니다.`, 'good');
   });
 }
 
@@ -5435,7 +5460,11 @@ function initEquipOcr() {
         const res = await worker.recognize(ocrInput);
         const text = res.data?.text || '';
 
-        const parsed = parseEquipmentOcrText(text, detectedStars);
+        const jobKey = $('job')?.value || 'nightWalker';
+        const jobStatConfig = DATA.jobStats?.jobs?.[jobKey] || { main: ['LUK'] };
+        const jobMainStat = jobStatConfig.main?.[0] || 'LUK';
+
+        const parsed = parseEquipmentOcrText(text, detectedStars, jobMainStat);
         if (parsed.slotId) {
           const targetEq = specupEquipments.find(e => e.id === parsed.slotId);
           if (targetEq) {
@@ -5445,6 +5474,11 @@ function initEquipOcr() {
             if (parsed.potentialLines && parsed.potentialLines.length) {
               targetEq.potentialLines = parsed.potentialLines;
               targetEq.cubeValidLines = parsed.potentialLines.filter(l => l && l.stat !== 'NONE' && l.value > 0).length;
+            }
+            if (parsed.additionalGrade) targetEq.additionalGrade = parsed.additionalGrade;
+            if (parsed.additionalLines && parsed.additionalLines.length) {
+              targetEq.additionalLines = parsed.additionalLines;
+              targetEq.additionalValidLines = parsed.additionalLines.filter(l => l && l.stat !== 'NONE' && l.value > 0).length;
             }
             successCount++;
 
@@ -5460,8 +5494,11 @@ function initEquipOcr() {
                   <strong style="color:#0b7a58;font-size:13px;">✅ [${escapeHtml(parsed.slotName)}] ${escapeHtml(targetEq.name)}</strong>
                   <span class="badge" style="background:#10b981;color:#fff;font-size:10px;">⭐ ${targetEq.currentStar}성</span>
                 </div>
-                <div style="font-size:11.5px;color:#475467;margin-top:4px;">
-                  등급: <strong>${GRADE_KOREAN[targetEq.cubeGrade] || targetEq.cubeGrade}</strong> · ${formatLineSummary(targetEq.potentialLines)}
+                <div style="font-size:11.5px;color:var(--ink);margin-top:4px;">
+                  🔮 윗잠: <strong>${GRADE_KOREAN[targetEq.cubeGrade] || targetEq.cubeGrade}</strong> · ${formatLineSummary(targetEq.potentialLines)}
+                </div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+                  💠 밑잠: <strong>${GRADE_KOREAN[targetEq.additionalGrade] || targetEq.additionalGrade || '노말'}</strong> · ${formatLineSummary(targetEq.additionalLines || [])}
                 </div>
               `;
               resultsEl.appendChild(card);
