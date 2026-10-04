@@ -677,109 +677,240 @@
         </div>
       </section>
 
-      <!-- TAB 4: Cube & Probability Analysis -->
+      <!-- TAB 4: Cube & Potential System (MekiCalc Full Architecture) -->
       <section class="tab-panel" data-panel="cube">
-        <div class="grid two-col">
-          <div>
-            <form class="card" id="cubeForm">
-              <div class="section-heading"><div><h2>큐브 잠재 옵션 비교</h2></div></div>
-              <div style="margin-bottom:12px;padding:8px 12px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
-                <span style="font-size:12.5px;font-weight:700;color:var(--ink);">📥 내 장비에서 큐브 상태 불러오기:</span>
-                <div style="display:flex;gap:6px;align-items:center;">
-                  <select id="cubeLoadFromEquipSelect" style="font-size:12px;padding:4px 8px;"></select>
-                  <button type="button" class="button secondary" id="cubeLoadFromEquipBtn" style="font-size:12px;padding:4px 10px;">불러오기</button>
+        <!-- MekiCalc Cube Sub-navigation Tabs -->
+        <div class="meki-subnav" id="cubeSubnav">
+          <button type="button" class="meki-subtab active" data-cubesub="recommend">🎯 우선순위 추천</button>
+          <button type="button" class="meki-subtab" data-cubesub="myoptions">✏️ 내 옵션 변경</button>
+          <button type="button" class="meki-subtab" data-cubesub="compare">⚖️ 옵션 비교</button>
+        </div>
+
+        <!-- SUBTAB 1: 우선순위 추천 (Priority Recommendations) -->
+        <div class="cube-subpanel active" id="cubeSubpanelRecommend">
+          <section class="card">
+            <div class="section-heading">
+              <div>
+                <h2>🏆 MekiCalc 큐브 강화 우선순위 랭킹</h2>
+              </div>
+              <span class="badge official">80% 신뢰수준 비용 기준</span>
+            </div>
+            <p class="hint">
+              15개 장비 부위의 현재 잠재능력 3줄을 넥슨 나우 공시 확률표와 전수 대조하여,
+              80% 확률로 현재보다 높은 딜 상승 조합을 뽑기 위한 기대 비용(메소)과 가성비를 실시간 계산합니다.
+            </p>
+
+            <!-- Filter Bar: Checkboxes + Slider -->
+            <div class="meki-filter-bar">
+              <div class="meki-filter-group">
+                <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;cursor:pointer;">
+                  <input type="checkbox" id="cubeFilterUpper" checked> 윗잠 (미라클 큐브)
+                </label>
+                <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;cursor:pointer;">
+                  <input type="checkbox" id="cubeFilterLower" checked> 아랫잠 (에디셔널 큐브)
+                </label>
+              </div>
+
+              <div class="meki-slider-group">
+                <span>← 가성비 우선</span>
+                <input type="range" id="cubePrioritySlider" min="0" max="100" value="50" style="width:140px;cursor:pointer;">
+                <span>종결 우선 →</span>
+              </div>
+            </div>
+
+            <!-- Recommendation Cards List (Populated Dynamically) -->
+            <div class="meki-card-list" id="mekiCubeRecommendListRoot">
+              <div style="padding:20px;text-align:center;color:var(--muted);">추천 랭킹을 계산하는 중...</div>
+            </div>
+          </section>
+        </div>
+
+        <!-- SUBTAB 2: 내 옵션 변경 (Edit My Options) -->
+        <div class="cube-subpanel" id="cubeSubpanelMyOptions" style="display:none;">
+          <section class="card">
+            <div class="section-heading">
+              <div>
+                <h2>✏️ 내 장비 3줄 잠재능력 편집 및 적용</h2>
+              </div>
+              <span class="badge official">실시간 반영</span>
+            </div>
+            <p class="hint">
+              장비 부위를 선택하고 현재 인게임 옵션을 넥슨 나우 공식 목록에서 선택하거나 수동 입력하세요.
+              [이 옵션으로 변경]을 누르면 내 캐릭터 스펙과 스펙업 최적화기에 즉시 저장됩니다.
+            </p>
+
+            <div class="fields compact" style="margin-bottom:14px;">
+              <label>대상 장비 선택
+                <select id="myOptionEquipSelect"></select>
+              </label>
+              <label>잠재 분류
+                <select id="myOptionCategory">
+                  <option value="upper" selected>윗잠 (미라클 큐브)</option>
+                  <option value="lower">아랫잠 (에디셔널 큐브)</option>
+                </select>
+              </label>
+              <label>잠재 등급
+                <select id="myOptionGrade">
+                  <option value="rare">레어</option>
+                  <option value="epic" selected>에픽</option>
+                  <option value="unique">유니크</option>
+                  <option value="legendary">레전더리</option>
+                  <option value="mystic">미스틱</option>
+                </select>
+              </label>
+            </div>
+
+            <!-- Current vs Candidate 3-Slot Grid -->
+            <div class="meki-compare-selector-grid">
+              <div style="background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px;">
+                <h3 style="font-size:14px;color:var(--ink);margin-bottom:10px;">📋 현재 장착 3줄</h3>
+                <div id="myOptionCurrentLinesRoot" style="display:flex;flex-direction:column;gap:8px;"></div>
+              </div>
+
+              <div style="background:#fff;border:1.5px solid var(--primary);border-radius:10px;padding:12px;">
+                <h3 style="font-size:14px;color:var(--primary-dark);margin-bottom:10px;">✨ 변경할 3줄 (후보)</h3>
+                <div id="myOptionCandidateLinesRoot" style="display:flex;flex-direction:column;gap:8px;"></div>
+              </div>
+            </div>
+
+            <!-- Comparison Metric Bar -->
+            <div style="margin-top:14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+              <div>
+                <span style="font-size:12px;color:var(--muted);font-weight:700;">DPS 변화:</span>
+                <strong id="myOptionDpsDelta" style="font-size:15px;color:#15803d;margin-left:6px;">+0 (+0.00%)</strong>
+              </div>
+              <button type="button" class="button primary" id="applyMyOptionBtn" style="padding:8px 16px;">
+                💾 이 옵션으로 변경 (내 스펙에 적용)
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <!-- SUBTAB 3: 옵션 비교 (Option Compare) -->
+        <div class="cube-subpanel" id="cubeSubpanelCompare" style="display:none;">
+          <section class="card">
+            <div class="section-heading">
+              <div>
+                <h2>⚖️ 잠재능력 옵션 정밀 비교기</h2>
+              </div>
+              <span class="badge official">Left vs Right DPS 분석</span>
+            </div>
+            <p class="hint">
+              좌측 옵션과 우측 옵션을 자유롭게 구성하여 실시간 딜량과 종합 전투력 차이를 정확히 비교합니다.
+            </p>
+
+            <div class="meki-compare-selector-grid">
+              <!-- Left Setup -->
+              <div style="background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <strong style="color:var(--ink);font-size:14px;">[옵션 A] 기존 옵션</strong>
+                  <button type="button" class="button ghost" id="loadCurrentIntoABtn" style="font-size:11.5px;padding:2px 8px;">내 장비 불러오기</button>
+                </div>
+                <div id="compareALinesRoot" style="display:flex;flex-direction:column;gap:8px;"></div>
+              </div>
+
+              <!-- Right Setup -->
+              <div style="background:#fff;border:1px solid var(--primary-light);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <strong style="color:var(--primary-dark);font-size:14px;">[옵션 B] 비교 옵션</strong>
+                  <span class="badge official" style="font-size:11px;">후보</span>
+                </div>
+                <div id="compareBLinesRoot" style="display:flex;flex-direction:column;gap:8px;"></div>
+              </div>
+            </div>
+
+            <!-- Compare Result Card -->
+            <div style="margin-top:14px;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                <strong style="font-size:15px;color:var(--ink);">📊 비교 분석 결과 ([옵션 B] vs [옵션 A])</strong>
+                <button type="button" class="button primary" id="runCompareBtn" style="padding:6px 14px;font-size:12.5px;">⚖️ 실시간 비교 계산</button>
+              </div>
+              <div class="result-grid" style="margin-top:4px;">
+                <div class="metric primary-metric">
+                  <span>초당 공격 피해(DPS) 차이</span>
+                  <strong id="compareResultDpsDelta">0 (+0.00%)</strong>
+                  <small id="compareResultDpsSub">A: 0 ➔ B: 0</small>
+                </div>
+                <div class="metric">
+                  <span>전투력 차이</span>
+                  <strong id="compareResultPowerDelta">0 (+0.00%)</strong>
+                  <small id="compareResultPowerSub">A: 0 ➔ B: 0</small>
                 </div>
               </div>
-              <div class="fields compact">
-                <label>장비 분류<select id="cubeEquipment"><option value="weapon">무기류 (무기/보조/엠블렘)</option><option value="armor">방어구류 (투구/한벌옷/장갑/신발)</option><option value="accessory">장신구류 (반지/목걸이/귀고리)</option></select></label>
-                <label>장비 부위<select id="cubeSlot"><option value="weapon">무기</option><option value="subWeapon">보조무기</option><option value="emblem">엠블렘</option><option value="hat">투구</option><option value="top">상의/한벌옷</option><option value="gloves">장갑</option><option value="shoes">신발</option></select></label>
-                <label>큐브 등급<select id="cubeGrade"><option value="legendary">레전더리</option><option value="unique">유니크</option><option value="epic">에픽</option><option value="rare">레어</option></select></label>
-                <label>1회 큐브 비용(메소)<input id="cubeCost" type="number" min="0" step="1000" value="500000"></label>
+            </div>
+          </section>
+
+          <!-- In-Game Auto-Cube Preferred Option Setting Guide (Full Width) -->
+          <section class="card" id="inGamePreferredOptionCard" style="border:1.5px solid #6366f1;margin-top:16px;">
+            <div class="section-heading">
+              <div>
+                <span class="step">🎮</span>
+                <h3>인게임 [선호 옵션 설정] 추천 세팅 가이드</h3>
               </div>
-              <div class="cube-columns" style="margin-top:14px;">
-                <div>
-                  <h3>현재 3슬롯 옵션</h3>
+              <span class="badge official" style="background:#6366f1;color:#fff;">인게임 자동 멈춤 세팅</span>
+            </div>
+            <p class="hint">
+              인게임 큐브 자동 변환 창의 <strong>[선호 옵션 설정]</strong>에서 아래 조건 3개를 그대로 등록하면,
+              불필요한 메소 낭비 없이 최고 가성비 라인에서 자동으로 변환이 멈춥니다.
+            </p>
+
+            <div id="inGamePreferredPresetsRoot" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));gap:10px;margin-top:12px;"></div>
+
+            <div id="inGameTierUpNoteRoot" style="margin-top:12px;background:#f8fafc;padding:10px 14px;border-radius:8px;border:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"></div>
+          </section>
+
+          <!-- Legacy Standalone Cube & 3-Slot Goal Analyzer (Full Width Drawer) -->
+          <details class="tool-drawer" style="margin-top:16px;">
+            <summary>🔬 정밀 단일 큐브 분석 &amp; 3슬롯 목표 확률기 (상세 모드)</summary>
+            <div class="tool-body" style="padding:14px;">
+              <form id="cubeForm">
+                <div class="fields compact">
+                  <label>장비 분류<select id="cubeEquipment"><option value="weapon">무기류 (무기/보조/엠블렘)</option><option value="armor">방어구류 (투구/한벌옷/장갑/신발)</option><option value="accessory">장신구류 (반지/목걸이/귀고리)</option></select></label>
+                  <label>장비 부위<select id="cubeSlot"><option value="weapon">무기</option><option value="subWeapon">보조무기</option><option value="emblem">엠블렘</option><option value="hat">투구</option><option value="top">상의/한벌옷</option><option value="gloves">장갑</option><option value="shoes">신발</option></select></label>
+                  <label>큐브 등급<select id="cubeGrade"><option value="legendary">레전더리</option><option value="unique">유니크</option><option value="epic">에픽</option><option value="rare">레어</option></select></label>
+                  <label>1회 큐브 비용(메소)<input id="cubeCost" type="number" min="0" step="1000" value="500000"></label>
+                </div>
+                <div class="cube-columns" style="margin-top:14px;display:none;">
                   <div id="currentOptions"></div>
-                </div>
-                <div class="compare-arrow">→</div>
-                <div>
-                  <h3>후보 3슬롯 옵션</h3>
                   <div id="candidateOptions"></div>
                 </div>
-              </div>
-              <button class="button primary full" type="button" id="calculateCube">큐브 효율 비교</button>
-            </form>
+                <button class="button primary full" type="button" id="calculateCube" style="margin-top:8px;">큐브 효율 비교</button>
+              </form>
 
-            <section class="card">
-              <div class="section-heading"><div><h2>공식 설정 확률 3슬롯 정밀 목표 분석</h2></div><span class="badge official">정밀 리롤 상태 모델</span></div>
-              <div class="fields compact">
-                <label>목표 판정 모드<select id="cubeGoalMode"><option value="any">목표 중 1개 이상 등장 (Any)</option><option value="all">선택 목표 모두 등장 (All)</option></select></label>
-                <label>목표 1<select id="cubeGoal1"><option value="">선택 안 함</option></select></label>
-                <label>목표 2<select id="cubeGoal2"><option value="">선택 안 함</option></select></label>
-                <label>목표 3<select id="cubeGoal3"><option value="">선택 안 함</option></select></label>
-              </div>
-              <div class="formula-note" id="cubeTargetSummary" style="margin-top:12px;">공식 설정 확률표에서 목표 옵션을 선택하면 독립 확률 및 리롤 배제 보정 확률을 자동 계산합니다.</div>
-            </section>
-          </div>
-
-          <div>
-            <section class="card result-card">
-              <div class="section-heading"><h2>큐브 변경 기대 효과</h2></div>
-              <div class="result-grid">
-                <div class="metric primary-metric"><span>초당 공격 피해(DPS) 변화</span><strong id="cubeDelta">0.00 (0.00%)</strong><small>현재 <span id="cubeCurrentDps">0</span> → 변경 <span id="cubeCandidateDps">0</span></small></div>
-                <div class="metric"><span>종합 전투력 변화</span><strong id="cubePowerDelta">0 (0.00%)</strong><small>현재 <span id="cubeCurrentPower">0</span> → 변경 <span id="cubeCandidatePower">0</span></small></div>
-              </div>
-              <div class="cube-economics" id="cubeEconomics">등장 확률을 입력하면 목표 달성 기대 횟수와 비용을 계산합니다.</div>
-            </section>
-
-            <!-- MekiCalc Cube Stop-Line & Efficiency Guide -->
-            <section class="card">
-              <div class="section-heading">
-                <div><h3>💡 MekiCalc 부위별 큐브 가성비 졸업 가이드</h3></div>
-                <span class="badge official">스톱 라인 추천</span>
-              </div>
-              <p class="hint">자본 상황과 장비 부위별로 큐브를 어디서 멈추는 것이 가장 효율적인지 제시합니다.</p>
-              <div class="guide-list" id="cubeStopGuideList"></div>
-            </section>
-
-            <!-- In-Game Auto-Cube Preferred Option Setting Guide (Matching in-game UI) -->
-            <section class="card" id="inGamePreferredOptionCard" style="border:1.5px solid #6366f1;">
-              <div class="section-heading">
-                <div>
-                  <span class="step">🎮</span>
-                  <h3>인게임 [선호 옵션 설정] 추천 세팅 가이드</h3>
+              <div style="margin-top:14px;">
+                <div class="fields compact">
+                  <label>목표 판정 모드<select id="cubeGoalMode"><option value="any">목표 중 1개 이상 등장 (Any)</option><option value="all">선택 목표 모두 등장 (All)</option></select></label>
+                  <label>목표 1<select id="cubeGoal1"><option value="">선택 안 함</option></select></label>
+                  <label>목표 2<select id="cubeGoal2"><option value="">선택 안 함</option></select></label>
+                  <label>목표 3<select id="cubeGoal3"><option value="">선택 안 함</option></select></label>
                 </div>
-                <span class="badge official" style="background:#6366f1;color:#fff;">인게임 자동 멈춤 세팅</span>
+                <div class="formula-note" id="cubeTargetSummary" style="margin-top:10px;">공식 설정 확률표에서 목표 옵션을 선택하면 독립 확률 및 리롤 배제 보정 확률을 자동 계산합니다.</div>
+                <div class="cube-economics" id="cubeEconomics" style="display:none;"></div>
+                <div class="guide-list" id="cubeStopGuideList" style="display:none;"></div>
+                <div style="display:none;">
+                  <span id="cubeDelta"></span><span id="cubeCurrentDps"></span><span id="cubeCandidateDps"></span>
+                  <span id="cubePowerDelta"></span><span id="cubeCurrentPower"></span><span id="cubeCandidatePower"></span>
+                </div>
               </div>
-              <p class="hint">
-                인게임 큐브 자동 변환 창의 <strong>[선호 옵션 설정]</strong>에서 아래 조건 3개를 그대로 등록하면,
-                불필요한 메소 낭비 없이 최고 가성비 라인에서 자동으로 변환이 멈춥니다.
-              </p>
+            </div>
+          </details>
 
-              <!-- In-Game Presets 3 Boxes (Condition 1, 2, 3) -->
-              <div id="inGamePreferredPresetsRoot" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));gap:10px;margin-top:12px;">
-                <!-- Populated dynamically -->
-              </div>
-
-              <!-- Bottom In-game Mode: Tier-up mode note -->
-              <div id="inGameTierUpNoteRoot" style="margin-top:12px;background:#f8fafc;padding:10px 14px;border-radius:8px;border:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                <!-- Populated dynamically -->
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="section-heading"><h2>확률·기댓값 시뮬레이터</h2><span class="badge official">베르누이 시행</span></div>
+          <!-- Bernoulli Probability Simulator Drawer (Full Width) -->
+          <details class="tool-drawer" style="margin-top:16px;">
+            <summary>🎲 베르누이 시행 확률·기댓값 정밀 시뮬레이터</summary>
+            <div class="tool-body" style="padding:14px;">
               <div class="fields compact">
                 <label>성공 확률(%)<input id="successRate" type="number" min="0" max="100" step="0.0001" value="1"></label>
                 <label>시도 횟수<input id="attempts" type="number" min="1" step="1" value="100"></label>
                 <label>1회 비용<input id="attemptCost" type="number" min="0" step="1" value="0"></label>
               </div>
-              <button class="button primary full" type="button" id="calculateProbability">확률 계산</button>
+              <button class="button primary full" type="button" id="calculateProbability" style="margin-top:10px;">확률 계산</button>
               <div class="probability-result" id="probabilityResult" style="margin-top:14px;">값을 입력하면 목표 달성 확률과 기대 시도 횟수를 보여줍니다.</div>
-            </section>
-          </div>
+            </div>
+          </details>
         </div>
       </section>
+
 
       <!-- TAB 5: OCR Tool Drawers -->
       <section class="tab-panel" data-panel="inventory">

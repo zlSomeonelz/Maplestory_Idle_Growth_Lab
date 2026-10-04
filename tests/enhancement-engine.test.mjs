@@ -330,6 +330,51 @@ assert.equal(bmArmorPref.mainStat, 'DEX', 'Bowmaster main stat must be DEX');
 assert.equal(bmArmorPref.tierUpMode, 'ON (권장)', 'Rare armor must recommend tier-up mode ON');
 assert.ok(bmArmorPref.presets[1].options.includes('DEX%'), 'Armor preset 2 must include DEX% for bowmaster');
 
+// 10. MekiCalc 80% Confidence Cube Improvement Probability Tests
+const potentialProbabilities = JSON.parse(fs.readFileSync('data/potential-probabilities.json', 'utf8'));
+const testGlove = { id: 'glove', name: '장갑', slotType: 'glove', cubeGrade: 'unique' };
+const testPlayerStats = {
+  attackFlat: 2000,
+  attackPct: 20,
+  mainStat: 5000,
+  subStat: 1000,
+  damage: 50,
+  bossDamage: 50,
+  target: 'boss',
+  critRate: 100,
+  critDamage: 50,
+  mainStatPct: 6,
+  skillCoefficient: 100,
+  attackInterval: 0.8,
+  accuracy: 100
+};
+
+// 10.1 0-valid-line glove should have high improvement chance
+const cubeProb0Line = (await import('../enhancement-engine.mjs')).calculateCubeImprovementProbability(
+  testGlove,
+  [{ stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }],
+  potentialProbabilities,
+  testPlayerStats,
+  combatRules,
+  { confidence: 0.80 }
+);
+assert.ok(cubeProb0Line.netImprovementProbability > 0.5, '0-line glove must have >50% improvement probability');
+assert.ok(cubeProb0Line.attempts80Percent >= 1, '80% attempts must be at least 1');
+assert.ok(cubeProb0Line.expectedCost80Percent > 0, '80% cost must be positive');
+assert.ok(cubeProb0Line.roiPerMillion > 0, 'ROI must be positive');
+
+// 10.2 2-valid-line glove with critDamage + mainStatPct should have selective improvement chance
+const cubeProb2Line = (await import('../enhancement-engine.mjs')).calculateCubeImprovementProbability(
+  testGlove,
+  [{ stat: 'critDamage', value: 20 }, { stat: 'mainStatPct', value: 6 }, { stat: 'NONE', value: 0 }],
+  potentialProbabilities,
+  testPlayerStats,
+  combatRules,
+  { confidence: 0.80 }
+);
+assert.ok(cubeProb2Line.netImprovementProbability < cubeProb0Line.netImprovementProbability, 'Better current lines must have lower improvement probability');
+assert.ok(cubeProb2Line.attempts80Percent > cubeProb0Line.attempts80Percent, 'Better current lines require more attempts for 80% confidence');
+
 console.log('enhancement-engine tests (including edge cases & invariants) passed cleanly!');
 console.log(`Initial DPS: ${roadmap.initialDps.toFixed(1)} -> Final DPS: ${roadmap.finalDps.toFixed(1)} (+${roadmap.totalDpsGainPct.toFixed(2)}%)`);
 console.log(`Budget Used: ${roadmap.budgetUsed.toLocaleString()} / ${roadmap.budgetTotal.toLocaleString()} meso across ${roadmap.steps.length} steps`);
@@ -338,3 +383,4 @@ roadmap.steps.slice(0, 3).forEach((s, idx) => {
   console.log(`  ${idx + 1}. ${s.description} (비용: ${Math.round(s.cost).toLocaleString()} 메소, DPS +${s.dpsGainPct.toFixed(2)}%, ROI: ${s.roi.toFixed(4)})`);
 });
 console.log(`MekiCalc Cube Leaderboard verified (${ranked.length} items evaluated): #1 ${ranked[0].equipmentName} [${ranked[0].verdictLabel}]`);
+

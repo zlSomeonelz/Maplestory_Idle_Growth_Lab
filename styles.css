@@ -2117,3 +2117,172 @@ footer {
     height: 1280px;
   }
 }
+
+/* ==========================================================================
+   MekiCalc Cube Upgrade System Styling (Tab 4 Revamp)
+   ========================================================================== */
+
+.meki-subnav {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 16px;
+  padding-bottom: 4px;
+  overflow-x: auto;
+}
+
+.meki-subtab {
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.meki-subtab:hover {
+  color: var(--primary);
+}
+
+.meki-subtab.active {
+  color: var(--primary-dark);
+  border-bottom-color: var(--primary);
+}
+
+.meki-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.meki-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.meki-slider-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.meki-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.meki-recom-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.meki-recom-card:hover {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.07);
+}
+
+.meki-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.meki-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meki-rank-num {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--primary);
+}
+
+.meki-card-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.meki-card-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: #fff;
+}
+
+.meki-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.meki-metric-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.meki-metric-label {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.meki-metric-value {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.meki-metric-value.highlight-green {
+  color: #0b7a58;
+}
+
+.meki-metric-value.highlight-blue {
+  color: var(--primary);
+}
+
+.meki-compare-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .meki-compare-selector-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

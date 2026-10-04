@@ -1,6 +1,6 @@
 import { calculateCombatPower, calculateDamage, calculatePvpDamage, calculateStatEfficiencies, cubeTargetSummary, probabilitySummary } from './engine.mjs';
 import { buildSkillModels, optimizeLoadout, simulateLoadout, DEFAULT_UNKNOWN_COOLDOWN, LOADOUT_SKILL_SLOTS } from './skill-optimizer.mjs';
-import { calculateStarforcePath, calculateScrollEnhancement, optimizeSpecUpPath, STARFORCE_MAX, recommendCubeAction, rankAllEquipmentCubes, getEquipmentCubeStats, getInGamePreferredCubeSettings } from './enhancement-engine.mjs';
+import { calculateStarforcePath, calculateScrollEnhancement, optimizeSpecUpPath, STARFORCE_MAX, recommendCubeAction, rankAllEquipmentCubes, getEquipmentCubeStats, getInGamePreferredCubeSettings, calculateCubeImprovementProbability, parseOfficialPotentialOption, convertLinesToStats, calculateConfidenceAttempts } from './enhancement-engine.mjs';
 'use strict';
 
 const STORE = 'maple-growth-lab-mvp-v1';
@@ -3182,7 +3182,528 @@ function renderCube() {
   const powerRate = currentPower.power ? powerDelta / currentPower.power * 100 : 0;
   if ($('cubePowerDelta')) $('cubePowerDelta').textContent = `${powerDelta >= 0 ? '+' : ''}${fmt(powerDelta)} (${powerRate >= 0 ? '+' : ''}${powerRate.toFixed(2)}%)`;
   renderCubeTargetSummary();
+  renderMekiCubeSystem();
 }
+
+/* ==========================================================================
+   MekiCalc 3-Subtab Cube Upgrade System Implementation
+   (우선순위 추천 / 내 옵션 변경 / 옵션 비교)
+   ========================================================================== */
+
+let activeCubeSubtab = 'recommend';
+
+function initMekiCubeSystem() {
+  // 1. Subtab Switching
+  const subnav = $('cubeSubnav');
+  if (subnav) {
+    subnav.querySelectorAll('.meki-subtab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.cubesub;
+        if (!target) return;
+        activeCubeSubtab = target;
+        subnav.querySelectorAll('.meki-subtab').forEach(b => b.classList.toggle('active', b === btn));
+        $('cubeSubpanelRecommend').style.display = target === 'recommend' ? 'block' : 'none';
+        $('cubeSubpanelMyOptions').style.display = target === 'myoptions' ? 'block' : 'none';
+        $('cubeSubpanelCompare').style.display = target === 'compare' ? 'block' : 'none';
+        if (target === 'recommend') renderMekiCubeRecommendations();
+        else if (target === 'myoptions') renderMekiMyOptionsPanel();
+        else if (target === 'compare') renderMekiComparePanel();
+      });
+    });
+  }
+
+  // 2. Filters & Priority Slider
+  $('cubeFilterUpper')?.addEventListener('change', renderMekiCubeRecommendations);
+  $('cubeFilterLower')?.addEventListener('change', renderMekiCubeRecommendations);
+  $('cubePrioritySlider')?.addEventListener('input', renderMekiCubeRecommendations);
+
+  // 3. My Options Setup
+  $('myOptionEquipSelect')?.addEventListener('change', () => {
+    const eqId = $('myOptionEquipSelect')?.value;
+    const eq = specupEquipments.find(e => e.id === eqId);
+    if (eq && $('myOptionGrade')) {
+      $('myOptionGrade').value = eq.cubeGrade || 'epic';
+    }
+    renderMekiMyOptionLines();
+  });
+  $('myOptionCategory')?.addEventListener('change', renderMekiMyOptionLines);
+  $('myOptionGrade')?.addEventListener('change', renderMekiMyOptionLines);
+  $('applyMyOptionBtn')?.addEventListener('click', handleApplyMyOptions);
+
+  // 4. Compare Setup
+  $('loadCurrentIntoABtn')?.addEventListener('click', handleLoadEquipIntoCompareA);
+  $('runCompareBtn')?.addEventListener('click', handleRunCompare);
+
+  renderMekiCubeSystem();
+}
+
+function renderMekiCubeSystem() {
+  if (activeCubeSubtab === 'recommend') {
+    renderMekiCubeRecommendations();
+  } else if (activeCubeSubtab === 'myoptions') {
+    renderMekiMyOptionsPanel();
+  } else if (activeCubeSubtab === 'compare') {
+    renderMekiComparePanel();
+  }
+}
+
+/**
+ * Subtab 1: MekiCalc 우선순위 추천 (Priority Recommendations)
+ * Evaluates all 15 equipment slots for 윗잠 and/or 아랫잠.
+ * Computes exact net improvement probability, 80% confidence attempts, average attempts,
+ * expected Meso cost, and ranks them by user's Bang-for-buck <---> Endgame slider.
+ */
+function renderMekiCubeRecommendations() {
+  const root = $('mekiCubeRecommendListRoot');
+  if (!root) return;
+
+  const showUpper = $('cubeFilterUpper')?.checked ?? true;
+  const showLower = $('cubeFilterLower')?.checked ?? true;
+  const sliderVal = Number($('cubePrioritySlider')?.value || 50); // 0 (가성비 우선) ~ 100 (종결 우선)
+  const weightRoi = (100 - sliderVal) / 100;
+  const weightGain = sliderVal / 100;
+
+  const playerInputs = typeof readInputs === 'function' ? readInputs() : {};
+  const combatRules = DATA.combat || {};
+  const potentialData = DATA.potentialProbabilities || {};
+
+  const evaluatedItems = [];
+
+  for (const eq of specupEquipments) {
+    if (!eq) continue;
+
+    // A. 윗잠 (Upper Potential)
+    if (showUpper) {
+      const upperLines = eq.potentialLines || generateDefaultLines(eq.slotType, eq.cubeGrade, eq.cubeValidLines);
+      const resUpper = calculateCubeImprovementProbability(
+        eq,
+        upperLines,
+        potentialData,
+        playerInputs,
+        combatRules,
+        { potentialCategory: 'upper', confidence: 0.80 }
+      );
+
+      // Score = weighted combination of ROI and raw DPS gain
+      const score = (resUpper.roiPerMillion * 10 * weightRoi) + (resUpper.expectedDpsGainPct * weightGain);
+      evaluatedItems.push({
+        id: eq.id,
+        name: eq.name,
+        category: '윗잠',
+        badge: '윗잠',
+        badgeColor: '#4f46d9',
+        equip: eq,
+        result: resUpper,
+        score
+      });
+    }
+
+    // B. 아랫잠 (Lower / Additional Potential)
+    if (showLower) {
+      // Lower potential lines (if stored, or default 1 line lower profile)
+      const lowerLines = eq.additionalPotentialLines || [
+        { stat: 'mainStatPct', value: eq.cubeGrade === 'legendary' ? 4 : (eq.cubeGrade === 'unique' ? 3 : 2) },
+        { stat: 'NONE', value: 0 },
+        { stat: 'NONE', value: 0 }
+      ];
+      const resLower = calculateCubeImprovementProbability(
+        eq,
+        lowerLines,
+        potentialData,
+        playerInputs,
+        combatRules,
+        { potentialCategory: 'lower', confidence: 0.80, isAdditional: true }
+      );
+
+      const score = (resLower.roiPerMillion * 10 * weightRoi) + (resLower.expectedDpsGainPct * weightGain);
+      evaluatedItems.push({
+        id: eq.id,
+        name: eq.name,
+        category: '아랫잠',
+        badge: '아랫잠',
+        badgeColor: '#0284c7',
+        equip: eq,
+        result: resLower,
+        score
+      });
+    }
+  }
+
+  evaluatedItems.sort((a, b) => b.score - a.score);
+
+  if (evaluatedItems.length === 0) {
+    root.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);">선택된 조건(윗잠/아랫잠)의 추천 항목이 없습니다.</div>';
+    return;
+  }
+
+  root.innerHTML = evaluatedItems.map((item, idx) => {
+    const r = item.result;
+    const bestCandText = r.bestCandidate?.lines?.join(' / ') || '상위 유효 2~3줄 옵션';
+    const netProbPct = (r.netImprovementProbability * 100).toFixed(2);
+    return `
+      <div class="meki-recom-card">
+        <div class="meki-card-header">
+          <div class="meki-card-title-group">
+            <span class="meki-rank-num">#${idx + 1}</span>
+            <strong class="meki-card-title">${escapeHtml(item.name)} ${escapeHtml(item.category)}</strong>
+            <span class="meki-card-badge" style="background:${item.badgeColor};">${item.badge}</span>
+            <span class="badge" style="background:#f1f5f9;color:#475467;font-size:11px;">${CUBE_GRADE_NAMES[r.grade] || r.grade}</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button type="button" class="button secondary meki-goto-edit-btn" data-eq-id="${escapeHtml(item.id)}" data-category="${item.category === '아랫잠' ? 'lower' : 'upper'}" style="font-size:11.5px;padding:3px 8px;">✏️ 내 옵션 변경</button>
+            <button type="button" class="button ghost meki-goto-compare-btn" data-eq-id="${escapeHtml(item.id)}" style="font-size:11.5px;padding:3px 8px;">⚖️ 비교기로 복사</button>
+          </div>
+        </div>
+
+        <!-- Metrics Row matching user's MekiCalc screenshots -->
+        <div class="meki-metrics-row">
+          <div class="meki-metric-cell">
+            <span class="meki-metric-label">예상 딜 증가량</span>
+            <strong class="meki-metric-value highlight-green">+${r.expectedDpsGainPct.toFixed(2)}%</strong>
+          </div>
+          <div class="meki-metric-cell">
+            <span class="meki-metric-label">1회 리롤·현재보다↑</span>
+            <strong class="meki-metric-value">${netProbPct}%</strong>
+          </div>
+          <div class="meki-metric-cell">
+            <span class="meki-metric-label">80% 달성 필요</span>
+            <strong class="meki-metric-value highlight-blue">${fmt(r.attempts80Percent)}회 (${fmt(r.expectedCost80Percent)} 메소)</strong>
+          </div>
+          <div class="meki-metric-cell">
+            <span class="meki-metric-label">평균 기대치</span>
+            <strong class="meki-metric-value">${fmt(r.averageAttempts)}회 (${fmt(r.expectedAverageCost)} 메소)</strong>
+          </div>
+          <div class="meki-metric-cell">
+            <span class="meki-metric-label">가성비 (100만 메소당)</span>
+            <strong class="meki-metric-value" style="color:var(--primary-dark);">${r.roiPerMillion.toFixed(4)}</strong>
+          </div>
+        </div>
+
+        <div style="font-size:12px;color:#475467;background:#fbfcfe;border:1px dashed var(--line);border-radius:6px;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+          <span>🎯 추천 극옵 목표: <strong>${escapeHtml(bestCandText)}</strong></span>
+          <span style="font-size:11px;color:var(--muted);">1회 비용: ${fmt(r.costPerTry)} 메소</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  root.querySelectorAll('.meki-goto-edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const eqId = btn.dataset.eqId;
+      const cat = btn.dataset.category;
+      activeCubeSubtab = 'myoptions';
+      $('cubeSubnav')?.querySelectorAll('.meki-subtab').forEach(b => b.classList.toggle('active', b.dataset.cubesub === 'myoptions'));
+      $('cubeSubpanelRecommend').style.display = 'none';
+      $('cubeSubpanelMyOptions').style.display = 'block';
+      $('cubeSubpanelCompare').style.display = 'none';
+      if ($('myOptionEquipSelect')) $('myOptionEquipSelect').value = eqId;
+      if ($('myOptionCategory')) $('myOptionCategory').value = cat;
+      renderMekiMyOptionsPanel();
+    });
+  });
+
+  root.querySelectorAll('.meki-goto-compare-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const eqId = btn.dataset.eqId;
+      activeCubeSubtab = 'compare';
+      $('cubeSubnav')?.querySelectorAll('.meki-subtab').forEach(b => b.classList.toggle('active', b.dataset.cubesub === 'compare'));
+      $('cubeSubpanelRecommend').style.display = 'none';
+      $('cubeSubpanelMyOptions').style.display = 'none';
+      $('cubeSubpanelCompare').style.display = 'block';
+      handleLoadSpecificEquipIntoCompareA(eqId);
+    });
+  });
+}
+
+/**
+ * Subtab 2: 내 옵션 변경 (Edit My Options)
+ */
+function renderMekiMyOptionsPanel() {
+  const sel = $('myOptionEquipSelect');
+  if (!sel) return;
+
+  const prevEqId = sel.value;
+  sel.innerHTML = specupEquipments.map(eq =>
+    `<option value="${escapeHtml(eq.id)}">${escapeHtml(eq.name)} (${CUBE_GRADE_NAMES[eq.cubeGrade] || eq.cubeGrade})</option>`
+  ).join('');
+
+  if (prevEqId && specupEquipments.some(e => e.id === prevEqId)) {
+    sel.value = prevEqId;
+  }
+
+  renderMekiMyOptionLines();
+}
+
+function renderMekiMyOptionLines() {
+  const eqId = $('myOptionEquipSelect')?.value;
+  const eq = specupEquipments.find(e => e.id === eqId);
+  if (!eq) return;
+
+  const grade = $('myOptionGrade')?.value || eq.cubeGrade || 'epic';
+  const category = $('myOptionCategory')?.value || 'upper';
+  const isAdditional = category === 'lower';
+
+  const currentLines = (isAdditional && Array.isArray(eq.additionalPotentialLines) && eq.additionalPotentialLines.length > 0)
+    ? eq.additionalPotentialLines
+    : (Array.isArray(eq.potentialLines) && eq.potentialLines.length > 0 ? eq.potentialLines : generateDefaultLines(eq.slotType, grade, eq.cubeValidLines));
+
+  // Render Current 3 Lines (Readonly display + badge)
+  const curRoot = $('myOptionCurrentLinesRoot');
+  if (curRoot) {
+    curRoot.innerHTML = currentLines.map((line, i) => {
+      const statLabel = CUBE_LINE_STATS.find(([k]) => k === line.stat)?.[1] || line.stat || '없음';
+      const valStr = line.value ? `+${line.value}${line.stat.includes('Pct') || line.stat.includes('Rate') || line.stat.includes('Damage') || line.stat.includes('Pen') || line.stat.includes('Speed') ? '%' : ''}` : '—';
+      return `
+        <div style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-weight:700;font-size:12px;color:var(--muted);">${i + 1}번 슬롯</span>
+          <strong style="font-size:13px;color:var(--ink);">${escapeHtml(statLabel)} ${escapeHtml(valStr)}</strong>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Render Candidate 3 Lines (Interactive Select Dropdowns populated with Nexon Now options)
+  const candRoot = $('myOptionCandidateLinesRoot');
+  if (candRoot) {
+    const gradeData = DATA.potentialProbabilities?.grades?.[grade];
+    let blocks = gradeData?.blocks?.filter(b => b.equipment === eq.name);
+    if (!blocks || blocks.length < 3) {
+      blocks = gradeData?.blocks?.filter(b => eq.name.startsWith(b.equipment) || b.equipment.startsWith(eq.name));
+    }
+
+    const sortedBlocks = (blocks && blocks.length >= 3)
+      ? [...blocks].sort((a, b) => (Number(a.slot) || 1) - (Number(b.slot) || 1))
+      : null;
+
+    candRoot.innerHTML = [1, 2, 3].map(slotNum => {
+      const block = sortedBlocks ? sortedBlocks[slotNum - 1] : null;
+      const options = block?.options || [];
+      const defaultLine = currentLines[slotNum - 1] || { stat: 'NONE', value: 0 };
+
+      let optionsHtml = '';
+      if (options.length > 0) {
+        optionsHtml = `<option value="">(옵션 선택)</option>` + options.map(o =>
+          `<option value="${escapeHtml(o.option)}">${escapeHtml(o.option)} (${o.settingPercent}%)</option>`
+        ).join('');
+      } else {
+        optionsHtml = CUBE_LINE_STATS.map(([k, lbl]) =>
+          `<option value="${k}">${lbl}</option>`
+        ).join('');
+      }
+
+      return `
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span style="font-weight:700;font-size:12px;color:var(--primary);width:45px;">${slotNum}번:</span>
+          <select class="table-input my-cand-slot-select" data-slot="${slotNum}" style="flex:1;font-size:12px;padding:4px 6px;">
+            ${optionsHtml}
+          </select>
+        </div>
+      `;
+    }).join('');
+
+    candRoot.querySelectorAll('.my-cand-slot-select').forEach(sel => {
+      sel.addEventListener('change', updateMyOptionDpsDelta);
+    });
+  }
+
+  updateMyOptionDpsDelta();
+}
+
+function updateMyOptionDpsDelta() {
+  const eqId = $('myOptionEquipSelect')?.value;
+  const eq = specupEquipments.find(e => e.id === eqId);
+  if (!eq) return;
+
+  const playerInputs = typeof readInputs === 'function' ? readInputs() : {};
+  const combatRules = DATA.combat || {};
+  let jobMainStat = 'STR';
+  if (playerInputs.job) {
+    if (['nightLord', 'shadower', 'nightWalker'].includes(playerInputs.job)) jobMainStat = 'LUK';
+    else if (['bowmaster', 'sniper', 'captain', 'windBreaker'].includes(playerInputs.job)) jobMainStat = 'DEX';
+    else if (['archMageIceLightning', 'archMageFirePoison', 'bishop'].includes(playerInputs.job)) jobMainStat = 'INT';
+  }
+
+  const currentLines = eq.potentialLines || generateDefaultLines(eq.slotType, eq.cubeGrade, eq.cubeValidLines);
+  const curStats = convertLinesToStats(currentLines, jobMainStat);
+  const baseWithout = subtractStatGains(playerInputs, curStats);
+  const curDps = calculateDamage(playerInputs, combatRules).dps;
+
+  // Collect candidate lines
+  const candStats = {};
+  document.querySelectorAll('.my-cand-slot-select').forEach(sel => {
+    const val = sel.value;
+    if (val) {
+      const parsed = parseOfficialPotentialOption(val, jobMainStat);
+      if (parsed.stat !== 'NONE' && parsed.value > 0) {
+        candStats[parsed.stat] = (candStats[parsed.stat] || 0) + parsed.value;
+      }
+    }
+  });
+
+  const candPlayer = applyStatGains(baseWithout, candStats);
+  const candDps = calculateDamage(candPlayer, combatRules).dps;
+  const delta = candDps - curDps;
+  const gainPct = curDps > 0 ? (delta / curDps) * 100 : 0;
+
+  const deltaEl = $('myOptionDpsDelta');
+  if (deltaEl) {
+    deltaEl.textContent = `${delta >= 0 ? '+' : ''}${fmt(delta)} (${gainPct >= 0 ? '+' : ''}${gainPct.toFixed(2)}%)`;
+    deltaEl.style.color = delta >= 0 ? '#15803d' : '#b91c1c';
+  }
+}
+
+function handleApplyMyOptions() {
+  const eqId = $('myOptionEquipSelect')?.value;
+  const eq = specupEquipments.find(e => e.id === eqId);
+  if (!eq) return;
+
+  const category = $('myOptionCategory')?.value || 'upper';
+  const grade = $('myOptionGrade')?.value || eq.cubeGrade || 'epic';
+  const isAdditional = category === 'lower';
+
+  let jobMainStat = 'STR';
+  const playerInputs = typeof readInputs === 'function' ? readInputs() : {};
+  if (playerInputs.job) {
+    if (['nightLord', 'shadower', 'nightWalker'].includes(playerInputs.job)) jobMainStat = 'LUK';
+    else if (['bowmaster', 'sniper', 'captain', 'windBreaker'].includes(playerInputs.job)) jobMainStat = 'DEX';
+    else if (['archMageIceLightning', 'archMageFirePoison', 'bishop'].includes(playerInputs.job)) jobMainStat = 'INT';
+  }
+
+  const lines = [];
+  document.querySelectorAll('.my-cand-slot-select').forEach(sel => {
+    const optText = sel.value;
+    if (optText) {
+      const parsed = parseOfficialPotentialOption(optText, jobMainStat);
+      lines.push({ stat: parsed.stat, value: parsed.value, option: optText });
+    } else {
+      lines.push({ stat: 'NONE', value: 0 });
+    }
+  });
+
+  if (isAdditional) {
+    eq.additionalPotentialLines = lines;
+  } else {
+    eq.cubeGrade = grade;
+    eq.potentialLines = lines;
+    eq.cubeValidLines = lines.filter(l => l.stat !== 'NONE' && l.value > 0).length;
+  }
+
+  try { localStorage.setItem(SPECUP_STORE_KEY, JSON.stringify(specupEquipments)); } catch (_) {}
+  renderSpecupEquipTable();
+  renderMekiMyOptionLines();
+  renderMekiCubeRecommendations();
+  setStatus(`[${eq.name}] ${isAdditional ? '아랫잠' : '윗잠'} 옵션이 성공적으로 내 장비에 적용되었습니다!`, 'good');
+}
+
+/**
+ * Subtab 3: 옵션 비교 (Option Compare)
+ */
+function renderMekiComparePanel() {
+  const rootA = $('compareALinesRoot');
+  const rootB = $('compareBLinesRoot');
+  if (!rootA || !rootB) return;
+
+  if (rootA.children.length === 0) {
+    rootA.innerHTML = [1, 2, 3].map(i => `
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span style="font-weight:700;font-size:12px;color:var(--muted);width:45px;">${i}번:</span>
+        <select class="table-input comp-a-stat" style="flex:1;font-size:12px;padding:4px;">
+          ${CUBE_LINE_STATS.map(([k, lbl]) => `<option value="${k}">${lbl}</option>`).join('')}
+        </select>
+        <input type="number" class="table-input comp-a-val" step="0.1" value="0" style="width:70px;font-size:12px;padding:4px;">
+      </div>
+    `).join('');
+  }
+
+  if (rootB.children.length === 0) {
+    rootB.innerHTML = [1, 2, 3].map(i => `
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span style="font-weight:700;font-size:12px;color:var(--primary);width:45px;">${i}번:</span>
+        <select class="table-input comp-b-stat" style="flex:1;font-size:12px;padding:4px;">
+          ${CUBE_LINE_STATS.map(([k, lbl]) => `<option value="${k}">${lbl}</option>`).join('')}
+        </select>
+        <input type="number" class="table-input comp-b-val" step="0.1" value="0" style="width:70px;font-size:12px;padding:4px;">
+      </div>
+    `).join('');
+  }
+
+  handleRunCompare();
+}
+
+function handleLoadEquipIntoCompareA() {
+  const eq = specupEquipments[0];
+  if (eq) handleLoadSpecificEquipIntoCompareA(eq.id);
+}
+
+function handleLoadSpecificEquipIntoCompareA(eqId) {
+  const eq = specupEquipments.find(e => e.id === eqId);
+  if (!eq) return;
+
+  const lines = eq.potentialLines || generateDefaultLines(eq.slotType, eq.cubeGrade, eq.cubeValidLines);
+  const statInputs = document.querySelectorAll('.comp-a-stat');
+  const valInputs = document.querySelectorAll('.comp-a-val');
+
+  lines.forEach((l, idx) => {
+    if (statInputs[idx]) statInputs[idx].value = l.stat || 'NONE';
+    if (valInputs[idx]) valInputs[idx].value = l.value || 0;
+  });
+
+  handleRunCompare();
+  setStatus(`[${eq.name}]의 잠재옵션 3줄을 [옵션 A]로 불러왔습니다.`, 'good');
+}
+
+function handleRunCompare() {
+  const playerInputs = typeof readInputs === 'function' ? readInputs() : {};
+  const combatRules = DATA.combat || {};
+
+  // Aggregated Stats for A
+  const statsA = {};
+  document.querySelectorAll('.comp-a-stat').forEach((sel, idx) => {
+    const val = Number(document.querySelectorAll('.comp-a-val')[idx]?.value || 0);
+    const stat = sel.value;
+    if (stat !== 'NONE' && val > 0) statsA[stat] = (statsA[stat] || 0) + val;
+  });
+
+  // Aggregated Stats for B
+  const statsB = {};
+  document.querySelectorAll('.comp-b-stat').forEach((sel, idx) => {
+    const val = Number(document.querySelectorAll('.comp-b-val')[idx]?.value || 0);
+    const stat = sel.value;
+    if (stat !== 'NONE' && val > 0) statsB[stat] = (statsB[stat] || 0) + val;
+  });
+
+  const basePlayer = { ...playerInputs };
+  const playerWithA = applyStatGains(basePlayer, statsA);
+  const playerWithB = applyStatGains(basePlayer, statsB);
+
+  const resA = calculateDamage(playerWithA, combatRules);
+  const resB = calculateDamage(playerWithB, combatRules);
+  const powerA = calculateCombatPower(playerWithA, combatRules).power;
+  const powerB = calculateCombatPower(playerWithB, combatRules).power;
+
+  const dpsA = resA.dps;
+  const dpsB = resB.dps;
+  const dpsDelta = dpsB - dpsA;
+  const dpsGainPct = dpsA > 0 ? (dpsDelta / dpsA) * 100 : 0;
+
+  const powerDelta = powerB - powerA;
+  const powerGainPct = powerA > 0 ? (powerDelta / powerA) * 100 : 0;
+
+  if ($('compareResultDpsDelta')) {
+    $('compareResultDpsDelta').textContent = `${dpsDelta >= 0 ? '+' : ''}${fmt(dpsDelta)} (${dpsGainPct >= 0 ? '+' : ''}${dpsGainPct.toFixed(2)}%)`;
+    $('compareResultDpsDelta').style.color = dpsDelta >= 0 ? '#15803d' : '#b91c1c';
+  }
+  if ($('compareResultDpsSub')) {
+    $('compareResultDpsSub').textContent = `A: ${fmt(dpsA)} ➔ B: ${fmt(dpsB)}`;
+  }
+  if ($('compareResultPowerDelta')) {
+    $('compareResultPowerDelta').textContent = `${powerDelta >= 0 ? '+' : ''}${fmt(powerDelta)} (${powerGainPct >= 0 ? '+' : ''}${powerGainPct.toFixed(2)}%)`;
+  }
+  if ($('compareResultPowerSub')) {
+    $('compareResultPowerSub').textContent = `A: ${fmt(powerA)} ➔ B: ${fmt(powerB)}`;
+  }
+}
+
 
 function renderProbability() {
   const r = probabilitySummary(n('successRate'), n('attempts'), n('attemptCost'));
@@ -4545,6 +5066,7 @@ function activateTab(tabName) {
     renderSpecupEquipTable();
   } else if (tabName === 'cube') {
     renderCubeEquipmentLoader();
+    renderMekiCubeSystem();
   } else if (tabName === 'efficiency') {
     renderStatEfficiencies();
   } else if (tabName === 'combat') {
@@ -4560,6 +5082,7 @@ function renderAll() {
   renderProbability();
   fillCubeSources();
   renderSpecupEquipTable();
+  renderMekiCubeSystem();
 }
 
 async function loadData() {
@@ -4797,5 +5320,7 @@ function bind() {
 renderOptionRows();
 renderProfileSelect();
 bind();
+initMekiCubeSystem();
 loadData();
 renderAll();
+

@@ -853,3 +853,260 @@ export function optimizeSpecUpPath({
     steps
   };
 }
+
+/* ==========================================================================
+   Exact Official Potential Option Parser & Joint Probability Combinatorics
+   (Nexon Now Official settingPercent & 80% Confidence MekiCalc Spec)
+   ========================================================================== */
+
+/**
+ * Parses official Nexon Now option text string into structured game stat delta.
+ * E.g., '크리티컬 데미지 30%' -> { stat: 'critDamage', value: 30 }
+ *       '스킬 재사용 대기시간 감소 1.5초' -> { stat: 'fixedCdr', value: 1.5 }
+ *       'STR 6%' -> { stat: 'STR_PCT', value: 6 }
+ */
+export function parseOfficialPotentialOption(optStr, jobMainStat = 'STR') {
+  if (!optStr || typeof optStr !== 'string') return { stat: 'NONE', value: 0 };
+  const str = optStr.trim();
+  let m;
+
+  if ((m = str.match(/^스킬 재사용 대기시간 감소\s*([\d.]+)초/))) return { stat: 'fixedCdr', value: parseFloat(m[1]) };
+  if ((m = str.match(/^크리티컬 데미지\s*([\d.]+)%/))) return { stat: 'critDamage', value: parseFloat(m[1]) };
+  if ((m = str.match(/^크리티컬 확률\s*([\d.]+)%/))) return { stat: 'critRate', value: parseFloat(m[1]) };
+  if ((m = str.match(/^공격 속도\s*([\d.]+)%/))) return { stat: 'attackSpeed', value: parseFloat(m[1]) };
+  if ((m = str.match(/^공격력\s*([\d.]+)%/))) return { stat: 'attackPct', value: parseFloat(m[1]) };
+  if ((m = str.match(/^공격력\s*([\d.]+)/))) return { stat: 'attackFlat', value: parseFloat(m[1]) };
+  if ((m = str.match(/^데미지\s*([\d.]+)%/))) return { stat: 'damage', value: parseFloat(m[1]) };
+  if ((m = str.match(/^최종 데미지\s*([\d.]+)%/))) return { stat: 'finalDamage', value: parseFloat(m[1]) };
+  if ((m = str.match(/^보스 몬스터 데미지\s*([\d.]+)%/))) return { stat: 'bossDamage', value: parseFloat(m[1]) };
+  if ((m = str.match(/^일반 몬스터 데미지\s*([\d.]+)%/))) return { stat: 'normalDamage', value: parseFloat(m[1]) };
+  if ((m = str.match(/^스킬 데미지\s*([\d.]+)%/))) return { stat: 'skillDmg', value: parseFloat(m[1]) };
+  if ((m = str.match(/^기본 공격 데미지\s*([\d.]+)%/))) return { stat: 'atkBasicDmg', value: parseFloat(m[1]) };
+  if ((m = str.match(/^버프 지속시간 증가\s*([\d.]+)%/))) return { stat: 'buffDuration', value: parseFloat(m[1]) };
+  if ((m = str.match(/^동료 소환 지속시간 증가\s*([\d.]+)%/))) return { stat: 'companionDuration', value: parseFloat(m[1]) };
+  if ((m = str.match(/^기본 공격 대상 수 증가\s*([\d.]+)/))) return { stat: 'targetCountInc', value: parseFloat(m[1]) };
+  if ((m = str.match(/^모든 스킬 레벨\s*([\d.]+)/))) return { stat: 'allSkillLevel', value: parseFloat(m[1]) };
+  if ((m = str.match(/^4레벨당 주 스탯%\s*([\d.]+)%/))) return { stat: 'mainStatPct', value: parseFloat(m[1]) * 25 }; // Lv100 standard
+  if ((m = str.match(/^1레벨당 주 스탯\s*([\d.]+)/))) return { stat: 'mainStat', value: parseFloat(m[1]) * 100 }; // Lv100 standard
+  if ((m = str.match(/^최소 데미지 배율\s*([\d.]+)%/))) return { stat: 'minDamage', value: parseFloat(m[1]) };
+  if ((m = str.match(/^최대 데미지 배율\s*([\d.]+)%/))) return { stat: 'maxDamage', value: parseFloat(m[1]) };
+  if ((m = str.match(/^방어 관통력\s*([\d.]+)%/))) return { stat: 'defPen', value: parseFloat(m[1]) };
+
+  if ((m = str.match(/^(STR|DEX|INT|LUK)\s*([\d.]+)%/))) {
+    const isMain = m[1].toUpperCase() === jobMainStat.toUpperCase();
+    return { stat: isMain ? 'mainStatPct' : 'subStatPct', value: parseFloat(m[2]) };
+  }
+  if ((m = str.match(/^(STR|DEX|INT|LUK)\s*([\d.]+)/))) {
+    const isMain = m[1].toUpperCase() === jobMainStat.toUpperCase();
+    return { stat: isMain ? 'mainStat' : 'subStat', value: parseFloat(m[2]) };
+  }
+  if ((m = str.match(/^방어력\s*([\d.]+)%/))) return { stat: 'playerDefense', value: parseFloat(m[1]) };
+  if ((m = str.match(/^방어력\s*([\d.]+)/))) return { stat: 'playerDefense', value: parseFloat(m[1]) };
+  if ((m = str.match(/^최대 HP\s*([\d.]+)%/))) return { stat: 'maxHp', value: parseFloat(m[1]) };
+  if ((m = str.match(/^최대 HP\s*([\d.]+)/))) return { stat: 'maxHp', value: parseFloat(m[1]) };
+  if ((m = str.match(/^최대 MP\s*([\d.]+)%/))) return { stat: 'maxMp', value: parseFloat(m[1]) };
+  if ((m = str.match(/^최대 MP\s*([\d.]+)/))) return { stat: 'maxMp', value: parseFloat(m[1]) };
+
+  return { stat: 'NONE', value: 0 };
+}
+
+/**
+ * Converts array of 3 lines into aggregated player stat delta.
+ */
+export function convertLinesToStats(lines = [], jobMainStat = 'STR') {
+  const stats = {};
+  for (const line of lines) {
+    if (!line) continue;
+    let stat = line.stat;
+    let val = Number(line.value) || 0;
+
+    if (line.option) {
+      const parsed = parseOfficialPotentialOption(line.option, jobMainStat);
+      stat = parsed.stat;
+      val = parsed.value;
+    }
+
+    if (!stat || stat === 'NONE' || !val) continue;
+
+    // Normalization mapping
+    if (stat === 'STR_PCT' || stat === 'DEX_PCT' || stat === 'INT_PCT' || stat === 'LUK_PCT') {
+      const statName = stat.split('_')[0];
+      stat = (statName === jobMainStat.toUpperCase()) ? 'mainStatPct' : 'subStatPct';
+    } else if (stat === 'STR_FLAT' || stat === 'DEX_FLAT' || stat === 'INT_FLAT' || stat === 'LUK_FLAT') {
+      const statName = stat.split('_')[0];
+      stat = (statName === jobMainStat.toUpperCase()) ? 'mainStat' : 'subStat';
+    }
+
+    stats[stat] = (stats[stat] || 0) + val;
+  }
+  return stats;
+}
+
+/**
+ * Calculates number of attempts to reach target confidence (default 80%) under Bernoulli trials.
+ * n = ceil( ln(1 - confidence) / ln(1 - p) )
+ */
+export function calculateConfidenceAttempts(p, confidence = 0.80) {
+  if (!p || p <= 0) return Infinity;
+  if (p >= 1) return 1;
+  const conf = Math.max(0.01, Math.min(0.9999, confidence));
+  return Math.ceil(Math.log(1 - conf) / Math.log(1 - p));
+}
+
+/**
+ * MekiCalc Full Combinatorial Potential Upgrade Evaluator
+ * Evaluates exact net improvement probability, 80% confidence attempts, average attempts,
+ * and cost-efficiency (ROI) for a given equipment slot and potential category (윗잠 / 아랫잠).
+ *
+ * @param {Object} equip Equipment data object
+ * @param {Array} currentLines Current 3 potential lines
+ * @param {Object} optionsData Potential probabilities dataset (grades.epic/unique/legendary/mystic)
+ * @param {Object} playerStats Base player inputs
+ * @param {Object} combatRules Combat rules
+ * @param {Object} options Configuration { potentialCategory: 'upper'|'lower', confidence: 0.80, cubeCost: meso }
+ */
+export function calculateCubeImprovementProbability(equip, currentLines = [], optionsData = {}, playerStats = {}, combatRules = {}, options = {}) {
+  const grade = equip.cubeGrade || 'epic';
+  const slotName = equip.name || '모자';
+  const confidence = options.confidence !== undefined ? options.confidence : 0.80;
+  const isAdditional = options.potentialCategory === 'lower' || options.isAdditional;
+  const costPerTry = options.cubeCost || (
+    isAdditional
+      ? (grade === 'rare' ? 120000 : grade === 'epic' ? 300000 : grade === 'unique' ? 900000 : 2200000)
+      : (grade === 'rare' ? 80000 : grade === 'epic' ? 200000 : grade === 'unique' ? 600000 : 1500000)
+  );
+
+  let jobMainStat = 'STR';
+  if (playerStats?.job) {
+    if (['nightLord', 'shadower', 'nightWalker'].includes(playerStats.job)) jobMainStat = 'LUK';
+    else if (['bowmaster', 'sniper', 'captain', 'windBreaker'].includes(playerStats.job)) jobMainStat = 'DEX';
+    else if (['archMageIceLightning', 'archMageFirePoison', 'bishop'].includes(playerStats.job)) jobMainStat = 'INT';
+  }
+
+  // Normalize playerStats to ensure statBased is present
+  const normalizedPlayer = {
+    ...playerStats,
+    statBased: playerStats.statBased !== undefined
+      ? playerStats.statBased
+      : ((Number(playerStats.mainStat) || 0) / 100 + (Number(playerStats.subStat) || 0) / 400)
+  };
+
+  // Baseline DPS with current 3 lines
+  const currentCubeStats = convertLinesToStats(currentLines, jobMainStat);
+  const baseStatsWithoutCube = subtractStatGains(normalizedPlayer, currentCubeStats);
+  const currentDpsRes = calculateDamage(normalizedPlayer, combatRules);
+  const currentDps = getEffectiveDPS(currentDpsRes);
+
+  // Retrieve official slot blocks
+  const gradeData = optionsData?.grades?.[grade];
+  let blocks = gradeData?.blocks?.filter(b => b.equipment === slotName || b.equipment === equip.name);
+  if (!blocks || blocks.length < 3) {
+    // Fallback: match by first token or standard mapping
+    blocks = gradeData?.blocks?.filter(b => slotName.startsWith(b.equipment) || b.equipment.startsWith(slotName));
+  }
+
+  if (!blocks || blocks.length < 3) {
+    // If not found in blocks, fallback to standard estimation
+    return {
+      slotName,
+      grade,
+      category: isAdditional ? '아랫잠' : '윗잠',
+      currentDps,
+      netImprovementProbability: 0.15,
+      attempts80Percent: calculateConfidenceAttempts(0.15, confidence),
+      averageAttempts: Math.round(1 / 0.15),
+      expectedCost80Percent: calculateConfidenceAttempts(0.15, confidence) * costPerTry,
+      expectedAverageCost: Math.round(1 / 0.15) * costPerTry,
+      expectedDpsGainPct: 1.5,
+      roiPerMillion: 1.5 / ((calculateConfidenceAttempts(0.15, confidence) * costPerTry) / 1000000),
+      topCandidateLines: []
+    };
+  }
+
+  const sortedBlocks = [...blocks].sort((a, b) => (Number(a.slot) || 1) - (Number(b.slot) || 1));
+  const slot1Options = sortedBlocks[0]?.options || [];
+  const slot2Options = sortedBlocks[1]?.options || [];
+  const slot3Options = sortedBlocks[2]?.options || [];
+
+  let betterProbSum = 0;
+  let totalSampleCount = 0;
+  let weightedGainSum = 0;
+  let bestCandidate = null;
+  let maxDelta = 0;
+
+  // Exact joint distribution iteration across 3 slots
+  for (let i = 0; i < slot1Options.length; i++) {
+    const opt1 = slot1Options[i];
+    const p1 = (Number(opt1.settingPercent) || 0) / 100;
+    if (p1 <= 0) continue;
+    const stat1 = parseOfficialPotentialOption(opt1.option, jobMainStat);
+
+    for (let j = 0; j < slot2Options.length; j++) {
+      const opt2 = slot2Options[j];
+      const p2 = (Number(opt2.settingPercent) || 0) / 100;
+      if (p2 <= 0) continue;
+      const stat2 = parseOfficialPotentialOption(opt2.option, jobMainStat);
+
+      for (let k = 0; k < slot3Options.length; k++) {
+        const opt3 = slot3Options[k];
+        const p3 = (Number(opt3.settingPercent) || 0) / 100;
+        if (p3 <= 0) continue;
+        const stat3 = parseOfficialPotentialOption(opt3.option, jobMainStat);
+
+        const jointProb = p1 * p2 * p3;
+        totalSampleCount++;
+
+        const candidateStats = {};
+        for (const s of [stat1, stat2, stat3]) {
+          if (s.stat && s.stat !== 'NONE' && s.value > 0) {
+            candidateStats[s.stat] = (candidateStats[s.stat] || 0) + s.value;
+          }
+        }
+
+        const candidatePlayerStats = applyStatGains(baseStatsWithoutCube, candidateStats);
+        const candDpsRes = calculateDamage(candidatePlayerStats, combatRules);
+        const candDps = getEffectiveDPS(candDpsRes);
+
+        if (candDps > currentDps * 1.0001) {
+          betterProbSum += jointProb;
+          const gainPct = ((candDps - currentDps) / currentDps) * 100;
+          weightedGainSum += jointProb * gainPct;
+
+          if (candDps - currentDps > maxDelta) {
+            maxDelta = candDps - currentDps;
+            bestCandidate = {
+              lines: [opt1.option, opt2.option, opt3.option],
+              dps: candDps,
+              gainPct
+            };
+          }
+        }
+      }
+    }
+  }
+
+  const pImprove = Math.max(0.00001, Math.min(0.9999, betterProbSum));
+  const avgAttempts = Math.round(1 / pImprove);
+  const attempts80 = calculateConfidenceAttempts(pImprove, confidence);
+  const cost80 = attempts80 * costPerTry;
+  const avgCost = avgAttempts * costPerTry;
+  const avgExpectedGainPct = betterProbSum > 0 ? (weightedGainSum / betterProbSum) : 0;
+  const roiPerMillion = cost80 > 0 ? (avgExpectedGainPct / (cost80 / 1000000)) : 0;
+
+  return {
+    slotName,
+    grade,
+    category: isAdditional ? '아랫잠' : '윗잠',
+    currentDps,
+    costPerTry,
+    netImprovementProbability: pImprove,
+    attempts80Percent: attempts80,
+    averageAttempts: avgAttempts,
+    expectedCost80Percent: cost80,
+    expectedAverageCost: avgCost,
+    expectedDpsGainPct: avgExpectedGainPct,
+    roiPerMillion,
+    bestCandidate
+  };
+}
+
