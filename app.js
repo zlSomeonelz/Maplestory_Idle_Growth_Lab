@@ -4654,7 +4654,20 @@ const CUBE_LINE_STATS = [
   ['critDamage', '크리티컬 데미지 %'],
   ['critRate', '크리티컬 확률 %'],
   ['mainStatPct', '주스탯 %'],
+  ['subStatPct', '부스탯 %'],
+  ['allStatPct', '올스탯 %'],
   ['damage', '데미지 %'],
+  ['minDamage', '최소 데미지 배율 %'],
+  ['maxDamage', '최대 데미지 배율 %'],
+  ['finalDamage', '최종 데미지 %'],
+  ['skillDmg', '스킬 데미지 %'],
+  ['atkBasicDmg', '기본 공격 데미지 %'],
+  ['attackSpeed', '공격 속도 %'],
+  ['defPen', '방어율 무시 %'],
+  ['cooldownReduction', '재사용 대기시간 감소 (초)'],
+  ['maxHpPct', '최대 HP %'],
+  ['maxMpPct', '최대 MP %'],
+  ['defPct', '방어력 %'],
   ['attackFlat', '공격력 (+)'],
   ['mainStat', '주스탯 (+)']
 ];
@@ -4665,7 +4678,20 @@ const ENGINE_TO_CUBE_MAP = {
   critDamage: 'CRIT_DMG',
   critRate: 'CRIT_RATE',
   mainStatPct: 'MAIN_STAT_PCT',
+  subStatPct: 'SUB_STAT_PCT',
+  allStatPct: 'ALL_STAT_PCT',
   damage: 'DMG',
+  minDamage: 'MIN_DMG',
+  maxDamage: 'MAX_DMG',
+  finalDamage: 'FINAL_DMG',
+  skillDmg: 'SKILL_DMG',
+  atkBasicDmg: 'ATK_BASIC_DMG',
+  attackSpeed: 'ATK_SPEED',
+  defPen: 'DEF_PEN',
+  cooldownReduction: 'CDR',
+  maxHpPct: 'MAX_HP_PCT',
+  maxMpPct: 'MAX_MP_PCT',
+  defPct: 'DEF_PCT',
   attackFlat: 'ATK_FLAT',
   mainStat: 'MAIN_STAT_FLAT',
   NONE: 'NONE'
@@ -4677,7 +4703,20 @@ const CUBE_TO_ENGINE_MAP = {
   CRIT_DMG: 'critDamage',
   CRIT_RATE: 'critRate',
   MAIN_STAT_PCT: 'mainStatPct',
+  SUB_STAT_PCT: 'subStatPct',
+  ALL_STAT_PCT: 'allStatPct',
   DMG: 'damage',
+  MIN_DMG: 'minDamage',
+  MAX_DMG: 'maxDamage',
+  FINAL_DMG: 'finalDamage',
+  SKILL_DMG: 'skillDmg',
+  ATK_BASIC_DMG: 'atkBasicDmg',
+  ATK_SPEED: 'attackSpeed',
+  DEF_PEN: 'defPen',
+  CDR: 'cooldownReduction',
+  MAX_HP_PCT: 'maxHpPct',
+  MAX_MP_PCT: 'maxMpPct',
+  DEF_PCT: 'defPct',
   ATK_FLAT: 'attackFlat',
   MAIN_STAT_FLAT: 'mainStat',
   NONE: 'NONE'
@@ -4692,6 +4731,12 @@ function formatLineSummary(lines) {
     if (l.display) {
       return l.display.replace(/\s*\(잡옵\)/g, '').trim();
     }
+    if (l.stat === 'minDamage') return `최소뎀 ${l.value}%`;
+    if (l.stat === 'maxDamage') return `최대뎀 ${l.value}%`;
+    if (l.stat === 'finalDamage') return `최종뎀 ${l.value}%`;
+    if (l.stat === 'skillDmg') return `스킬뎀 ${l.value}%`;
+    if (l.stat === 'atkBasicDmg') return `기공뎀 ${l.value}%`;
+    if (l.stat === 'attackSpeed') return `공속 ${l.value}%`;
     if (l.stat === 'attackPct') return `공 ${l.value}%`;
     if (l.stat === 'bossDamage') return `보공 ${l.value}%`;
     if (l.stat === 'critDamage') return `크뎀 ${l.value}%`;
@@ -4701,6 +4746,8 @@ function formatLineSummary(lines) {
     if (l.stat === 'allStatPct') return `올스탯 ${l.value}%`;
     if (l.stat === 'damage') return `뎀 ${l.value}%`;
     if (l.stat === 'maxHpPct') return `HP ${l.value}%`;
+    if (l.stat === 'maxMpPct') return `MP ${l.value}%`;
+    if (l.stat === 'defPct') return `방어 ${l.value}%`;
     if (l.stat === 'defPen') return `방관 ${l.value}%`;
     if (l.stat === 'cooldownReduction') return `쿨감 ${l.value}초`;
     if (l.stat === 'attackFlat') return `공 +${l.value}`;
@@ -5110,12 +5157,21 @@ const STAT_TO_SPEC_KEY = {
   subStatPct: 'statPct',
   allStatPct: 'statPct',
   damage: 'damage',
+  minDamage: 'minDamage',
+  maxDamage: 'maxDamage',
+  finalDamage: 'finalDamage',
+  skillDmg: 'skillDmg',
+  atkBasicDmg: 'atkBasicDmg',
   critRate: 'critRate',
   critDamage: 'critDamage',
   bossDamage: 'bossDamage',
   attackPct: 'attackPct',
+  attackSpeed: 'attackSpeed',
   cooldownReduction: 'cooldownReduction',
   maxHpPct: 'maxHpPct',
+  maxMpPct: 'maxMpPct',
+  defPct: 'defPct',
+  defPen: 'defPen',
   mainStat: 'statFlat',
   subStat: 'statFlat',
   allStat: 'statFlat'

@@ -46,44 +46,44 @@ export const GRADE_KOREAN = {
 export const GRADE_POTENTIAL_SPECS = {
   normal: {
     slots: {
-      1: { statPct: [3], damage: [5], critRate: [3], maxHpPct: [6], maxMpPct: [3], defPct: [3], attackSpeed: [3], statFlat: [50] },
-      2: { statPct: [3], damage: [5], critRate: [3], maxHpPct: [6], maxMpPct: [3], defPct: [3], attackSpeed: [3], statFlat: [50] },
-      3: { statPct: [3], damage: [5], critRate: [3], maxHpPct: [6], maxMpPct: [3], defPct: [3], attackSpeed: [3], statFlat: [50] }
+      1: { statPct: [3], damage: [5], minDamage: [3], maxDamage: [3], critRate: [3], maxHpPct: [6], maxMpPct: [3], defPct: [3], attackSpeed: [3], statFlat: [50] },
+      2: { statPct: [3], damage: [5], minDamage: [3], maxDamage: [3], critRate: [3], maxHpPct: [6], maxMpPct: [3], defPct: [3], attackSpeed: [3], statFlat: [50] },
+      3: { statPct: [3], damage: [5], minDamage: [3], maxDamage: [3], critRate: [3], maxHpPct: [6], maxMpPct: [3], defPct: [3], attackSpeed: [3], statFlat: [50] }
     }
   },
   rare: {
     slots: {
-      1: { statPct: [4.5], damage: [8], critRate: [4.5], maxHpPct: [9], maxMpPct: [4.5], defPct: [4.5], attackSpeed: [3.5], statFlat: [100] },
-      2: { statPct: [3, 4.5], damage: [5, 8], critRate: [3, 4.5], maxHpPct: [6, 9], maxMpPct: [3, 4.5], defPct: [3, 4.5], attackSpeed: [3, 3.5], statFlat: [50, 100] },
-      3: { statPct: [3, 4.5], damage: [5, 8], critRate: [3, 4.5], maxHpPct: [6, 9], maxMpPct: [3, 4.5], defPct: [3, 4.5], attackSpeed: [3, 3.5], statFlat: [50, 100] }
+      1: { statPct: [4.5], damage: [8], minDamage: [6], maxDamage: [6], critRate: [4.5], maxHpPct: [9], maxMpPct: [4.5], defPct: [4.5], attackSpeed: [3.5], statFlat: [100] },
+      2: { statPct: [3, 4.5], damage: [5, 8], minDamage: [3, 6], maxDamage: [3, 6], critRate: [3, 4.5], maxHpPct: [6, 9], maxMpPct: [3, 4.5], defPct: [3, 4.5], attackSpeed: [3, 3.5], statFlat: [50, 100] },
+      3: { statPct: [3, 4.5], damage: [5, 8], minDamage: [3, 6], maxDamage: [3, 6], critRate: [3, 4.5], maxHpPct: [6, 9], maxMpPct: [3, 4.5], defPct: [3, 4.5], attackSpeed: [3, 3.5], statFlat: [50, 100] }
     }
   },
   epic: {
     slots: {
-      1: { statPct: [6], damage: [12], critRate: [6], maxHpPct: [12], maxMpPct: [6], defPct: [6], attackSpeed: [4], statFlat: [200], cooldownReduction: [0.5], critDamage: [10], attackPct: [6], bossDamage: [6], finalDamage: [3] },
-      2: { statPct: [4.5, 6], damage: [8, 12], critRate: [4.5, 6], maxHpPct: [9, 12], maxMpPct: [4.5, 6], defPct: [4.5, 6], attackSpeed: [3.5, 4], statFlat: [100, 200], cooldownReduction: [0.5], critDamage: [10], attackPct: [4.5, 6], bossDamage: [6], finalDamage: [3] },
-      3: { statPct: [4.5, 6], damage: [8, 12], critRate: [4.5, 6], maxHpPct: [9, 12], maxMpPct: [4.5, 6], defPct: [4.5, 6], attackSpeed: [3.5, 4], statFlat: [100, 200], cooldownReduction: [0.5], critDamage: [10], attackPct: [4.5, 6], bossDamage: [6], finalDamage: [3] }
+      1: { statPct: [6], damage: [12], minDamage: [8], maxDamage: [8], critRate: [6], maxHpPct: [12], maxMpPct: [6], defPct: [6], attackSpeed: [4], statFlat: [200], cooldownReduction: [0.5], critDamage: [10], attackPct: [6], bossDamage: [6], finalDamage: [3], skillDmg: [8], atkBasicDmg: [8] },
+      2: { statPct: [4.5, 6], damage: [8, 12], minDamage: [6, 8], maxDamage: [6, 8], critRate: [4.5, 6], maxHpPct: [9, 12], maxMpPct: [4.5, 6], defPct: [4.5, 6], attackSpeed: [3.5, 4], statFlat: [100, 200], cooldownReduction: [0.5], critDamage: [10], attackPct: [4.5, 6], bossDamage: [6], finalDamage: [3], skillDmg: [8], atkBasicDmg: [8] },
+      3: { statPct: [4.5, 6], damage: [8, 12], minDamage: [6, 8], maxDamage: [6, 8], critRate: [4.5, 6], maxHpPct: [9, 12], maxMpPct: [4.5, 6], defPct: [4.5, 6], attackSpeed: [3.5, 4], statFlat: [100, 200], cooldownReduction: [0.5], critDamage: [10], attackPct: [4.5, 6], bossDamage: [6], finalDamage: [3], skillDmg: [8], atkBasicDmg: [8] }
     }
   },
   unique: {
     slots: {
-      1: { statPct: [9], damage: [18], critRate: [9], maxHpPct: [15], maxMpPct: [9], defPct: [9], attackSpeed: [5], statFlat: [400], cooldownReduction: [1], critDamage: [20], attackPct: [9], bossDamage: [12], defPen: [8], finalDamage: [5] },
-      2: { statPct: [6, 9], damage: [12, 18], critRate: [6, 9], maxHpPct: [12, 15], maxMpPct: [6, 9], defPct: [6, 9], attackSpeed: [4, 5], statFlat: [200, 400], cooldownReduction: [0.5, 1], critDamage: [10, 20], attackPct: [6, 9], bossDamage: [6, 12], defPen: [8], finalDamage: [3, 5] },
-      3: { statPct: [6, 9], damage: [12, 18], critRate: [6, 9], maxHpPct: [12, 15], maxMpPct: [6, 9], defPct: [6, 9], attackSpeed: [4, 5], statFlat: [200, 400], cooldownReduction: [0.5, 1], critDamage: [10, 20], attackPct: [6, 9], bossDamage: [6, 12], defPen: [8], finalDamage: [3, 5] }
+      1: { statPct: [9], damage: [18], minDamage: [10], maxDamage: [10], critRate: [9], maxHpPct: [15], maxMpPct: [9], defPct: [9], attackSpeed: [5], statFlat: [400], cooldownReduction: [1], critDamage: [20], attackPct: [9], bossDamage: [12], defPen: [8], finalDamage: [5], skillDmg: [14], atkBasicDmg: [14] },
+      2: { statPct: [6, 9], damage: [12, 18], minDamage: [8, 10], maxDamage: [8, 10], critRate: [6, 9], maxHpPct: [12, 15], maxMpPct: [6, 9], defPct: [6, 9], attackSpeed: [4, 5], statFlat: [200, 400], cooldownReduction: [0.5, 1], critDamage: [10, 20], attackPct: [6, 9], bossDamage: [6, 12], defPen: [8], finalDamage: [3, 5], skillDmg: [8, 14], atkBasicDmg: [8, 14] },
+      3: { statPct: [6, 9], damage: [12, 18], minDamage: [8, 10], maxDamage: [8, 10], critRate: [6, 9], maxHpPct: [12, 15], maxMpPct: [6, 9], defPct: [6, 9], attackSpeed: [4, 5], statFlat: [200, 400], cooldownReduction: [0.5, 1], critDamage: [10, 20], attackPct: [6, 9], bossDamage: [6, 12], defPen: [8], finalDamage: [3, 5], skillDmg: [8, 14], atkBasicDmg: [8, 14] }
     }
   },
   legendary: {
     slots: {
-      1: { statPct: [12], damage: [25], critRate: [12], maxHpPct: [20], maxMpPct: [12], defPct: [12], attackSpeed: [7], statFlat: [600], cooldownReduction: [1.5], critDamage: [30], attackPct: [12], bossDamage: [18], defPen: [12], finalDamage: [8] },
-      2: { statPct: [9, 12], damage: [18, 25], critRate: [9, 12], maxHpPct: [15, 20], maxMpPct: [9, 12], defPct: [9, 12], attackSpeed: [5, 7], statFlat: [400, 600], cooldownReduction: [1, 1.5], critDamage: [20, 30], attackPct: [9, 12], bossDamage: [12, 18], defPen: [8, 12], finalDamage: [5, 8] },
-      3: { statPct: [9, 12], damage: [18, 25], critRate: [9, 12], maxHpPct: [15, 20], maxMpPct: [9, 12], defPct: [9, 12], attackSpeed: [5, 7], statFlat: [400, 600], cooldownReduction: [1, 1.5], critDamage: [20, 30], attackPct: [9, 12], bossDamage: [12, 18], defPen: [8, 12], finalDamage: [5, 8] }
+      1: { statPct: [12], damage: [25], minDamage: [15], maxDamage: [15], critRate: [12], maxHpPct: [20], maxMpPct: [12], defPct: [12], attackSpeed: [7], statFlat: [600], cooldownReduction: [1.5], critDamage: [30], attackPct: [12], bossDamage: [18], defPen: [12], finalDamage: [8] },
+      2: { statPct: [9, 12], damage: [18, 25], minDamage: [10, 15], maxDamage: [10, 15], critRate: [9, 12], maxHpPct: [15, 20], maxMpPct: [9, 12], defPct: [9, 12], attackSpeed: [5, 7], statFlat: [400, 600], cooldownReduction: [1, 1.5], critDamage: [20, 30], attackPct: [9, 12], bossDamage: [12, 18], defPen: [8, 12], finalDamage: [5, 8] },
+      3: { statPct: [9, 12], damage: [18, 25], minDamage: [10, 15], maxDamage: [10, 15], critRate: [9, 12], maxHpPct: [15, 20], maxMpPct: [9, 12], defPct: [9, 12], attackSpeed: [5, 7], statFlat: [400, 600], cooldownReduction: [1, 1.5], critDamage: [20, 30], attackPct: [9, 12], bossDamage: [12, 18], defPen: [8, 12], finalDamage: [5, 8] }
     }
   },
   mystic: {
     slots: {
-      1: { statPct: [15], damage: [35], critRate: [15], maxHpPct: [25], maxMpPct: [15], defPct: [15], attackSpeed: [10], statFlat: [1000], cooldownReduction: [2], critDamage: [50], attackPct: [15], bossDamage: [24], defPen: [20], finalDamage: [12] },
-      2: { statPct: [12, 15], damage: [25, 35], critRate: [12, 15], maxHpPct: [20, 25], maxMpPct: [12, 15], defPct: [12, 15], attackSpeed: [7, 10], statFlat: [600, 1000], cooldownReduction: [1.5, 2], critDamage: [30, 50], attackPct: [12, 15], bossDamage: [18, 24], defPen: [12, 20], finalDamage: [8, 12] },
-      3: { statPct: [12, 15], damage: [25, 35], critRate: [12, 15], maxHpPct: [20, 25], maxMpPct: [12, 15], defPct: [12, 15], attackSpeed: [7, 10], statFlat: [600, 1000], cooldownReduction: [1.5, 2], critDamage: [30, 50], attackPct: [12, 15], bossDamage: [18, 24], defPen: [12, 20], finalDamage: [8, 12] }
+      1: { statPct: [15], damage: [35], minDamage: [25], maxDamage: [25], critRate: [15], maxHpPct: [25], maxMpPct: [15], defPct: [15], attackSpeed: [10], statFlat: [1000], cooldownReduction: [2], critDamage: [50], attackPct: [15], bossDamage: [24], defPen: [20], finalDamage: [12], skillDmg: [30], atkBasicDmg: [30] },
+      2: { statPct: [12, 15], damage: [25, 35], minDamage: [15, 25], maxDamage: [15, 25], critRate: [12, 15], maxHpPct: [20, 25], maxMpPct: [12, 15], defPct: [12, 15], attackSpeed: [7, 10], statFlat: [600, 1000], cooldownReduction: [1.5, 2], critDamage: [30, 50], attackPct: [12, 15], bossDamage: [18, 24], defPen: [12, 20], finalDamage: [8, 12], skillDmg: [21, 30], atkBasicDmg: [21, 30] },
+      3: { statPct: [12, 15], damage: [25, 35], minDamage: [15, 25], maxDamage: [15, 25], critRate: [12, 15], maxHpPct: [20, 25], maxMpPct: [12, 15], defPct: [12, 15], attackSpeed: [7, 10], statFlat: [600, 1000], cooldownReduction: [1.5, 2], critDamage: [30, 50], attackPct: [12, 15], bossDamage: [18, 24], defPen: [12, 20], finalDamage: [8, 12], skillDmg: [21, 30], atkBasicDmg: [21, 30] }
     }
   }
 };
@@ -126,15 +126,53 @@ export function parsePotentialLine(line, jobMainStat = 'LUK', jobSubStat = null,
     return { stat: 'NONE', value: 0, raw: trimmed, display: '잡옵' };
   }
 
-  // 1. HP% (최대 HP, HP, 최대 1P, 최대 IP etc.)
+  // 1. Min / Max Damage Ratio (최소 데미지 배율, 최대 데미지 배율)
+  if (/(?:최소\s*데미지\s*배율|최소\s*데미지|최소뎀)/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('minDamage', rawNum, 8);
+    return { stat: 'minDamage', value: val, raw: trimmed, display: `최소뎀 ${val}%` };
+  }
+
+  if (/(?:최대\s*데미지\s*배율|최대\s*데미지|최대뎀)/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('maxDamage', rawNum, 8);
+    return { stat: 'maxDamage', value: val, raw: trimmed, display: `최대뎀 ${val}%` };
+  }
+
+  // 1.5 Final Damage (최종 데미지)
+  if (/(?:최종\s*데미지|최종뎀)/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('finalDamage', rawNum, 5);
+    return { stat: 'finalDamage', value: val, raw: trimmed, display: `최종뎀 ${val}%` };
+  }
+
+  // 1.6 Skill / Basic Attack Damage (스킬 데미지, 기본 공격 데미지)
+  if (/(?:스킬\s*데미지|스킬뎀)/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('skillDmg', rawNum, 14);
+    return { stat: 'skillDmg', value: val, raw: trimmed, display: `스킬뎀 ${val}%` };
+  }
+
+  if (/(?:기본\s*공격\s*데미지|기공뎀|평타\s*데미지)/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('atkBasicDmg', rawNum, 14);
+    return { stat: 'atkBasicDmg', value: val, raw: trimmed, display: `기공뎀 ${val}%` };
+  }
+
+  // 2. HP% (최대 HP, HP, 최대 1P, 최대 IP etc.)
   const hpMatch = trimmed.match(/(?:최대\s*HP|최대\s*1[0-9]|최대\s*IP|HP)\s*([0-9.]*)\s*%?/i);
-  if (hpMatch && !/공격력|데미지|대미지|더미지|크리티컬/.test(trimmed)) {
+  if (hpMatch && !/공격력|데미지|대미지|더미지|크리티컬|배율/.test(trimmed)) {
     const rawVal = hpMatch[1] ? Number(hpMatch[1]) : null;
     const val = resolveValue('maxHpPct', rawVal, 15);
     return { stat: 'maxHpPct', value: val, raw: trimmed, display: `HP ${val}%` };
   }
 
-  // 2. Specific Stat Names (STR, DEX, INT, LUK, 주스탯, 부스탯, 올스탯)
+  // 3. Specific Stat Names (STR, DEX, INT, LUK, 주스탯, 부스탯, 올스탯)
   const statMatch = trimmed.match(/(?:^|[\s|:·•\-])(STR|DEX|PEX|INT|LUK|주스탯|부스탯|올스탯)\s*([0-9.]*)\s*(?:%|[×xX]|o\/o|\/o)?/i);
   if (statMatch) {
     let statName = statMatch[1].toUpperCase();
@@ -166,13 +204,85 @@ export function parsePotentialLine(line, jobMainStat = 'LUK', jobSubStat = null,
     return { stat: 'NONE', value: 0, raw: trimmed, display: `${statName} ${pctVal}% (잡옵)` };
   }
 
-  // 3. Combat Stats with Fuzzy Keyword & Grade Value Matching
-  // A. Damage (데미지, 대미지, 더미지, 도미지, 태미지, som, dam, dmg, 뎀)
-  if (/(?:데미지|대미지|더미지|도미지|태미지|som|dam|dmg|뎀)/i.test(trimmed) && !/보스|크리티컬/.test(trimmed)) {
+  // 4. Combat Stats with Fuzzy Keyword & Grade Value Matching
+  // A. General Damage (데미지, 대미지, 더미지, 도미지, 태미지, som, dam, dmg, 뎀)
+  if (/(?:데미지|대미지|더미지|도미지|태미지|som|dam|dmg|뎀)/i.test(trimmed) && !/보스|크리티컬|최소|최대|최종|스킬|기본/.test(trimmed)) {
     const numMatch = trimmed.match(/([0-9.]+)/);
     const rawNum = numMatch ? Number(numMatch[1]) : null;
     const val = resolveValue('damage', rawNum, 12);
     return { stat: 'damage', value: val, raw: trimmed, display: `데미지 ${val}%` };
+  }
+
+  // B. Critical Rate (크리티컬 확률, 크확, 크리티컬)
+  if (/(?:크리티컬\s*확률|크확)/i.test(trimmed) || (/크리티컬/i.test(trimmed) && !/데미지|대미지|크뎀/.test(trimmed))) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('critRate', rawNum, 6);
+    return { stat: 'critRate', value: val, raw: trimmed, display: `크확 ${val}%` };
+  }
+
+  // C. Critical Damage (크리티컬 데미지, 크뎀)
+  if (/(?:크리티컬\s*데미지|크뎀)/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('critDamage', rawNum, 10);
+    return { stat: 'critDamage', value: val, raw: trimmed, display: `크뎀 ${val}%` };
+  }
+
+  // D. Cooldown Reduction (스킬 재사용 대기시간 감소, 쿨감, 재사용 대기시간)
+  if (/(?:스킬\s*재사용|재사용\s*대기시간|대기시간\s*감소|쿨감)/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('cooldownReduction', rawNum, 1);
+    return { stat: 'cooldownReduction', value: val, raw: trimmed, display: `쿨감 ${val}초` };
+  }
+
+  // E. Boss Damage (보스 몬스터 공격 시 데미지, 보스 데미지, 보공)
+  if (/(?:보스\s*몬스터\s*공격\s*시\s*데미지|보스\s*데미지|보공)/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('bossDamage', rawNum, 12);
+    return { stat: 'bossDamage', value: val, raw: trimmed, display: `보공 ${val}%` };
+  }
+
+  // F. Attack Speed (공격 속도, 공속)
+  if (/(?:공격\s*속도|공속)\s*([0-9.]*)\s*%?/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('attackSpeed', rawNum, 5);
+    return { stat: 'attackSpeed', value: val, raw: trimmed, display: `공속 ${val}%` };
+  }
+
+  // G. Attack % (공격력 %, 마력 %)
+  if (/(?:공격력|마력)\s*([0-9.]*)\s*%/i.test(trimmed)) {
+    const numMatch = trimmed.match(/(?:공격력|마력)\s*([0-9.]*)\s*%/i);
+    const rawNum = numMatch && numMatch[1] ? Number(numMatch[1]) : null;
+    const val = resolveValue('attackPct', rawNum, 9);
+    return { stat: 'attackPct', value: val, raw: trimmed, display: `공 ${val}%` };
+  }
+
+  // H. Def Pen (방어율 무시, 방어력 관통, 방관, 방무)
+  if (/(?:방어율\s*무시|방어력\s*관통|방관|방무)\s*([0-9.]*)\s*%?/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('defPen', rawNum, 8);
+    return { stat: 'defPen', value: val, raw: trimmed, display: `방관 ${val}%` };
+  }
+
+  // I. Def % (방어력 %)
+  if (/방어력\s*([0-9.]*)\s*%/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('defPct', rawNum, 9);
+    return { stat: 'defPct', value: val, raw: trimmed, display: `방어 ${val}%` };
+  }
+
+  // J. Max MP % (최대 MP %)
+  if (/(?:최대\s*MP|MP)\s*([0-9.]*)\s*%/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('maxMpPct', rawNum, 9);
+    return { stat: 'maxMpPct', value: val, raw: trimmed, display: `MP ${val}%` };
   }
 
   // B. Critical Rate (크리티컬 확률, 크확, 크리티컬)

@@ -240,6 +240,31 @@ assert.equal(hatParsed.potentialLines[2].stat, 'damage');
 assert.equal(hatParsed.potentialLines[2].value, 12);
 assert.equal(hatParsed.hasAdditional, false);
 
+// 3F. Extended Potential Stats: Min/Max Damage Ratio, Final Damage, Skill Damage, Attack Speed
+const minDmgPot = parsePotentialLine('최소 데미지 배율 8%', 'LUK', 'DEX', 'epic', 1);
+assert.equal(minDmgPot.stat, 'minDamage');
+assert.equal(minDmgPot.value, 8);
+
+const maxDmgPot = parsePotentialLine('최대 데미지 배율 10%', 'LUK', 'DEX', 'unique', 1);
+assert.equal(maxDmgPot.stat, 'maxDamage');
+assert.equal(maxDmgPot.value, 10);
+
+const finalDmgPot = parsePotentialLine('최종 데미지 5%', 'LUK', 'DEX', 'unique', 1);
+assert.equal(finalDmgPot.stat, 'finalDamage');
+assert.equal(finalDmgPot.value, 5);
+
+const skillDmgPot = parsePotentialLine('스킬 데미지 14%', 'LUK', 'DEX', 'unique', 1);
+assert.equal(skillDmgPot.stat, 'skillDmg');
+assert.equal(skillDmgPot.value, 14);
+
+const basicAtkPot = parsePotentialLine('기본 공격 데미지 14%', 'LUK', 'DEX', 'unique', 1);
+assert.equal(basicAtkPot.stat, 'atkBasicDmg');
+assert.equal(basicAtkPot.value, 14);
+
+const atkSpeedPot = parsePotentialLine('공격 속도 4%', 'LUK', 'DEX', 'epic', 1);
+assert.equal(atkSpeedPot.stat, 'attackSpeed');
+assert.equal(atkSpeedPot.value, 4);
+
 // 4. Yellow Star Pixel Counter Test
 const width = 100;
 const height = 10;
