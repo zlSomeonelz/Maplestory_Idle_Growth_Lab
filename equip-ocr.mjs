@@ -121,8 +121,9 @@ export function parsePotentialLine(line, jobMainStat = 'LUK', jobSubStat = null,
     return slotIdx === 1 ? allowed[allowed.length - 1] : allowed[0];
   }
 
-  // Guard against decimal percentages (Cube potentials NEVER have decimals; decimals like 5.7% or 6.2% are base/equipped stats)
-  if (/\b\d+\.\d+\s*%/.test(trimmed)) {
+  // Guard against non-half decimals (Cube potentials only ever have integers or .5, e.g. 4.5%, 3.5%; values like 5.7% or 6.2% are equipped base stats)
+  const decMatch = trimmed.match(/\b\d+\.(\d+)\s*%/);
+  if (decMatch && decMatch[1] !== '5') {
     return { stat: 'NONE', value: 0, raw: trimmed, display: '잡옵' };
   }
 
@@ -513,7 +514,8 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
       if (parsedLines.length >= 3) break;
       if (/강화\s*효과|상세보기|장착\s*효과|자동\s*분해|일괄\s*분해|슬롯|보스\s*몬스터/.test(line)) continue;
       if (/^(?:잠재\s*[옵점][션선]?|[점잠]재\s*옵션|옵션|에디셔널)/.test(line)) continue;
-      if (/\b\d+\.\d+\s*%/.test(line)) continue; // Cube potentials never contain decimal numbers; decimals are base stats
+      const decMatch = line.match(/\b\d+\.(\d+)\s*%/);
+      if (decMatch && decMatch[1] !== '5') continue; // Cube potentials only have integers or .5; filter non-.5 base stats
       if (!line.includes('%') && /공격력\s+[0-9,]{4,}/.test(line)) continue;
       if (!line.includes('%') && /최대\s*HP\s+[0-9,]{4,}/.test(line)) continue;
       if (!line.includes('%') && /방어력\s+[0-9,]{3,}/.test(line)) continue;

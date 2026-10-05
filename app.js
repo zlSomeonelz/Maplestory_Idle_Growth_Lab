@@ -5151,14 +5151,221 @@ function renderMekiCubeLeaderboard() {
 
 let currentEditingEquipId = null;
 
+function getCubeDropdownOptions(eqName, slotType, grade, slotNum, jobMainStat = 'LUK', jobSubStat = 'DEX') {
+  const g = grade || 'epic';
+  const slotIdx = Number(slotNum) || 1;
+
+  const options = [
+    { stat: 'NONE', value: 0, label: '(비움 / 잡옵)' }
+  ];
+
+  // 1. Try official blocks in DATA.potentialProbabilities
+  const gData = DATA.potentialProbabilities?.grades?.[g];
+  const block = gData?.blocks?.find(b =>
+    (b.equipment === eqName || eqName.includes(b.equipment) || b.equipment.includes(eqName)) &&
+    Number(b.slot) === slotIdx
+  );
+
+  if (block && block.options && block.options.length > 0) {
+    const seen = new Set();
+    const candidates = [];
+    for (const opt of block.options) {
+      const text = opt.option;
+      const statMatch = text.match(/^(STR|DEX|INT|LUK)\s*([0-9.]*)\s*(%)?$/i);
+      if (statMatch) {
+        const sName = statMatch[1].toUpperCase();
+        const num = Number(statMatch[2]);
+        const isPct = Boolean(statMatch[3]);
+
+        if (sName === jobMainStat) {
+          candidates.push({
+            stat: isPct ? 'mainStatPct' : 'mainStat',
+            value: num,
+            label: isPct ? `주스탯 ${num}% (${sName})` : `주스탯(+) ${num} (${sName})`,
+            order: isPct ? 60 : 80
+          });
+        } else if (sName === jobSubStat) {
+          candidates.push({
+            stat: isPct ? 'subStatPct' : 'subStat',
+            value: num,
+            label: isPct ? `부스탯 ${num}% (${sName})` : `부스탯(+) ${num} (${sName})`,
+            order: isPct ? 70 : 90
+          });
+        }
+        continue;
+      }
+
+      let statKey = null;
+      let val = null;
+      let order = 100;
+      let label = text;
+
+      if (text.includes('크리티컬 확률')) {
+        statKey = 'critRate';
+        val = Number(text.match(/([0-9.]+)/)?.[1]);
+        order = 10;
+      } else if (text.includes('공격 속도')) {
+        statKey = 'attackSpeed';
+        val = Number(text.match(/([0-9.]+)/)?.[1]);
+        order = 20;
+      } else if (text.includes('최소 데미지 배율')) {
+        statKey = 'minDamage';
+        val = Number(text.match(/([0-9.]+)/)?.[1]);
+        order = 40;
+      } else if (text.includes('최대 데미지 배율')) {
+        statKey = 'maxDamage';
+        val = Number(text.match(/([0-9.]+)/)?.[1]);
+        order = 50;
+      } else if (text.includes('데미지') && !text.includes('크리티컬') && !text.includes('보스') && !text.includes('스킬') && !text.includes('기본')) {
+        statKey = 'damage';
+        val = Number(text.match(/([0-9.]+)/)?.[1]);
+        order = 30;
+      } else if (text.includes('스킬 재사용')) {
+        statKey = 'cooldownReduction';
+        val = Number(text.match(/([0-9.]+)/)?.[1]);
+        order = 5;
+      } else if (text.includes('크리티컬 데미지')) {
+        statKey = 'critDamage';
+        val = Number(text.match(/([0-9.]+)/)?.[1]);
+        order = 8;
+      } else if (text.includes('보스')) {
+        statKey = 'bossDamage';
+        val = Number(text.match(/([0-9.]+)/)?.[1]);
+        order = 12;
+      } else if (text.includes('공격력') && text.includes('%')) {
+        statKey = 'attackPct';
+        val = Number(text.match(/([0-9.]+)/)?.[1]);
+        order = 15;
+      } else if (text.includes('방어율')) {
+        statKey = 'defPen';
+        val = Number(text.match(/([0-9.]+)/)?.[1]);
+        order = 18;
+      } else if (text.includes('최대 HP')) {
+        statKey = 'maxHpPct';
+        val = Number(text.match(/([0-9.]+)/)?.[1]);
+        order = 110;
+      } else if (text.includes('방어력')) {
+        statKey = 'defPct';
+        val = Number(text.match(/([0-9.]+)/)?.[1]);
+        order = 120;
+      } else if (text.includes('최대 MP')) {
+        statKey = 'maxMpPct';
+        val = Number(text.match(/([0-9.]+)/)?.[1]);
+        order = 130;
+      }
+
+      if (statKey && val != null) {
+        candidates.push({ stat: statKey, value: val, label, order });
+      }
+    }
+
+    candidates.sort((a, b) => a.order - b.order || a.value - b.value);
+    for (const c of candidates) {
+      const key = `${c.stat}:${c.value}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        options.push(c);
+      }
+    }
+  } else {
+    // Fallback from GRADE_POTENTIAL_SPECS (e.g. for normal grade)
+    const spec = GRADE_POTENTIAL_SPECS[g]?.slots?.[slotIdx] || {};
+    const orderedKeys = [
+      ['critRate', '크리티컬 확률'],
+      ['attackSpeed', '공격 속도'],
+      ['damage', '데미지'],
+      ['minDamage', '최소 데미지 배율'],
+      ['maxDamage', '최대 데미지 배율'],
+      ['statPct', '주스탯'],
+      ['statFlat', '주스탯(+)'],
+      ['maxHpPct', '최대 HP'],
+      ['defPct', '방어력'],
+      ['maxMpPct', '최대 MP']
+    ];
+
+    for (const [sKey, lbl] of orderedKeys) {
+      const vals = spec[sKey] || [];
+      for (const val of vals) {
+        if (sKey === 'statPct') {
+          options.push({ stat: 'mainStatPct', value: val, label: `주스탯 ${val}% (${jobMainStat})` });
+          options.push({ stat: 'subStatPct', value: val, label: `부스탯 ${val}% (${jobSubStat})` });
+        } else if (sKey === 'statFlat') {
+          options.push({ stat: 'mainStat', value: val, label: `주스탯(+) ${val} (${jobMainStat})` });
+          options.push({ stat: 'subStat', value: val, label: `부스탯(+) ${val} (${jobSubStat})` });
+        } else {
+          const statMap = {
+            critRate: 'critRate', attackSpeed: 'attackSpeed', damage: 'damage',
+            minDamage: 'minDamage', maxDamage: 'maxDamage', maxHpPct: 'maxHpPct',
+            defPct: 'defPct', maxMpPct: 'maxMpPct'
+          };
+          options.push({ stat: statMap[sKey] || sKey, value: val, label: `${lbl} ${val}%` });
+        }
+      }
+    }
+  }
+
+  return options;
+}
+
+function populateModalSlotOptions(isAdditional = false) {
+  const prefix = isAdditional ? 'cubeAddSlot' : 'cubeSlot';
+  const gradeSel = isAdditional ? $('cubeEditAddGrade') : $('cubeEditGrade');
+  const grade = gradeSel?.value || (isAdditional ? 'normal' : 'epic');
+  const eq = specupEquipments.find(e => e.id === currentEditingEquipId);
+  const eqName = eq?.name || '모자';
+  const slotType = eq?.slotType || 'armor';
+
+  const jobKey = $('job')?.value || 'nightWalker';
+  const jobStatConfig = DATA.jobs?.jobs?.[jobKey] || FALLBACK_JOB_STATS[jobKey] || { main: ['LUK'], sub: ['DEX'] };
+  const jobMainStat = jobStatConfig.main?.[0] || 'LUK';
+  const jobSubStat = jobStatConfig.sub?.[0] || 'DEX';
+
+  [1, 2, 3].forEach(slotNum => {
+    const sel = $(`${prefix}${slotNum}Select`);
+    if (!sel) return;
+    const currentVal = sel.value;
+    const opts = getCubeDropdownOptions(eqName, slotType, grade, slotNum, jobMainStat, jobSubStat);
+
+    sel.innerHTML = opts.map(o =>
+      `<option value="${o.stat}:${o.value}">${escapeHtml(o.label)}</option>`
+    ).join('');
+
+    if (currentVal) {
+      const match = Array.from(sel.options).find(o => o.value === currentVal);
+      if (match) {
+        sel.value = currentVal;
+      } else {
+        const [prevStat] = currentVal.split(':');
+        const statMatch = Array.from(sel.options).find(o => o.value.startsWith(`${prevStat}:`));
+        if (statMatch) sel.value = statMatch.value;
+      }
+    }
+  });
+}
+
 function applyLinesToModalInputs(lines, isAdditional = false) {
   const prefix = isAdditional ? 'cubeAddSlot' : 'cubeSlot';
   [1, 2, 3].forEach((slotNum, idx) => {
     const line = lines[idx] || { stat: 'NONE', value: 0 };
-    const statEl = $(`${prefix}${slotNum}Stat`);
-    const valEl = $(`${prefix}${slotNum}Value`);
-    if (statEl) statEl.value = line.stat || 'NONE';
-    if (valEl) valEl.value = Number(line.value) || 0;
+    const sel = $(`${prefix}${slotNum}Select`);
+    if (!sel) return;
+    const key = `${line.stat}:${Number(line.value) || 0}`;
+
+    let matchedOption = Array.from(sel.options).find(o => o.value === key);
+    if (!matchedOption && line.stat !== 'NONE' && line.value > 0) {
+      matchedOption = Array.from(sel.options).find(o => o.value.startsWith(`${line.stat}:`));
+    }
+    if (matchedOption) {
+      sel.value = matchedOption.value;
+    } else if (line.stat !== 'NONE' && line.value > 0) {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = `[현재] ${line.display || (line.stat + ' ' + line.value)}`;
+      sel.appendChild(opt);
+      sel.value = key;
+    } else {
+      sel.value = 'NONE:0';
+    }
   });
 }
 
@@ -5182,9 +5389,10 @@ function openCubeEditModal(eqId) {
     ? eq.additionalLines
     : [ { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 } ];
 
+  populateModalSlotOptions(false);
+  populateModalSlotOptions(true);
   applyLinesToModalInputs(lines, false);
   applyLinesToModalInputs(addLines, true);
-  renderModalQuickChips();
 
   // Render in-game preferred settings preview inside modal
   const jobKey = $('job')?.value || 'nightWalker';
@@ -5193,94 +5401,9 @@ function openCubeEditModal(eqId) {
   if (typeof modal.showModal === 'function') modal.showModal(); else modal.setAttribute('open', '');
 }
 
-const STAT_TO_SPEC_KEY = {
-  mainStatPct: 'statPct',
-  subStatPct: 'statPct',
-  allStatPct: 'statPct',
-  damage: 'damage',
-  minDamage: 'minDamage',
-  maxDamage: 'maxDamage',
-  finalDamage: 'finalDamage',
-  skillDmg: 'skillDmg',
-  atkBasicDmg: 'atkBasicDmg',
-  critRate: 'critRate',
-  critDamage: 'critDamage',
-  bossDamage: 'bossDamage',
-  attackPct: 'attackPct',
-  attackSpeed: 'attackSpeed',
-  cooldownReduction: 'cooldownReduction',
-  maxHpPct: 'maxHpPct',
-  maxMpPct: 'maxMpPct',
-  defPct: 'defPct',
-  defPen: 'defPen',
-  mainStat: 'statFlat',
-  subStat: 'statFlat',
-  allStat: 'statFlat'
-};
-
-function renderModalQuickChips() {
-  const mainGrade = $('cubeEditGrade')?.value || 'epic';
-  const addGrade = $('cubeEditAddGrade')?.value || 'normal';
-
-  // 윗잠 chips
-  [1, 2, 3].forEach(slot => {
-    const chipEl = $(`cubeSlot${slot}QuickChips`);
-    if (!chipEl) return;
-    const statVal = $(`cubeSlot${slot}Stat`)?.value || 'NONE';
-    const specKey = STAT_TO_SPEC_KEY[statVal];
-    const allowed = specKey ? (GRADE_POTENTIAL_SPECS[mainGrade]?.slots?.[slot]?.[specKey] || []) : [];
-    if (!allowed.length) {
-      chipEl.innerHTML = '';
-      return;
-    }
-    const unit = specKey === 'cooldownReduction' ? '초' : (specKey === 'statFlat' ? '' : '%');
-    chipEl.innerHTML = allowed.map(val =>
-      `<button type="button" class="tag" style="cursor:pointer;font-size:11px;padding:2px 7px;background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe;border-radius:4px;font-weight:600;" data-target="cubeSlot${slot}Value" data-val="${val}">${val}${unit}</button>`
-    ).join('');
-  });
-
-  // 밑잠 chips
-  [1, 2, 3].forEach(slot => {
-    const chipEl = $(`cubeAddSlot${slot}QuickChips`);
-    if (!chipEl) return;
-    const statVal = $(`cubeAddSlot${slot}Stat`)?.value || 'NONE';
-    const specKey = STAT_TO_SPEC_KEY[statVal];
-    const allowed = specKey ? (GRADE_POTENTIAL_SPECS[addGrade]?.slots?.[slot]?.[specKey] || []) : [];
-    if (!allowed.length) {
-      chipEl.innerHTML = '';
-      return;
-    }
-    const unit = specKey === 'cooldownReduction' ? '초' : (specKey === 'statFlat' ? '' : '%');
-    chipEl.innerHTML = allowed.map(val =>
-      `<button type="button" class="tag" style="cursor:pointer;font-size:11px;padding:2px 7px;background:#dcfce7;color:#166534;border:1px solid #bbf7d0;border-radius:4px;font-weight:600;" data-target="cubeAddSlot${slot}Value" data-val="${val}">${val}${unit}</button>`
-    ).join('');
-  });
-}
-
 function initCubeEditModal() {
   const modal = $('cubeLineEditModal');
   if (!modal) return;
-
-  const statOptionsHtml = CUBE_LINE_STATS.map(([k, lbl]) => `<option value="${k}">${lbl}</option>`).join('');
-  ['cubeSlot1Stat', 'cubeSlot2Stat', 'cubeSlot3Stat', 'cubeAddSlot1Stat', 'cubeAddSlot2Stat', 'cubeAddSlot3Stat'].forEach(id => {
-    const sel = $(id);
-    if (sel) {
-      sel.innerHTML = statOptionsHtml;
-      sel.addEventListener('change', () => {
-        renderModalQuickChips();
-        // Auto-select primary allowed value if current value is 0
-        const isAdd = id.includes('Add');
-        const slotNum = id.match(/Slot(\d)/)?.[1] || '1';
-        const valInput = $(isAdd ? `cubeAddSlot${slotNum}Value` : `cubeSlot${slotNum}Value`);
-        const grade = isAdd ? ($('cubeEditAddGrade')?.value || 'normal') : ($('cubeEditGrade')?.value || 'epic');
-        const specKey = STAT_TO_SPEC_KEY[sel.value];
-        const allowed = specKey ? (GRADE_POTENTIAL_SPECS[grade]?.slots?.[Number(slotNum)]?.[specKey] || []) : [];
-        if (valInput && (Number(valInput.value) === 0 || !valInput.value) && allowed.length > 0) {
-          valInput.value = allowed[allowed.length - 1];
-        }
-      });
-    }
-  });
 
   const closeModal = () => {
     if (typeof modal.close === 'function') modal.close(); else modal.removeAttribute('open');
@@ -5290,16 +5413,6 @@ function initCubeEditModal() {
   $('cancelCubeEditBtn')?.addEventListener('click', closeModal);
   modal.addEventListener('click', e => {
     if (e.target === modal) closeModal();
-    const chipBtn = e.target.closest('button[data-target][data-val]');
-    if (chipBtn) {
-      const targetId = chipBtn.dataset.target;
-      const val = chipBtn.dataset.val;
-      const input = $(targetId);
-      if (input) {
-        input.value = val;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-      }
-    }
   });
 
   $('cubeEditGrade')?.addEventListener('change', (e) => {
@@ -5307,45 +5420,30 @@ function initCubeEditModal() {
     if (!eq) return;
     const jobKey = $('job')?.value || 'nightWalker';
     renderInGamePreferredSettings(eq.slotType, e.target.value, 'modalPreferredSettingsRoot', jobKey);
-    renderModalQuickChips();
+    populateModalSlotOptions(false);
   });
 
   $('cubeEditAddGrade')?.addEventListener('change', () => {
-    renderModalQuickChips();
+    populateModalSlotOptions(true);
   });
 
-  $('cubePresetGarbageBtn')?.addEventListener('click', () => {
-    applyLinesToModalInputs([
-      { stat: 'NONE', value: 0 },
-      { stat: 'NONE', value: 0 },
-      { stat: 'NONE', value: 0 }
-    ], false);
-    renderModalQuickChips();
-  });
+  const applyPresetToSelects = (count) => {
+    [1, 2, 3].forEach((slotNum, idx) => {
+      const sel = $(`cubeSlot${slotNum}Select`);
+      if (!sel) return;
+      if (idx < count) {
+        const mainOpt = Array.from(sel.options).find(o => o.value.startsWith('mainStatPct:'));
+        sel.value = mainOpt ? mainOpt.value : (sel.options[1]?.value || 'NONE:0');
+      } else {
+        sel.value = 'NONE:0';
+      }
+    });
+  };
 
-  $('cubePreset1LineBtn')?.addEventListener('click', () => {
-    const eq = specupEquipments.find(e => e.id === currentEditingEquipId);
-    const grade = $('cubeEditGrade')?.value || 'epic';
-    const lines = generateDefaultLines(eq?.slotType || 'armor', grade, 1);
-    applyLinesToModalInputs(lines, false);
-    renderModalQuickChips();
-  });
-
-  $('cubePreset2LineBtn')?.addEventListener('click', () => {
-    const eq = specupEquipments.find(e => e.id === currentEditingEquipId);
-    const grade = $('cubeEditGrade')?.value || 'unique';
-    const lines = generateDefaultLines(eq?.slotType || 'armor', grade, 2);
-    applyLinesToModalInputs(lines, false);
-    renderModalQuickChips();
-  });
-
-  $('cubePreset3LineBtn')?.addEventListener('click', () => {
-    const eq = specupEquipments.find(e => e.id === currentEditingEquipId);
-    const grade = $('cubeEditGrade')?.value || 'legendary';
-    const lines = generateDefaultLines(eq?.slotType || 'armor', grade, 3);
-    applyLinesToModalInputs(lines, false);
-    renderModalQuickChips();
-  });
+  $('cubePresetGarbageBtn')?.addEventListener('click', () => applyPresetToSelects(0));
+  $('cubePreset1LineBtn')?.addEventListener('click', () => applyPresetToSelects(1));
+  $('cubePreset2LineBtn')?.addEventListener('click', () => applyPresetToSelects(2));
+  $('cubePreset3LineBtn')?.addEventListener('click', () => applyPresetToSelects(3));
 
   $('saveCubeEditBtn')?.addEventListener('click', () => {
     const eq = specupEquipments.find(e => e.id === currentEditingEquipId);
@@ -5354,9 +5452,11 @@ function initCubeEditModal() {
     // Save 윗잠
     eq.cubeGrade = $('cubeEditGrade')?.value || 'epic';
     const lines = [1, 2, 3].map(i => {
-      const stat = $(`cubeSlot${i}Stat`)?.value || 'NONE';
-      const val = Number($(`cubeSlot${i}Value`)?.value || 0);
-      return { stat, value: val };
+      const valStr = $(`cubeSlot${i}Select`)?.value || 'NONE:0';
+      const [stat, valNum] = valStr.split(':');
+      const value = Number(valNum) || 0;
+      const display = $(`cubeSlot${i}Select`)?.selectedOptions?.[0]?.textContent || (stat + ' ' + value);
+      return { stat, value, display };
     });
     eq.potentialLines = lines;
     eq.cubeValidLines = lines.filter(l => l.stat !== 'NONE' && l.value > 0).length;
@@ -5364,9 +5464,11 @@ function initCubeEditModal() {
     // Save 밑잠 (에디셔널)
     eq.additionalGrade = $('cubeEditAddGrade')?.value || 'normal';
     const addLines = [1, 2, 3].map(i => {
-      const stat = $(`cubeAddSlot${i}Stat`)?.value || 'NONE';
-      const val = Number($(`cubeAddSlot${i}Value`)?.value || 0);
-      return { stat, value: val };
+      const valStr = $(`cubeAddSlot${i}Select`)?.value || 'NONE:0';
+      const [stat, valNum] = valStr.split(':');
+      const value = Number(valNum) || 0;
+      const display = $(`cubeAddSlot${i}Select`)?.selectedOptions?.[0]?.textContent || (stat + ' ' + value);
+      return { stat, value, display };
     });
     eq.additionalLines = addLines;
     eq.additionalValidLines = addLines.filter(l => l.stat !== 'NONE' && l.value > 0).length;
