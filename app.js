@@ -5575,10 +5575,27 @@ function initEquipOcr() {
   const jobSelect = $('equipOcrJobSelect');
   const jobHint = $('equipOcrJobHint');
 
+  const FALLBACK_JOB_STATS = {
+    nightWalker: { main: ['LUK'], sub: ['DEX'] },
+    nightLord: { main: ['LUK'], sub: ['DEX'] },
+    shadower: { main: ['LUK'], sub: ['DEX'] },
+    hero: { main: ['STR'], sub: ['DEX'] },
+    paladin: { main: ['STR'], sub: ['DEX'] },
+    darkKnight: { main: ['STR'], sub: ['DEX'] },
+    viper: { main: ['STR'], sub: ['DEX'] },
+    bowmaster: { main: ['DEX'], sub: ['STR'] },
+    sniper: { main: ['DEX'], sub: ['STR'] },
+    windBreaker: { main: ['DEX'], sub: ['STR'] },
+    captain: { main: ['DEX'], sub: ['STR'] },
+    archMageIceLightning: { main: ['INT'], sub: ['LUK'] },
+    archMageFirePoison: { main: ['INT'], sub: ['LUK'] },
+    bishop: { main: ['INT'], sub: ['LUK'] }
+  };
+
   function syncJobSelector() {
     if (!jobSelect) return;
-    const currentJobKey = $('job')?.value || 'nightWalker';
-    const jobs = DATA.jobStats?.jobs || {};
+    const currentJobKey = $('job')?.value || jobSelect.value || 'nightWalker';
+    const jobs = DATA.jobs?.jobs || FALLBACK_JOB_STATS;
     
     if (!jobSelect.options.length) {
       jobSelect.innerHTML = Object.keys(jobs).map(k => {
@@ -5589,7 +5606,7 @@ function initEquipOcr() {
       }).join('');
     }
     jobSelect.value = currentJobKey;
-    const activeStat = jobs[currentJobKey] || { main: ['LUK'], sub: ['DEX'] };
+    const activeStat = jobs[currentJobKey] || jobs.nightWalker || { main: ['LUK'], sub: ['DEX'] };
     if (jobHint) {
       jobHint.textContent = `(주스탯: ${activeStat.main[0]} · 부스탯: ${activeStat.sub[0]})`;
     }
@@ -5603,8 +5620,8 @@ function initEquipOcr() {
       $('job').value = newJob;
       $('job').dispatchEvent(new Event('change'));
     }
-    const jobs = DATA.jobStats?.jobs || {};
-    const activeStat = jobs[newJob] || { main: ['LUK'], sub: ['DEX'] };
+    const jobs = DATA.jobs?.jobs || FALLBACK_JOB_STATS;
+    const activeStat = jobs[newJob] || jobs.nightWalker || { main: ['LUK'], sub: ['DEX'] };
     if (jobHint) {
       jobHint.textContent = `(주스탯: ${activeStat.main[0]} · 부스탯: ${activeStat.sub[0]})`;
     }
@@ -5628,11 +5645,16 @@ function initEquipOcr() {
     const valid = Array.from(files).filter(f => f.type.startsWith('image/') || f instanceof Blob);
     if (!valid.length) return;
     selectedFiles = [...selectedFiles, ...valid];
-    updateStatus(`총 ${selectedFiles.length}장의 장비 스크린샷이 대기 중입니다. [🔍 분석 실행]을 눌러 자동 등록하세요.`, 'info');
+    updateStatus(`총 ${selectedFiles.length}장의 장비 스크린샷이 선택되었습니다.`, 'info');
   }
 
   fileInput?.addEventListener('change', () => {
-    if (fileInput.files?.length) addFiles(fileInput.files);
+    if (fileInput.files?.length) {
+      const filesToProcess = Array.from(fileInput.files);
+      addFiles(filesToProcess);
+      processEquipFiles(filesToProcess);
+      fileInput.value = '';
+    }
   });
 
   dropZone?.addEventListener('dragover', (e) => {
@@ -5776,7 +5798,7 @@ function initEquipOcr() {
         const text = res.data?.text || '';
 
         const jobKey = $('equipOcrJobSelect')?.value || $('job')?.value || 'nightWalker';
-        const jobStatConfig = DATA.jobStats?.jobs?.[jobKey] || { main: ['LUK'], sub: ['DEX'] };
+        const jobStatConfig = DATA.jobs?.jobs?.[jobKey] || FALLBACK_JOB_STATS[jobKey] || { main: ['LUK'], sub: ['DEX'] };
         const jobMainStat = jobStatConfig.main?.[0] || 'LUK';
         const jobSubStat = jobStatConfig.sub?.[0] || 'DEX';
         const jobNameKr = JOB_NAMES[jobKey] || jobKey;

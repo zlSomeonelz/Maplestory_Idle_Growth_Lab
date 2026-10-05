@@ -549,14 +549,28 @@
           <div style="display:flex;align-items:center;gap:10px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;padding:9px 14px;margin-bottom:12px;flex-wrap:wrap;">
             <span style="font-size:12.5px;font-weight:700;color:#3730a3;">🎯 주스탯 판정 기준 직업:</span>
             <select id="equipOcrJobSelect" style="font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:6px;border:1px solid #6366f1;background:#fff;color:#1e1b4b;min-width:200px;cursor:pointer;">
+              <option value="nightWalker" selected>나이트워커 (주: LUK · 부: DEX)</option>
+              <option value="nightLord">나이트로드 (주: LUK · 부: DEX)</option>
+              <option value="shadower">섀도어 (주: LUK · 부: DEX)</option>
+              <option value="hero">히어로 (주: STR · 부: DEX)</option>
+              <option value="paladin">팔라딘 (주: STR · 부: DEX)</option>
+              <option value="darkKnight">다크나이트 (주: STR · 부: DEX)</option>
+              <option value="viper">바이퍼 (주: STR · 부: DEX)</option>
+              <option value="bowmaster">보우마스터 (주: DEX · 부: STR)</option>
+              <option value="sniper">신궁 (주: DEX · 부: STR)</option>
+              <option value="windBreaker">윈드브레이커 (주: DEX · 부: STR)</option>
+              <option value="captain">캡틴 (주: DEX · 부: STR)</option>
+              <option value="archMageIceLightning">썬콜 (주: INT · 부: LUK)</option>
+              <option value="archMageFirePoison">불독 (주: INT · 부: LUK)</option>
+              <option value="bishop">비숍 (주: INT · 부: LUK)</option>
             </select>
             <span id="equipOcrJobHint" style="font-size:12px;color:#4338ca;font-weight:600;">(주스탯: LUK · 부스탯: DEX)</span>
           </div>
 
           <label class="drop" id="equipOcrDropZone" for="equipOcrFileInput" style="display:block;cursor:pointer;border:2px dashed #6366f1;border-radius:12px;padding:22px 16px;text-align:center;background:#fff;transition:all .2s;margin-bottom:10px;">
-            <div style="font-size:28px;margin-bottom:6px;">📸 📥</div>
-            <strong style="color:var(--primary-dark);font-size:14px;">여기를 클릭하여 장비 스크린샷 선택</strong>
-            <div style="font-size:12px;color:var(--muted);margin-top:4px;">또는 이미지를 여기로 드래그하거나 [Ctrl + V]로 붙여넣으세요</div>
+            <div style="font-size:28px;margin-bottom:6px;pointer-events:none;">📸 📥</div>
+            <strong style="color:var(--primary-dark);font-size:14px;pointer-events:none;display:block;">여기를 클릭하여 장비 스크린샷 선택</strong>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;pointer-events:none;">또는 이미지를 여기로 드래그하거나 [Ctrl + V]로 붙여넣으세요 (터치 시 사진 보관함 열림)</div>
             <input type="file" id="equipOcrFileInput" accept="image/*" multiple style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);padding:0;margin:-1px;">
           </label>
 
@@ -1208,6 +1222,6 @@
 
     <footer>Maple Growth Lab · 공식 원문에 없는 값은 provisional / unverified로 투명하게 표시합니다.</footer>
   </div>
-  <script type="module" src="app.js?v=20261005_1145"></script>
+  <script type="module" src="app.js?v=20261005_1350"></script>
 </body>
 </html>
