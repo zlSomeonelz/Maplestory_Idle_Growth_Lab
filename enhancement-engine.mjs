@@ -639,6 +639,7 @@ function getEffectiveDPS(res) {
 
 export function optimizeSpecUpPath({
   budgetMeso = 100000000,
+  inventory = {},
   playerInputs = {},
   equipmentList = [],
   enhancementRules = {},
@@ -648,6 +649,16 @@ export function optimizeSpecUpPath({
   maxSteps = 30
 }) {
   let budgetRemaining = Math.max(0, Number(budgetMeso) || 0);
+  let starforceScrollsLeft = inventory.starforceScrolls !== undefined ? Math.max(0, Number(inventory.starforceScrolls)) : Infinity;
+  let spellTracesLeft = inventory.spellTraces !== undefined ? Math.max(0, Number(inventory.spellTraces)) : Infinity;
+  let miracleCubesLeft = inventory.miracleCubes !== undefined ? Math.max(0, Number(inventory.miracleCubes)) : Infinity;
+  let additionalCubesLeft = inventory.additionalCubes !== undefined ? Math.max(0, Number(inventory.additionalCubes)) : Infinity;
+
+  let totalScrollsUsed = 0;
+  let totalSpellTracesUsed = 0;
+  let totalMiracleCubesUsed = 0;
+  let totalAdditionalCubesUsed = 0;
+
   let currentStats = {
     accuracy: 100,
     skillCoefficient: 100,
@@ -672,7 +683,11 @@ export function optimizeSpecUpPath({
     scrollSlotsUsed: Number(eq.scrollSlotsUsed) || 0,
     cubeGrade: eq.cubeGrade || 'epic', // 'rare', 'epic', 'unique', 'legendary'
     cubeValidLines: Math.min(3, Math.max(0, Number(eq.cubeValidLines !== undefined ? eq.cubeValidLines : 1))),
-    potentialLines: Array.isArray(eq.potentialLines) ? JSON.parse(JSON.stringify(eq.potentialLines)) : null
+    potentialLines: Array.isArray(eq.potentialLines) ? JSON.parse(JSON.stringify(eq.potentialLines)) : null,
+    hasAdditional: Boolean(eq.hasAdditional),
+    additionalGrade: eq.additionalGrade || 'normal',
+    additionalValidLines: Math.min(3, Math.max(0, Number(eq.additionalValidLines !== undefined ? eq.additionalValidLines : (eq.additionalLines ? eq.additionalLines.filter(l => l && l.stat !== 'NONE' && l.value > 0).length : 0)))),
+    additionalLines: Array.isArray(eq.additionalLines) ? JSON.parse(JSON.stringify(eq.additionalLines)) : null
   }));
 
   const steps = [];
@@ -686,7 +701,7 @@ export function optimizeSpecUpPath({
 
     // 1. Star Force Candidates (+1 star step)
     for (const eq of equips) {
-      if (eq.currentStar < eq.maxStar) {
+      if (eq.currentStar < eq.maxStar && starforceScrollsLeft >= 1) {
         const nextStar = eq.currentStar + 1;
         const sfRes = calculateStarforcePath(eq.currentStar, nextStar, {
           itemLevel: eq.itemLevel,
@@ -708,6 +723,8 @@ export function optimizeSpecUpPath({
             equipment: eq,
             targetStar: nextStar,
             cost: sfRes.totalCost,
+            scrollsUsed: 1,
+            resourceDetail: '스타포스 주문서 1장',
             statGains: sfRes.statGains,
             dpsDelta,
             dpsGainPct,
@@ -718,24 +735,21 @@ export function optimizeSpecUpPath({
       }
     }
 
-    // 2. Note: MapleStory Idle enhancement strictly consists of Starforce & Cube Potential (no scrolls).
-    // Scroll candidates are omitted to reflect pure MapleStory Idle system mechanics.
-
-    // 3. Cube Potential Candidates (Reroll for valid lines or Tier up)
+    // 2. Miracle Cube (윗잠 큐브) Candidates
     for (const eq of equips) {
       const currentLines = eq.cubeValidLines;
       const currentGrade = eq.cubeGrade;
       const currentCubeStats = getEquipmentCubeStats(eq);
       const cubeCost = enhancementRules.cubeCosts?.[currentGrade] || 200000;
 
-      // 3A. Reroll at current grade to gain +1 valid line (if lines < 2)
+      // 2A. Reroll at current grade to gain +1 valid line (if lines < 2)
       if (currentLines < 2) {
         const targetLines = currentLines + 1;
         const targetStats = getCubeStatProfile(eq.slotType, currentGrade, targetLines);
         const expectedTries = targetLines === 1 ? 8 : 26;
         const totalCubeCost = expectedTries * cubeCost;
 
-        if (totalCubeCost <= budgetRemaining) {
+        if (totalCubeCost <= budgetRemaining && miracleCubesLeft >= expectedTries) {
           const statsWithoutOld = subtractStatGains(currentStats, currentCubeStats);
           const testInputs = applyStatGains(statsWithoutOld, targetStats);
           const testDpsRes = calculateDamage(testInputs, combatRules);
@@ -751,25 +765,27 @@ export function optimizeSpecUpPath({
               targetGrade: currentGrade,
               targetValidLines: targetLines,
               cost: totalCubeCost,
+              cubesUsed: expectedTries,
+              resourceDetail: `미라클 큐브 ${expectedTries}개`,
               oldCubeStats: currentCubeStats,
               newCubeStats: targetStats,
               statGains: targetStats,
               dpsDelta,
               dpsGainPct,
               roi,
-              description: `[${eq.name}] 큐브 재설정 (${currentGrade} ${currentLines}줄 → ${targetLines}줄 유효)`
+              description: `[${eq.name}] 윗잠 큐브 재설정 (${currentGrade} ${currentLines}줄 → ${targetLines}줄 유효)`
             });
           }
         }
       }
 
-      // 3B. Tier-up to next grade
+      // 2B. Tier-up to next grade
       if (currentGrade !== 'legendary') {
         const nextGrade = currentGrade === 'rare' ? 'epic' : currentGrade === 'epic' ? 'unique' : 'legendary';
         const expectedTries = nextGrade === 'epic' ? 20 : nextGrade === 'unique' ? 45 : 100;
         const totalCubeCost = expectedTries * cubeCost;
 
-        if (totalCubeCost <= budgetRemaining) {
+        if (totalCubeCost <= budgetRemaining && miracleCubesLeft >= expectedTries) {
           const targetLines = Math.max(1, currentLines);
           const targetStats = getCubeStatProfile(eq.slotType, nextGrade, targetLines);
 
@@ -788,13 +804,84 @@ export function optimizeSpecUpPath({
               targetGrade: nextGrade,
               targetValidLines: targetLines,
               cost: totalCubeCost,
+              cubesUsed: expectedTries,
+              resourceDetail: `미라클 큐브 ${expectedTries}개`,
               oldCubeStats: currentCubeStats,
               newCubeStats: targetStats,
               statGains: targetStats,
               dpsDelta,
               dpsGainPct,
               roi,
-              description: `[${eq.name}] 큐브 등급업 (${currentGrade} → ${nextGrade}, 유효 ${targetLines}줄)`
+              description: `[${eq.name}] 윗잠 큐브 등급업 (${currentGrade} → ${nextGrade}, 유효 ${targetLines}줄)`
+            });
+          }
+        }
+      }
+    }
+
+    // 3. Additional Cube (밑잠 큐브) Candidates
+    for (const eq of equips) {
+      const addLines = eq.additionalValidLines || 0;
+      if (eq.hasAdditional && addLines < 1 && additionalCubesLeft >= 6) {
+        const addCostPerTry = 80000;
+        const expectedTries = 6;
+        const totalAddCost = expectedTries * addCostPerTry;
+
+        if (totalAddCost <= budgetRemaining) {
+          const addStatGain = { mainStatPct: 3 };
+          const testInputs = applyStatGains(currentStats, addStatGain);
+          const testDpsRes = calculateDamage(testInputs, combatRules);
+          const testDpsVal = getEffectiveDPS(testDpsRes);
+          const dpsDelta = Math.max(0, testDpsVal - currentDps);
+          const dpsGainPct = (dpsDelta / currentDps) * 100;
+          const roi = totalAddCost > 0 ? (dpsGainPct / (totalAddCost / 10000)) : 0;
+
+          if (dpsGainPct > 0) {
+            candidates.push({
+              type: 'additional_cube',
+              equipment: eq,
+              cost: totalAddCost,
+              cubesUsed: expectedTries,
+              resourceDetail: `에디셔널 큐브 ${expectedTries}개`,
+              statGains: addStatGain,
+              dpsDelta,
+              dpsGainPct,
+              roi,
+              description: `[${eq.name}] 밑잠 에디셔널 큐브 1줄 유효 확보 (주스탯 +3%)`
+            });
+          }
+        }
+      }
+    }
+
+    // 4. Spell Traces (주문의 흔적) Candidates
+    for (const eq of equips) {
+      if (eq.scrollSlotsUsed < eq.scrollSlotsTotal && spellTracesLeft >= 200) {
+        const traceCost = 150000;
+        const tracesUsed = 200;
+        if (traceCost <= budgetRemaining) {
+          const traceStatGain = eq.slotType === 'weapon'
+            ? { attackFlat: 3, mainStat: 2 }
+            : { mainStat: 3, subStat: 1 };
+          const testInputs = applyStatGains(currentStats, traceStatGain);
+          const testDpsRes = calculateDamage(testInputs, combatRules);
+          const testDpsVal = getEffectiveDPS(testDpsRes);
+          const dpsDelta = Math.max(0, testDpsVal - currentDps);
+          const dpsGainPct = (dpsDelta / currentDps) * 100;
+          const roi = traceCost > 0 ? (dpsGainPct / (traceCost / 10000)) : 0;
+
+          if (dpsGainPct > 0) {
+            candidates.push({
+              type: 'scroll',
+              equipment: eq,
+              cost: traceCost,
+              tracesUsed,
+              resourceDetail: `주문의 흔적 ${tracesUsed}개`,
+              statGains: traceStatGain,
+              dpsDelta,
+              dpsGainPct,
+              roi,
+              description: `[${eq.name}] 주문의 흔적 작 (+1 슬롯)`
             });
           }
         }
@@ -812,15 +899,35 @@ export function optimizeSpecUpPath({
     if (chosen.type === 'starforce') {
       chosen.equipment.currentStar = chosen.targetStar;
       currentStats = applyStatGains(currentStats, chosen.statGains);
+      if (chosen.scrollsUsed) {
+        starforceScrollsLeft = Math.max(0, starforceScrollsLeft - chosen.scrollsUsed);
+        totalScrollsUsed += chosen.scrollsUsed;
+      }
     } else if (chosen.type === 'scroll') {
       chosen.equipment.scrollSlotsUsed += 1;
       currentStats = applyStatGains(currentStats, chosen.statGains);
+      if (chosen.tracesUsed) {
+        spellTracesLeft = Math.max(0, spellTracesLeft - chosen.tracesUsed);
+        totalSpellTracesUsed += chosen.tracesUsed;
+      }
     } else if (chosen.type === 'cube') {
       chosen.equipment.cubeGrade = chosen.targetGrade;
       chosen.equipment.cubeValidLines = chosen.targetValidLines;
       chosen.equipment.potentialLines = null;
       currentStats = subtractStatGains(currentStats, chosen.oldCubeStats);
       currentStats = applyStatGains(currentStats, chosen.newCubeStats);
+      if (chosen.cubesUsed) {
+        miracleCubesLeft = Math.max(0, miracleCubesLeft - chosen.cubesUsed);
+        totalMiracleCubesUsed += chosen.cubesUsed;
+      }
+    } else if (chosen.type === 'additional_cube') {
+      chosen.equipment.hasAdditional = true;
+      chosen.equipment.additionalValidLines = 1;
+      currentStats = applyStatGains(currentStats, chosen.statGains);
+      if (chosen.cubesUsed) {
+        additionalCubesLeft = Math.max(0, additionalCubesLeft - chosen.cubesUsed);
+        totalAdditionalCubesUsed += chosen.cubesUsed;
+      }
     }
 
     const newDpsRes = calculateDamage(currentStats, combatRules);
@@ -833,6 +940,7 @@ export function optimizeSpecUpPath({
       type: chosen.type,
       description: chosen.description,
       cost: chosen.cost,
+      resourceDetail: chosen.resourceDetail || '',
       dpsDelta: chosen.dpsDelta,
       dpsGainPct: chosen.dpsGainPct,
       roi: chosen.roi,
@@ -855,6 +963,18 @@ export function optimizeSpecUpPath({
     budgetTotal: budgetMeso,
     budgetUsed: budgetMeso - budgetRemaining,
     budgetRemaining,
+    resourcesUsed: {
+      starforceScrolls: totalScrollsUsed,
+      spellTraces: totalSpellTracesUsed,
+      miracleCubes: totalMiracleCubesUsed,
+      additionalCubes: totalAdditionalCubesUsed
+    },
+    resourcesRemaining: {
+      starforceScrolls: starforceScrollsLeft,
+      spellTraces: spellTracesLeft,
+      miracleCubes: miracleCubesLeft,
+      additionalCubes: additionalCubesLeft
+    },
     steps
   };
 }

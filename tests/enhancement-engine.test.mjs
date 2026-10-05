@@ -375,6 +375,24 @@ const cubeProb2Line = (await import('../enhancement-engine.mjs')).calculateCubeI
 assert.ok(cubeProb2Line.netImprovementProbability < cubeProb0Line.netImprovementProbability, 'Better current lines must have lower improvement probability');
 assert.ok(cubeProb2Line.attempts80Percent > cubeProb0Line.attempts80Percent, 'Better current lines require more attempts for 80% confidence');
 
+// 11. Inventory Constrained Roadmap Tests
+const invConstrainedRes = optimizeSpecUpPath({
+  budgetMeso: 50000000,
+  inventory: { starforceScrolls: 0, spellTraces: 0, miracleCubes: 100, additionalCubes: 50 },
+  playerInputs: baseStats,
+  equipmentList: equips,
+  enhancementRules,
+  starforceProbabilities: probabilities.starforce,
+  potentialProbabilities: probabilities.normalPotentialPartial,
+  combatRules,
+  maxSteps: 10
+});
+assert.ok(!invConstrainedRes.steps.some(s => s.type === 'starforce'), 'When starforce scrolls are 0, no starforce steps should be generated');
+assert.ok(!invConstrainedRes.steps.some(s => s.type === 'scroll'), 'When spell traces are 0, no scroll steps should be generated');
+assert.ok(invConstrainedRes.steps.every(s => s.type === 'cube' || s.type === 'additional_cube'), 'All steps must be cube steps when scrolls are 0');
+assert.ok(invConstrainedRes.resourcesUsed.starforceScrolls === 0);
+assert.ok(invConstrainedRes.resourcesUsed.miracleCubes > 0);
+
 console.log('enhancement-engine tests (including edge cases & invariants) passed cleanly!');
 console.log(`Initial DPS: ${roadmap.initialDps.toFixed(1)} -> Final DPS: ${roadmap.finalDps.toFixed(1)} (+${roadmap.totalDpsGainPct.toFixed(2)}%)`);
 console.log(`Budget Used: ${roadmap.budgetUsed.toLocaleString()} / ${roadmap.budgetTotal.toLocaleString()} meso across ${roadmap.steps.length} steps`);

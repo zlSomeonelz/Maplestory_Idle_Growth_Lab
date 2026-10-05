@@ -4913,6 +4913,9 @@ function renderSpecupEquipTable() {
   tbody.innerHTML = specupEquipments.map(eq => {
     const rec = recommendCubeAction(eq, inputs, DATA.combat || {}, DATA.enhancementRules || {});
     const linesSummary = formatLineSummary(eq.potentialLines);
+    const addSummary = eq.hasAdditional && eq.additionalGrade
+      ? formatLineSummary(eq.additionalLines || [])
+      : '미개방 (옵션 없음)';
 
     return `
       <tr>
@@ -4930,23 +4933,40 @@ function renderSpecupEquipTable() {
           </div>
         </td>
         <td>
-          <select class="table-select" data-eq-id="${escapeHtml(eq.id)}" data-field="cubeGrade">
-            <option value="rare" ${eq.cubeGrade === 'rare' ? 'selected' : ''}>레어</option>
-            <option value="epic" ${eq.cubeGrade === 'epic' ? 'selected' : ''}>에픽</option>
-            <option value="unique" ${eq.cubeGrade === 'unique' ? 'selected' : ''}>유니크</option>
-            <option value="legendary" ${eq.cubeGrade === 'legendary' ? 'selected' : ''}>레전더리</option>
-          </select>
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+            <select class="table-select" data-eq-id="${escapeHtml(eq.id)}" data-field="cubeGrade" style="font-weight:700;color:#4f46e5;font-size:11.5px;padding:2px 5px;">
+              <option value="rare" ${eq.cubeGrade === 'rare' ? 'selected' : ''}>레어</option>
+              <option value="epic" ${eq.cubeGrade === 'epic' ? 'selected' : ''}>에픽</option>
+              <option value="unique" ${eq.cubeGrade === 'unique' ? 'selected' : ''}>유니크</option>
+              <option value="legendary" ${eq.cubeGrade === 'legendary' ? 'selected' : ''}>레전더리</option>
+              <option value="mystic" ${eq.cubeGrade === 'mystic' ? 'selected' : ''}>미스틱</option>
+            </select>
+            <span style="font-size:11px;color:var(--muted);">${eq.cubeValidLines || 0}줄 유효</span>
+          </div>
+          <div style="font-size:11.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;" title="윗잠: ${escapeHtml(linesSummary)}">
+            ${escapeHtml(linesSummary)}
+          </div>
         </td>
         <td>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="badge" style="background:${rec.badgeColor};color:#fff;font-size:11px;padding:3px 7px;">${rec.verdictLabel}</span>
-            <button type="button" class="button secondary edit-cube-line-btn" data-eq-id="${escapeHtml(eq.id)}" style="font-size:11.5px;padding:3px 8px;min-height:30px;">✏️ 3줄 편집</button>
+          <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+            <select class="table-select" data-eq-id="${escapeHtml(eq.id)}" data-field="additionalGrade" style="font-weight:700;color:${eq.hasAdditional ? '#0b7a58' : '#6b7280'};font-size:11.5px;padding:2px 5px;">
+              <option value="none" ${!eq.hasAdditional ? 'selected' : ''}>미개방</option>
+              <option value="normal" ${eq.hasAdditional && eq.additionalGrade === 'normal' ? 'selected' : ''}>노말</option>
+              <option value="rare" ${eq.hasAdditional && eq.additionalGrade === 'rare' ? 'selected' : ''}>레어</option>
+              <option value="epic" ${eq.hasAdditional && eq.additionalGrade === 'epic' ? 'selected' : ''}>에픽</option>
+              <option value="unique" ${eq.hasAdditional && eq.additionalGrade === 'unique' ? 'selected' : ''}>유니크</option>
+              <option value="legendary" ${eq.hasAdditional && eq.additionalGrade === 'legendary' ? 'selected' : ''}>레전더리</option>
+            </select>
+            ${eq.hasAdditional ? `<span style="font-size:11px;color:var(--muted);">${eq.additionalValidLines || 0}줄 유효</span>` : ''}
           </div>
-          <div style="font-size:11.5px;color:var(--ink);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;" title="윗잠: ${escapeHtml(linesSummary)}">
-            🔮 윗: <span style="font-weight:700;color:#4f46e5;">${CUBE_GRADE_NAMES[eq.cubeGrade] || eq.cubeGrade}</span> (${escapeHtml(linesSummary)})
+          <div style="font-size:11px;color:${eq.hasAdditional ? 'var(--ink)' : '#6b7280'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;" title="밑잠: ${escapeHtml(addSummary)}">
+            ${eq.hasAdditional ? escapeHtml(addSummary) : '<span style="color:#94a3b8;">미개방 (옵션 없음)</span>'}
           </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;" title="밑잠: ${escapeHtml(eq.hasAdditional && eq.additionalGrade ? formatLineSummary(eq.additionalLines || []) : '미개방')}">
-            💠 밑: ${eq.hasAdditional && eq.additionalGrade ? `<span style="font-weight:700;color:#0b7a58;">${GRADE_KOREAN[eq.additionalGrade] || eq.additionalGrade}</span> (${escapeHtml(formatLineSummary(eq.additionalLines || []))})` : '<span style="color:#6b7280;">미개방</span>'}
+        </td>
+        <td>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
+            <span class="badge" style="background:${rec.badgeColor};color:#fff;font-size:11px;padding:2px 6px;">${rec.verdictLabel}</span>
+            <button type="button" class="button secondary edit-cube-line-btn" data-eq-id="${escapeHtml(eq.id)}" style="font-size:11px;padding:3px 8px;min-height:26px;">✏️ 3줄 편집</button>
           </div>
         </td>
       </tr>
@@ -4973,6 +4993,27 @@ function renderSpecupEquipTable() {
           if (!targetEq.potentialLines) {
             targetEq.potentialLines = generateDefaultLines(targetEq.slotType, targetEq.cubeGrade, targetEq.cubeValidLines);
           }
+          localStorage.setItem(SPECUP_STORE_KEY, JSON.stringify(specupEquipments));
+          renderSpecupEquipTable();
+          renderMekiCubeLeaderboard();
+          renderCubeEquipmentLoader();
+          return;
+        } else if (field === 'additionalGrade') {
+          if (el.value === 'none') {
+            targetEq.hasAdditional = false;
+            targetEq.additionalGrade = null;
+          } else {
+            targetEq.hasAdditional = true;
+            targetEq.additionalGrade = el.value;
+            if (!Array.isArray(targetEq.additionalLines) || !targetEq.additionalLines.length) {
+              targetEq.additionalLines = [ { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 }, { stat: 'NONE', value: 0 } ];
+            }
+          }
+          localStorage.setItem(SPECUP_STORE_KEY, JSON.stringify(specupEquipments));
+          renderSpecupEquipTable();
+          renderMekiCubeLeaderboard();
+          renderCubeEquipmentLoader();
+          return;
         } else {
           targetEq[field] = el.value;
         }
@@ -5487,14 +5528,55 @@ function handleRunScrollStandalone() {
   `;
 }
 
+const INVENTORY_STORE_KEY = 'maple-growth-lab-inventory-v01';
+
+function loadInventoryInputs() {
+  const defaults = {
+    meso: 50000000,
+    starforceScrolls: 50,
+    spellTraces: 20000,
+    miracleCubes: 100,
+    additionalCubes: 50,
+    maxSteps: 20
+  };
+  const saved = parseLocalJson(INVENTORY_STORE_KEY, defaults);
+  if ($('specupBudgetMeso')) $('specupBudgetMeso').value = saved.meso ?? defaults.meso;
+  if ($('specupStarforceScrolls')) $('specupStarforceScrolls').value = saved.starforceScrolls ?? defaults.starforceScrolls;
+  if ($('specupSpellTraces')) $('specupSpellTraces').value = saved.spellTraces ?? defaults.spellTraces;
+  if ($('specupMiracleCubes')) $('specupMiracleCubes').value = saved.miracleCubes ?? defaults.miracleCubes;
+  if ($('specupAdditionalCubes')) $('specupAdditionalCubes').value = saved.additionalCubes ?? defaults.additionalCubes;
+  if ($('specupMaxSteps')) $('specupMaxSteps').value = saved.maxSteps ?? defaults.maxSteps;
+}
+
+function saveInventoryInputs() {
+  const inv = {
+    meso: Number($('specupBudgetMeso')?.value || 50000000),
+    starforceScrolls: Number($('specupStarforceScrolls')?.value || 50),
+    spellTraces: Number($('specupSpellTraces')?.value || 20000),
+    miracleCubes: Number($('specupMiracleCubes')?.value || 100),
+    additionalCubes: Number($('specupAdditionalCubes')?.value || 50),
+    maxSteps: Number($('specupMaxSteps')?.value || 20)
+  };
+  try { localStorage.setItem(INVENTORY_STORE_KEY, JSON.stringify(inv)); } catch (_) {}
+  return inv;
+}
+
 function handleRunSpecupOptimizer() {
-  const budgetMeso = Number($('specupBudgetMeso')?.value || 50000000);
-  const maxSteps = Number($('specupMaxSteps')?.value || 20);
+  const inv = saveInventoryInputs();
+  const budgetMeso = inv.meso;
+  const maxSteps = inv.maxSteps;
+  const inventory = {
+    starforceScrolls: inv.starforceScrolls,
+    spellTraces: inv.spellTraces,
+    miracleCubes: inv.miracleCubes,
+    additionalCubes: inv.additionalCubes
+  };
   const playerInputs = readInputs();
 
   // Run dynamic portfolio optimization
   const res = optimizeSpecUpPath({
     budgetMeso,
+    inventory,
     playerInputs,
     equipmentList: specupEquipments,
     enhancementRules: DATA.enhancementRules,
@@ -5509,7 +5591,10 @@ function handleRunSpecupOptimizer() {
   if ($('specupPowerSummary')) $('specupPowerSummary').textContent = `${fmt(res.initialPower)} ➔ ${fmt(res.finalPower)}`;
   if ($('specupPowerGainPct')) $('specupPowerGainPct').textContent = `+${res.totalPowerGainPct.toFixed(2)}% 증가`;
   if ($('specupBudgetSummary')) $('specupBudgetSummary').textContent = `${fmt(res.budgetUsed)} 메소`;
-  if ($('specupBudgetLeft')) $('specupBudgetLeft').textContent = `남은 예산: ${fmt(res.budgetRemaining)} 메소`;
+  if ($('specupBudgetLeft')) {
+    const rem = res.resourcesRemaining || {};
+    $('specupBudgetLeft').innerHTML = `남은 예산: ${fmt(res.budgetRemaining)} 메소<br><span style="color:#4f46e5;font-weight:600;font-size:11px;">잔여: ⭐주문서 ${fmt(rem.starforceScrolls)}장 · 📜주흔 ${fmt(rem.spellTraces)}개 · 🔮큐브 ${fmt(rem.miracleCubes)}개 · 💠에디 ${fmt(rem.additionalCubes)}개</span>`;
+  }
   if ($('specupStepsCount')) $('specupStepsCount').textContent = `${res.steps.length} 단계`;
 
   const listEl = $('specupRoadmapList');
@@ -5518,7 +5603,7 @@ function handleRunSpecupOptimizer() {
   if (!res.steps || res.steps.length === 0) {
     listEl.innerHTML = `
       <div class="stage-verdict warn" style="margin:0;">
-        ⚠️ 현재 보유 예산(${fmt(budgetMeso)} 메소) 내에서 진행 가능한 강화 후보가 없습니다. 예산을 늘리거나 다른 장비 부위를 설정해보세요.
+        ⚠️ 현재 보유 재화 내에서 진행 가능한 강화 후보가 없습니다. 메소나 큐브/주문서 보유 수량을 늘리거나 장비 슬롯 설정을 확인해보세요.
       </div>
     `;
     return;
@@ -5526,8 +5611,9 @@ function handleRunSpecupOptimizer() {
 
   const typeLabels = {
     starforce: '⭐ 스타포스',
-    scroll: '📜 주문서',
-    cube: '🧊 잠재능력'
+    scroll: '📜 주문의 흔적',
+    cube: '🔮 윗잠 (미라클)',
+    additional_cube: '💠 밑잠 (에디셔널)'
   };
 
   listEl.innerHTML = res.steps.map(s => `
@@ -5536,7 +5622,7 @@ function handleRunSpecupOptimizer() {
         <span class="roadmap-rank">#${s.stepNumber}</span>
         <span class="type-badge ${s.type}">${typeLabels[s.type] || s.type}</span>
         <span class="roadmap-title">${escapeHtml(s.description)}</span>
-        <span class="roadmap-cost">${fmt(s.cost)} 메소</span>
+        <span class="roadmap-cost">${fmt(s.cost)} 메소 ${s.resourceDetail ? `<small style="font-weight:600;color:#4f46e5;">(${escapeHtml(s.resourceDetail)})</small>` : ''}</span>
       </div>
       <div class="roadmap-metrics">
         <span class="roadmap-gain">DPS +${s.dpsGainPct.toFixed(2)}% (+${fmt(s.dpsDelta)})</span>
@@ -5878,6 +5964,11 @@ function initEquipOcr() {
 }
 
 function initSpecupTab() {
+  loadInventoryInputs();
+  ['specupBudgetMeso', 'specupStarforceScrolls', 'specupSpellTraces', 'specupMiracleCubes', 'specupAdditionalCubes', 'specupMaxSteps'].forEach(id => {
+    $(id)?.addEventListener('input', saveInventoryInputs);
+    $(id)?.addEventListener('change', saveInventoryInputs);
+  });
   initCubeEditModal();
   initEquipOcr();
   renderSpecupEquipTable();

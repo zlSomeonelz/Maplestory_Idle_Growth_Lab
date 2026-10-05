@@ -455,22 +455,50 @@
             수학적으로 최적 강화 경로(ROI 로드맵)를 산출합니다.
           </p>
 
-          <div class="fields" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
-            <label>
-              보유 메소 (Meso Budget)
-              <input id="specupBudgetMeso" type="number" min="0" step="1000000" value="50000000">
-            </label>
-            <label>
-              최대 추천 스텝 (Max Steps)
-              <input id="specupMaxSteps" type="number" min="1" max="40" value="20">
-            </label>
-            <div style="display:flex;flex-direction:column;justify-content:flex-end;">
-              <span style="font-size:12px;font-weight:700;color:#475467;margin-bottom:5px;">장비 세팅 빠른 불러오기</span>
-              <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                <button type="button" class="button secondary" id="specupPreset100Btn" style="padding:8px 12px;font-size:12px;">🌱 입문 (8성 · 레어)</button>
-                <button type="button" class="button secondary" id="specupPreset120Btn" style="padding:8px 12px;font-size:12px;">⭐ 표준 (10성 · 에픽)</button>
-                <button type="button" class="button secondary" id="specupPreset140Btn" style="padding:8px 12px;font-size:12px;">👑 종결 (15성 · 유니크)</button>
-              </div>
+          <!-- Resource Inventory Card -->
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+              <strong style="font-size:13.5px;color:var(--ink);display:flex;align-items:center;gap:6px;">
+                🎒 보유 재화 인벤토리 설정
+                <span class="badge" style="font-size:11px;background:#e0e7ff;color:#3730a3;">실제 인벤토리 기반 ROI 분석</span>
+              </strong>
+              <span style="font-size:11.5px;color:var(--muted);">입력한 재화 수량 내에서만 가성비 최적 강화 순서를 산출합니다.</span>
+            </div>
+
+            <div class="fields" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));gap:10px;">
+              <label>
+                💰 보유 메소 (Meso)
+                <input id="specupBudgetMeso" type="number" min="0" step="1000000" value="50000000" placeholder="50,000,000">
+              </label>
+              <label>
+                ⭐ 스타포스 주문서 (장)
+                <input id="specupStarforceScrolls" type="number" min="0" step="1" value="50" placeholder="50">
+              </label>
+              <label>
+                📜 주문의 흔적 (개)
+                <input id="specupSpellTraces" type="number" min="0" step="500" value="20000" placeholder="20,000">
+              </label>
+              <label>
+                🔮 미라클 큐브 / 윗잠 (개)
+                <input id="specupMiracleCubes" type="number" min="0" step="10" value="100" placeholder="100">
+              </label>
+              <label>
+                💠 에디셔널 큐브 / 밑잠 (개)
+                <input id="specupAdditionalCubes" type="number" min="0" step="10" value="50" placeholder="50">
+              </label>
+              <label>
+                🎯 최대 추천 스텝
+                <input id="specupMaxSteps" type="number" min="1" max="40" value="20">
+              </label>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:12px;font-weight:700;color:#475467;">장비 세팅 빠른 불러오기:</span>
+              <button type="button" class="button secondary" id="specupPreset100Btn" style="padding:6px 10px;font-size:12px;">🌱 입문 (8성 · 레어)</button>
+              <button type="button" class="button secondary" id="specupPreset120Btn" style="padding:6px 10px;font-size:12px;">⭐ 표준 (10성 · 에픽)</button>
+              <button type="button" class="button secondary" id="specupPreset140Btn" style="padding:6px 10px;font-size:12px;">👑 종결 (15성 · 유니크)</button>
             </div>
           </div>
 
@@ -603,11 +631,12 @@
             <table class="styled-table" id="specupEquipTable">
               <thead>
                 <tr>
-                  <th style="min-width:120px;">부위명 (15개 슬롯)</th>
-                  <th style="min-width:80px;">분류</th>
-                  <th style="min-width:130px;">스타포스 성급 (현재/최대)</th>
-                  <th style="min-width:90px;">잠재 등급</th>
-                  <th style="min-width:260px;">현재 3줄 옵션 &amp; 추천 액션</th>
+                  <th style="min-width:110px;">부위명 (15개 슬롯)</th>
+                  <th style="min-width:70px;">분류</th>
+                  <th style="min-width:120px;">스타포스 (현재/최대)</th>
+                  <th style="min-width:180px;">🔮 윗잠 (잠재능력)</th>
+                  <th style="min-width:180px;">💠 밑잠 (에디셔널)</th>
+                  <th style="min-width:130px;">추천 액션 &amp; 편집</th>
                 </tr>
               </thead>
               <tbody id="specupEquipTableBody">
@@ -1222,6 +1251,6 @@
 
     <footer>Maple Growth Lab · 공식 원문에 없는 값은 provisional / unverified로 투명하게 표시합니다.</footer>
   </div>
-  <script type="module" src="app.js?v=20261005_1350"></script>
+  <script type="module" src="app.js?v=20261005_2250"></script>
 </body>
 </html>
