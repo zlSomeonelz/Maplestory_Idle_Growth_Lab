@@ -678,7 +678,7 @@ export function optimizeSpecUpPath({
     slotType: eq.slotType || 'weapon', // 'weapon', 'glove', 'armor', 'accessory'
     itemLevel: Number(eq.itemLevel) || 120,
     currentStar: Math.min(STARFORCE_MAX, Math.max(0, Number(eq.currentStar) || 0)),
-    maxStar: Math.min(STARFORCE_MAX, Number(eq.maxStar) || 20),
+    maxStar: Math.min(STARFORCE_MAX, Number(eq.maxStar) || STARFORCE_MAX),
     scrollSlotsTotal: Number(eq.scrollSlotsTotal) || 8,
     scrollSlotsUsed: Number(eq.scrollSlotsUsed) || 0,
     cubeGrade: eq.cubeGrade || 'epic', // 'rare', 'epic', 'unique', 'legendary'
