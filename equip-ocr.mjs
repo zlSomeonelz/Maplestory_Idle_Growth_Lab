@@ -285,53 +285,15 @@ export function parsePotentialLine(line, jobMainStat = 'LUK', jobSubStat = null,
     return { stat: 'maxMpPct', value: val, raw: trimmed, display: `MP ${val}%` };
   }
 
-  // B. Critical Rate (크리티컬 확률, 크확, 크리티컬)
-  if (/(?:크리티컬\s*확률|크확)/i.test(trimmed) || (/크리티컬/i.test(trimmed) && !/데미지|대미지|크뎀/.test(trimmed))) {
+  // K. Fallback for orphan percentage (e.g. "| 9%" or "9%")
+  if (/^[+|:\-·•\s]*([0-9.]+)%\s*$/.test(trimmed)) {
     const numMatch = trimmed.match(/([0-9.]+)/);
     const rawNum = numMatch ? Number(numMatch[1]) : null;
-    const val = resolveValue('critRate', rawNum, 6);
-    return { stat: 'critRate', value: val, raw: trimmed, display: `크확 ${val}%` };
+    const statName = (jobMainStat || 'LUK').toUpperCase();
+    const pctVal = resolveValue('statPct', rawNum, 9);
+    return { stat: 'mainStatPct', value: pctVal, raw: trimmed, display: `${statName} ${pctVal}%` };
   }
 
-  // C. Critical Damage (크리티컬 데미지, 크뎀)
-  if (/(?:크리티컬\s*데미지|크뎀)/i.test(trimmed)) {
-    const numMatch = trimmed.match(/([0-9.]+)/);
-    const rawNum = numMatch ? Number(numMatch[1]) : null;
-    const val = resolveValue('critDamage', rawNum, 10);
-    return { stat: 'critDamage', value: val, raw: trimmed, display: `크뎀 ${val}%` };
-  }
-
-  // D. Cooldown Reduction (스킬 재사용 대기시간 감소, 쿨감, 재사용 대기시간)
-  if (/(?:스킬\s*재사용|재사용\s*대기시간|대기시간\s*감소|쿨감)/i.test(trimmed)) {
-    const numMatch = trimmed.match(/([0-9.]+)/);
-    const rawNum = numMatch ? Number(numMatch[1]) : null;
-    const val = resolveValue('cooldownReduction', rawNum, 1);
-    return { stat: 'cooldownReduction', value: val, raw: trimmed, display: `쿨감 ${val}초` };
-  }
-
-  // E. Boss Damage (보스 몬스터 공격 시 데미지, 보스 데미지, 보공)
-  if (/(?:보스\s*몬스터\s*공격\s*시\s*데미지|보스\s*데미지|보공)/i.test(trimmed)) {
-    const numMatch = trimmed.match(/([0-9.]+)/);
-    const rawNum = numMatch ? Number(numMatch[1]) : null;
-    const val = resolveValue('bossDamage', rawNum, 12);
-    return { stat: 'bossDamage', value: val, raw: trimmed, display: `보공 ${val}%` };
-  }
-
-  // F. Attack % (공격력 %, 마력 %)
-  if (/(?:공격력|마력)\s*([0-9.]*)\s*%/i.test(trimmed)) {
-    const numMatch = trimmed.match(/(?:공격력|마력)\s*([0-9.]*)\s*%/i);
-    const rawNum = numMatch && numMatch[1] ? Number(numMatch[1]) : null;
-    const val = resolveValue('attackPct', rawNum, 9);
-    return { stat: 'attackPct', value: val, raw: trimmed, display: `공 ${val}%` };
-  }
-
-  // G. Def Pen (방어율 무시, 방어력 관통, 방관, 방무)
-  if (/(?:방어율\s*무시|방어력\s*관통|방관|방무)\s*([0-9.]*)\s*%?/i.test(trimmed)) {
-    const numMatch = trimmed.match(/([0-9.]+)/);
-    const rawNum = numMatch ? Number(numMatch[1]) : null;
-    const val = resolveValue('defPen', rawNum, 8);
-    return { stat: 'defPen', value: val, raw: trimmed, display: `방관 ${val}%` };
-  }
 
   // 4. Flat Stats Fallback
   if (!trimmed.includes('%')) {
@@ -380,10 +342,26 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
   };
 
   // 1. Split text into Main Potential (윗잠) and Additional Potential (밑잠)
-  const hasAdditional = /(?:에디[셔서][널블서]?|에디|additional)/i.test(text);
-  const addSplit = text.split(/(?:에디[셔서][널블서]?|에디|additional)/i);
-  const mainSec = addSplit[0];
-  const addSec = hasAdditional ? (addSplit.slice(1).join('\n') || '') : '';
+  let hasAdditional = /(?:에디[셔서]?[널블서]?|에디|additional|HOME\s*잠재)/i.test(text);
+  let mainSec = text;
+  let addSec = '';
+
+  const addRegex = /(?:에디[셔서]?[널블서]?|에디|additional|HOME\s*잠재)/i;
+  if (addRegex.test(text)) {
+    hasAdditional = true;
+    const parts = text.split(addRegex);
+    mainSec = parts[0];
+    addSec = parts.slice(1).join('\n') || '';
+  } else {
+    // Check if there are two "잠재 옵션" headers in text
+    const potHeaderMatches = [...text.matchAll(/(?:잠재\s*[옵점][션선]?|[점잠]재\s*옵션)/gi)];
+    if (potHeaderMatches.length >= 2) {
+      hasAdditional = true;
+      const secondIndex = potHeaderMatches[1].index;
+      mainSec = text.slice(0, secondIndex);
+      addSec = text.slice(secondIndex);
+    }
+  }
 
   // 1A. Detect Main Potential Grade (윗잠)
   // Check immediately following '잠재 옵션' first so item quality (e.g. 레전더리 상의) does not shadow cube grade
@@ -392,19 +370,22 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
     ? mainSec.split(/(?:잠재\s*[옵점][션선]?|[점잠]재\s*옵션)/i)[1]
     : null;
   if (potSecText) {
-    mainGradeMatch = potSecText.match(/(유니크|유4크|유43|유닉|레전더리|레전|에픽|레어|미스틱)/) ||
-                     potSecText.match(/^\s*(?:[^\n]*?)(Ey|sua)/i);
+    mainGradeMatch = potSecText.match(/(유니크|유4크|유43|유닉|유니|윤크|fU3|fU|fu|RUS|Ey|sua|레전더리|레전|레전더|에픽|애픽|레어|래어|미스틱)/i);
   }
   if (!mainGradeMatch) {
-    mainGradeMatch = mainSec.match(/잠재\s*[옵점][션선]?[^\n]*(Ey|sua|유니크|유4크|유43|유닉|레전더리|레전|에픽|레어|미스틱)/i) ||
-                     mainSec.match(/(유니크|유4크|유43|유닉|레전더리|레전|에픽|레어|미스틱)/);
+    mainGradeMatch = mainSec.match(/잠재\s*[옵점][션선]?[^\n]*(유니크|유4크|유43|유닉|유니|윤크|fU3|fU|fu|RUS|Ey|sua|레전더리|레전|레전더|에픽|애픽|레어|래어|미스틱)/i) ||
+                     mainSec.match(/(유니크|유4크|유43|유닉|유니|윤크|fU3|fU|fu|RUS|Ey|sua|레전더리|레전|레전더|에픽|애픽|레어|래어|미스틱)/i);
   }
   if (mainGradeMatch) {
     const rawGrade = (mainGradeMatch[1] || '').toLowerCase();
-    if (rawGrade === '유4크' || rawGrade === '유43' || rawGrade === '유닉' || rawGrade === 'ey' || rawGrade === 'sua') {
+    if (['유니크', '유4크', '유43', '유닉', '유니', '윤크', 'fu3', 'fu', 'rus', 'ey', 'sua'].includes(rawGrade)) {
       result.grade = 'unique';
-    } else if (rawGrade === '레전') {
+    } else if (['레전더리', '레전', '레전더'].includes(rawGrade)) {
       result.grade = 'legendary';
+    } else if (['에픽', '애픽'].includes(rawGrade)) {
+      result.grade = 'epic';
+    } else if (['레어', '래어'].includes(rawGrade)) {
+      result.grade = 'rare';
     } else {
       result.grade = GRADE_MAP[rawGrade] || 'epic';
     }
@@ -412,14 +393,20 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
 
   // 1B. Detect Additional Potential Grade (밑잠)
   if (hasAdditional && addSec) {
-    const addGradeMatch = addSec.match(/(노말|레어|에픽|유니크|유4크|유43|유닉|레전더리|레전)/) ||
-                          addSec.match(/에디[^\n]*(Ey|sua)/i);
+    const addGradeMatch = addSec.match(/(노말|노밀|노알|뇌|뇩말|노맏|레어|래어|에픽|애픽|유니크|유4크|유43|유닉|유니|레전더리|레전)/i) ||
+                          addSec.match(/에디[^\n]*(Ey|sua|fu3|fu)/i);
     if (addGradeMatch) {
       const rawAddGrade = (addGradeMatch[1] || '').toLowerCase();
-      if (rawAddGrade === '유4크' || rawAddGrade === '유43' || rawAddGrade === '유닉' || rawAddGrade === 'ey' || rawAddGrade === 'sua') {
+      if (['유니크', '유4크', '유43', '유닉', '유니', 'ey', 'sua', 'fu3', 'fu'].includes(rawAddGrade)) {
         result.additionalGrade = 'unique';
-      } else if (rawAddGrade === '레전') {
+      } else if (['레전더리', '레전'].includes(rawAddGrade)) {
         result.additionalGrade = 'legendary';
+      } else if (['에픽', '애픽'].includes(rawAddGrade)) {
+        result.additionalGrade = 'epic';
+      } else if (['레어', '래어'].includes(rawAddGrade)) {
+        result.additionalGrade = 'rare';
+      } else if (['노말', '노밀', '노알', '뇌', '뇩말', '노맏'].includes(rawAddGrade)) {
+        result.additionalGrade = 'normal';
       } else {
         result.additionalGrade = GRADE_MAP[rawAddGrade] || 'normal';
       }
@@ -509,9 +496,20 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
         { stat: 'NONE', value: 0, display: '잡옵' }
       ];
     }
-    const lines = sec.split('\n').map(l => l.trim()).filter(Boolean);
+    const rawLines = sec.split('\n').map(l => l.trim()).filter(Boolean);
+    const mergedLines = [];
+    for (let i = 0; i < rawLines.length; i++) {
+      const cur = rawLines[i];
+      const next = rawLines[i + 1];
+      if (next && /^[+|:\-·•\s]*([0-9.]+)%\s*$/.test(next) && /(?:LUK|STR|DEX|INT|PEX|주스탯|부스탯|올스탯|데미지|대미지|더미지|도미지|태미지|크리티컬|보스|방어|최대|스킬|기본)/i.test(cur) && !cur.includes('%')) {
+        mergedLines.push(`${cur} ${next}`);
+        i++;
+      } else {
+        mergedLines.push(cur);
+      }
+    }
     const parsedLines = [];
-    for (const line of lines) {
+    for (const line of mergedLines) {
       if (parsedLines.length >= 3) break;
       if (/강화\s*효과|상세보기|장착\s*효과|자동\s*분해|일괄\s*분해|슬롯|보스\s*몬스터/.test(line)) continue;
       if (/^(?:잠재\s*[옵점][션선]?|[점잠]재\s*옵션|옵션|에디셔널)/.test(line)) continue;

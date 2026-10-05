@@ -5842,16 +5842,24 @@ function initEquipOcr() {
         updateStatus(`장비 OCR 분석 중… (${i + 1}/${filesToProcess.length})`);
 
         const img = await loadHtmlImage(file);
-        const isWide = img.width / img.height > 1.3;
+        const aspect = img.width / img.height;
 
         // 1. Starforce yellow pixel detection
         let detectedStars = null;
         try {
           const starCanvas = document.createElement('canvas');
-          const sx = isWide ? Math.round(img.width * 0.342) : Math.round(img.width * 0.05);
-          const sy = isWide ? Math.round(img.height * 0.10) : Math.round(img.height * 0.02);
-          const sw = isWide ? Math.round(img.width * 0.26) : Math.round(img.width * 0.90);
-          const sh = isWide ? Math.round(img.height * 0.05) : Math.round(img.height * 0.15);
+          let sx = 0, sy = 0, sw = img.width, sh = img.height;
+          if (aspect >= 1.5) {
+            sx = Math.round(img.width * 0.60);
+            sy = Math.round(img.height * 0.07);
+            sw = Math.round(img.width * 0.26);
+            sh = Math.round(img.height * 0.15);
+          } else if (aspect >= 1.25) {
+            sx = Math.round(img.width * 0.10);
+            sy = Math.round(img.height * 0.08);
+            sw = Math.round(img.width * 0.56);
+            sh = Math.round(img.height * 0.18);
+          }
           starCanvas.width = Math.max(10, sw);
           starCanvas.height = Math.max(10, sh);
           const sCtx = starCanvas.getContext('2d');
@@ -5865,10 +5873,18 @@ function initEquipOcr() {
 
         // 2. Prepare canvas for OCR
         const ocrCanvas = document.createElement('canvas');
-        const cropX = isWide ? Math.round(img.width * 0.59) : 0;
-        const cropY = isWide ? Math.round(img.height * 0.05) : 0;
-        const cropW = isWide ? Math.round(img.width * 0.38) : img.width;
-        const cropH = isWide ? Math.round(img.height * 0.72) : img.height;
+        let cropX = 0, cropY = 0, cropW = img.width, cropH = img.height;
+        if (aspect >= 1.5) {
+          cropX = Math.round(img.width * 0.60);
+          cropY = Math.round(img.height * 0.07);
+          cropW = Math.round(img.width * 0.26);
+          cropH = Math.round(img.height * 0.66);
+        } else if (aspect >= 1.25) {
+          cropX = Math.round(img.width * 0.10);
+          cropY = Math.round(img.height * 0.08);
+          cropW = Math.round(img.width * 0.56);
+          cropH = Math.round(img.height * 0.75);
+        }
 
         const scale = 1.5;
         ocrCanvas.width = Math.round(cropW * scale);
