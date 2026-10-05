@@ -1,7 +1,7 @@
 import { calculateCombatPower, calculateDamage, calculatePvpDamage, calculateStatEfficiencies, cubeTargetSummary, probabilitySummary } from './engine.mjs';
 import { buildSkillModels, optimizeLoadout, simulateLoadout, DEFAULT_UNKNOWN_COOLDOWN, LOADOUT_SKILL_SLOTS } from './skill-optimizer.mjs';
 import { calculateStarforcePath, calculateScrollEnhancement, optimizeSpecUpPath, STARFORCE_MAX, recommendCubeAction, rankAllEquipmentCubes, getEquipmentCubeStats, getInGamePreferredCubeSettings, calculateCubeImprovementProbability, parseOfficialPotentialOption, convertLinesToStats, calculateConfidenceAttempts } from './enhancement-engine.mjs';
-import { parseEquipmentOcrText, countYellowStarsFromPixels, GRADE_KOREAN } from './equip-ocr.mjs';
+import { parseEquipmentOcrText, countYellowStarsFromPixels, GRADE_KOREAN, GRADE_POTENTIAL_SPECS } from './equip-ocr.mjs';
 'use strict';
 
 const STORE = 'maple-growth-lab-mvp-v1';
@@ -4685,9 +4685,10 @@ const CUBE_TO_ENGINE_MAP = {
 
 function formatLineSummary(lines) {
   if (!Array.isArray(lines) || !lines.length) return '1줄 유효';
-  const valid = lines.filter(l => l && l.stat && l.stat !== 'NONE' && Number(l.value) > 0);
-  if (!valid.length) return '잡옵 3줄 (0줄 유효)';
-  return valid.map(l => {
+  const validCount = lines.filter(l => l && l.stat && l.stat !== 'NONE' && Number(l.value) > 0).length;
+  if (!validCount) return '잡옵 3줄 (0줄 유효)';
+  return lines.map(l => {
+    if (!l || l.stat === 'NONE' || !l.value) return '잡옵';
     if (l.display) {
       return l.display.replace(/\s*\(잡옵\)/g, '').trim();
     }
@@ -4720,19 +4721,20 @@ function generateDefaultLines(slotType, grade, validLines = 1) {
       { stat: 'NONE', value: 0 }
     ];
   }
-  const primaryVal = grade === 'rare' ? 3 : grade === 'epic' ? 6 : grade === 'unique' ? 9 : 12;
-  const secVal = grade === 'rare' ? 3 : grade === 'epic' ? 6 : grade === 'unique' ? 6 : 9;
+  const primaryVal = grade === 'rare' ? 4.5 : grade === 'epic' ? 6 : grade === 'unique' ? 9 : grade === 'legendary' ? 12 : 15;
+  const secVal = grade === 'rare' ? 3 : grade === 'epic' ? 4.5 : grade === 'unique' ? 6 : grade === 'legendary' ? 9 : 12;
 
   if (slotType === 'glove') {
-    const cdVal = grade === 'rare' ? 2 : grade === 'epic' ? 2 : grade === 'unique' ? 4 : 8;
+    const cdVal = grade === 'epic' ? 10 : grade === 'unique' ? 20 : grade === 'legendary' ? 30 : 50;
+    const cdSecVal = grade === 'epic' ? 10 : grade === 'unique' ? 10 : grade === 'legendary' ? 20 : 30;
     return [
       { stat: 'critDamage', value: cdVal },
-      lines >= 2 ? { stat: 'attackPct', value: secVal } : { stat: 'NONE', value: 0 },
+      lines >= 2 ? { stat: 'critDamage', value: cdSecVal } : { stat: 'NONE', value: 0 },
       lines >= 3 ? { stat: 'mainStatPct', value: secVal } : { stat: 'NONE', value: 0 }
     ];
   }
   if (slotType === 'weapon') {
-    const bdVal = grade === 'rare' ? 3 : grade === 'epic' ? 6 : grade === 'unique' ? 12 : 12;
+    const bdVal = grade === 'epic' ? 6 : grade === 'unique' ? 12 : grade === 'legendary' ? 18 : 24;
     return [
       { stat: 'attackPct', value: primaryVal },
       lines >= 2 ? { stat: 'bossDamage', value: bdVal } : { stat: 'NONE', value: 0 },
@@ -5094,12 +5096,68 @@ function openCubeEditModal(eqId) {
 
   applyLinesToModalInputs(lines, false);
   applyLinesToModalInputs(addLines, true);
+  renderModalQuickChips();
 
   // Render in-game preferred settings preview inside modal
   const jobKey = $('job')?.value || 'nightWalker';
   renderInGamePreferredSettings(eq.slotType, eq.cubeGrade || 'epic', 'modalPreferredSettingsRoot', jobKey);
 
   if (typeof modal.showModal === 'function') modal.showModal(); else modal.setAttribute('open', '');
+}
+
+const STAT_TO_SPEC_KEY = {
+  mainStatPct: 'statPct',
+  subStatPct: 'statPct',
+  allStatPct: 'statPct',
+  damage: 'damage',
+  critRate: 'critRate',
+  critDamage: 'critDamage',
+  bossDamage: 'bossDamage',
+  attackPct: 'attackPct',
+  cooldownReduction: 'cooldownReduction',
+  maxHpPct: 'maxHpPct',
+  mainStat: 'statFlat',
+  subStat: 'statFlat',
+  allStat: 'statFlat'
+};
+
+function renderModalQuickChips() {
+  const mainGrade = $('cubeEditGrade')?.value || 'epic';
+  const addGrade = $('cubeEditAddGrade')?.value || 'normal';
+
+  // 윗잠 chips
+  [1, 2, 3].forEach(slot => {
+    const chipEl = $(`cubeSlot${slot}QuickChips`);
+    if (!chipEl) return;
+    const statVal = $(`cubeSlot${slot}Stat`)?.value || 'NONE';
+    const specKey = STAT_TO_SPEC_KEY[statVal];
+    const allowed = specKey ? (GRADE_POTENTIAL_SPECS[mainGrade]?.slots?.[slot]?.[specKey] || []) : [];
+    if (!allowed.length) {
+      chipEl.innerHTML = '';
+      return;
+    }
+    const unit = specKey === 'cooldownReduction' ? '초' : (specKey === 'statFlat' ? '' : '%');
+    chipEl.innerHTML = allowed.map(val =>
+      `<button type="button" class="tag" style="cursor:pointer;font-size:11px;padding:2px 7px;background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe;border-radius:4px;font-weight:600;" data-target="cubeSlot${slot}Value" data-val="${val}">${val}${unit}</button>`
+    ).join('');
+  });
+
+  // 밑잠 chips
+  [1, 2, 3].forEach(slot => {
+    const chipEl = $(`cubeAddSlot${slot}QuickChips`);
+    if (!chipEl) return;
+    const statVal = $(`cubeAddSlot${slot}Stat`)?.value || 'NONE';
+    const specKey = STAT_TO_SPEC_KEY[statVal];
+    const allowed = specKey ? (GRADE_POTENTIAL_SPECS[addGrade]?.slots?.[slot]?.[specKey] || []) : [];
+    if (!allowed.length) {
+      chipEl.innerHTML = '';
+      return;
+    }
+    const unit = specKey === 'cooldownReduction' ? '초' : (specKey === 'statFlat' ? '' : '%');
+    chipEl.innerHTML = allowed.map(val =>
+      `<button type="button" class="tag" style="cursor:pointer;font-size:11px;padding:2px 7px;background:#dcfce7;color:#166534;border:1px solid #bbf7d0;border-radius:4px;font-weight:600;" data-target="cubeAddSlot${slot}Value" data-val="${val}">${val}${unit}</button>`
+    ).join('');
+  });
 }
 
 function initCubeEditModal() {
@@ -5109,7 +5167,22 @@ function initCubeEditModal() {
   const statOptionsHtml = CUBE_LINE_STATS.map(([k, lbl]) => `<option value="${k}">${lbl}</option>`).join('');
   ['cubeSlot1Stat', 'cubeSlot2Stat', 'cubeSlot3Stat', 'cubeAddSlot1Stat', 'cubeAddSlot2Stat', 'cubeAddSlot3Stat'].forEach(id => {
     const sel = $(id);
-    if (sel) sel.innerHTML = statOptionsHtml;
+    if (sel) {
+      sel.innerHTML = statOptionsHtml;
+      sel.addEventListener('change', () => {
+        renderModalQuickChips();
+        // Auto-select primary allowed value if current value is 0
+        const isAdd = id.includes('Add');
+        const slotNum = id.match(/Slot(\d)/)?.[1] || '1';
+        const valInput = $(isAdd ? `cubeAddSlot${slotNum}Value` : `cubeSlot${slotNum}Value`);
+        const grade = isAdd ? ($('cubeEditAddGrade')?.value || 'normal') : ($('cubeEditGrade')?.value || 'epic');
+        const specKey = STAT_TO_SPEC_KEY[sel.value];
+        const allowed = specKey ? (GRADE_POTENTIAL_SPECS[grade]?.slots?.[Number(slotNum)]?.[specKey] || []) : [];
+        if (valInput && (Number(valInput.value) === 0 || !valInput.value) && allowed.length > 0) {
+          valInput.value = allowed[allowed.length - 1];
+        }
+      });
+    }
   });
 
   const closeModal = () => {
@@ -5118,13 +5191,30 @@ function initCubeEditModal() {
 
   $('closeCubeEditModalBtn')?.addEventListener('click', closeModal);
   $('cancelCubeEditBtn')?.addEventListener('click', closeModal);
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+  modal.addEventListener('click', e => {
+    if (e.target === modal) closeModal();
+    const chipBtn = e.target.closest('button[data-target][data-val]');
+    if (chipBtn) {
+      const targetId = chipBtn.dataset.target;
+      const val = chipBtn.dataset.val;
+      const input = $(targetId);
+      if (input) {
+        input.value = val;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+  });
 
   $('cubeEditGrade')?.addEventListener('change', (e) => {
     const eq = specupEquipments.find(item => item.id === currentEditingEquipId);
     if (!eq) return;
     const jobKey = $('job')?.value || 'nightWalker';
     renderInGamePreferredSettings(eq.slotType, e.target.value, 'modalPreferredSettingsRoot', jobKey);
+    renderModalQuickChips();
+  });
+
+  $('cubeEditAddGrade')?.addEventListener('change', () => {
+    renderModalQuickChips();
   });
 
   $('cubePresetGarbageBtn')?.addEventListener('click', () => {
@@ -5133,6 +5223,7 @@ function initCubeEditModal() {
       { stat: 'NONE', value: 0 },
       { stat: 'NONE', value: 0 }
     ], false);
+    renderModalQuickChips();
   });
 
   $('cubePreset1LineBtn')?.addEventListener('click', () => {
@@ -5140,6 +5231,7 @@ function initCubeEditModal() {
     const grade = $('cubeEditGrade')?.value || 'epic';
     const lines = generateDefaultLines(eq?.slotType || 'armor', grade, 1);
     applyLinesToModalInputs(lines, false);
+    renderModalQuickChips();
   });
 
   $('cubePreset2LineBtn')?.addEventListener('click', () => {
@@ -5147,6 +5239,7 @@ function initCubeEditModal() {
     const grade = $('cubeEditGrade')?.value || 'unique';
     const lines = generateDefaultLines(eq?.slotType || 'armor', grade, 2);
     applyLinesToModalInputs(lines, false);
+    renderModalQuickChips();
   });
 
   $('cubePreset3LineBtn')?.addEventListener('click', () => {
@@ -5154,6 +5247,7 @@ function initCubeEditModal() {
     const grade = $('cubeEditGrade')?.value || 'legendary';
     const lines = generateDefaultLines(eq?.slotType || 'armor', grade, 3);
     applyLinesToModalInputs(lines, false);
+    renderModalQuickChips();
   });
 
   $('saveCubeEditBtn')?.addEventListener('click', () => {

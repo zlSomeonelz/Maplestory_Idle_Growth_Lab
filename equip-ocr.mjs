@@ -43,92 +43,188 @@ export const GRADE_KOREAN = {
   mystic: '미스틱'
 };
 
+export const GRADE_POTENTIAL_SPECS = {
+  normal: {
+    slots: {
+      1: { statPct: [3], damage: [5], critRate: [3], maxHpPct: [6], maxMpPct: [3], defPct: [3], attackSpeed: [3], statFlat: [50] },
+      2: { statPct: [3], damage: [5], critRate: [3], maxHpPct: [6], maxMpPct: [3], defPct: [3], attackSpeed: [3], statFlat: [50] },
+      3: { statPct: [3], damage: [5], critRate: [3], maxHpPct: [6], maxMpPct: [3], defPct: [3], attackSpeed: [3], statFlat: [50] }
+    }
+  },
+  rare: {
+    slots: {
+      1: { statPct: [4.5], damage: [8], critRate: [4.5], maxHpPct: [9], maxMpPct: [4.5], defPct: [4.5], attackSpeed: [3.5], statFlat: [100] },
+      2: { statPct: [3, 4.5], damage: [5, 8], critRate: [3, 4.5], maxHpPct: [6, 9], maxMpPct: [3, 4.5], defPct: [3, 4.5], attackSpeed: [3, 3.5], statFlat: [50, 100] },
+      3: { statPct: [3, 4.5], damage: [5, 8], critRate: [3, 4.5], maxHpPct: [6, 9], maxMpPct: [3, 4.5], defPct: [3, 4.5], attackSpeed: [3, 3.5], statFlat: [50, 100] }
+    }
+  },
+  epic: {
+    slots: {
+      1: { statPct: [6], damage: [12], critRate: [6], maxHpPct: [12], maxMpPct: [6], defPct: [6], attackSpeed: [4], statFlat: [200], cooldownReduction: [0.5], critDamage: [10], attackPct: [6], bossDamage: [6], finalDamage: [3] },
+      2: { statPct: [4.5, 6], damage: [8, 12], critRate: [4.5, 6], maxHpPct: [9, 12], maxMpPct: [4.5, 6], defPct: [4.5, 6], attackSpeed: [3.5, 4], statFlat: [100, 200], cooldownReduction: [0.5], critDamage: [10], attackPct: [4.5, 6], bossDamage: [6], finalDamage: [3] },
+      3: { statPct: [4.5, 6], damage: [8, 12], critRate: [4.5, 6], maxHpPct: [9, 12], maxMpPct: [4.5, 6], defPct: [4.5, 6], attackSpeed: [3.5, 4], statFlat: [100, 200], cooldownReduction: [0.5], critDamage: [10], attackPct: [4.5, 6], bossDamage: [6], finalDamage: [3] }
+    }
+  },
+  unique: {
+    slots: {
+      1: { statPct: [9], damage: [18], critRate: [9], maxHpPct: [15], maxMpPct: [9], defPct: [9], attackSpeed: [5], statFlat: [400], cooldownReduction: [1], critDamage: [20], attackPct: [9], bossDamage: [12], defPen: [8], finalDamage: [5] },
+      2: { statPct: [6, 9], damage: [12, 18], critRate: [6, 9], maxHpPct: [12, 15], maxMpPct: [6, 9], defPct: [6, 9], attackSpeed: [4, 5], statFlat: [200, 400], cooldownReduction: [0.5, 1], critDamage: [10, 20], attackPct: [6, 9], bossDamage: [6, 12], defPen: [8], finalDamage: [3, 5] },
+      3: { statPct: [6, 9], damage: [12, 18], critRate: [6, 9], maxHpPct: [12, 15], maxMpPct: [6, 9], defPct: [6, 9], attackSpeed: [4, 5], statFlat: [200, 400], cooldownReduction: [0.5, 1], critDamage: [10, 20], attackPct: [6, 9], bossDamage: [6, 12], defPen: [8], finalDamage: [3, 5] }
+    }
+  },
+  legendary: {
+    slots: {
+      1: { statPct: [12], damage: [25], critRate: [12], maxHpPct: [20], maxMpPct: [12], defPct: [12], attackSpeed: [7], statFlat: [600], cooldownReduction: [1.5], critDamage: [30], attackPct: [12], bossDamage: [18], defPen: [12], finalDamage: [8] },
+      2: { statPct: [9, 12], damage: [18, 25], critRate: [9, 12], maxHpPct: [15, 20], maxMpPct: [9, 12], defPct: [9, 12], attackSpeed: [5, 7], statFlat: [400, 600], cooldownReduction: [1, 1.5], critDamage: [20, 30], attackPct: [9, 12], bossDamage: [12, 18], defPen: [8, 12], finalDamage: [5, 8] },
+      3: { statPct: [9, 12], damage: [18, 25], critRate: [9, 12], maxHpPct: [15, 20], maxMpPct: [9, 12], defPct: [9, 12], attackSpeed: [5, 7], statFlat: [400, 600], cooldownReduction: [1, 1.5], critDamage: [20, 30], attackPct: [9, 12], bossDamage: [12, 18], defPen: [8, 12], finalDamage: [5, 8] }
+    }
+  },
+  mystic: {
+    slots: {
+      1: { statPct: [15], damage: [35], critRate: [15], maxHpPct: [25], maxMpPct: [15], defPct: [15], attackSpeed: [10], statFlat: [1000], cooldownReduction: [2], critDamage: [50], attackPct: [15], bossDamage: [24], defPen: [20], finalDamage: [12] },
+      2: { statPct: [12, 15], damage: [25, 35], critRate: [12, 15], maxHpPct: [20, 25], maxMpPct: [12, 15], defPct: [12, 15], attackSpeed: [7, 10], statFlat: [600, 1000], cooldownReduction: [1.5, 2], critDamage: [30, 50], attackPct: [12, 15], bossDamage: [18, 24], defPen: [12, 20], finalDamage: [8, 12] },
+      3: { statPct: [12, 15], damage: [25, 35], critRate: [12, 15], maxHpPct: [20, 25], maxMpPct: [12, 15], defPct: [12, 15], attackSpeed: [7, 10], statFlat: [600, 1000], cooldownReduction: [1.5, 2], critDamage: [30, 50], attackPct: [12, 15], bossDamage: [18, 24], defPen: [12, 20], finalDamage: [8, 12] }
+    }
+  }
+};
+
 /**
  * Maps potential option text to engine stat key
  */
-export function parsePotentialLine(line, jobMainStat = 'LUK', jobSubStat = null) {
+export function parsePotentialLine(line, jobMainStat = 'LUK', jobSubStat = null, grade = null, slotIndex = null) {
   if (!line || typeof line !== 'string') return { stat: 'NONE', value: 0 };
   const trimmed = line.trim();
 
-  // 1. Check HP% first (to avoid conflict with flat HP or number 10 in OCR)
-  const hpPctMatch = trimmed.match(/(?:최대\s*HP|최대\s*1[0-9]|최대|HP)\s*([0-9.]+)\s*%/i);
-  if (hpPctMatch) {
-    const val = Number(hpPctMatch[1]);
-    return { stat: 'maxHpPct', value: val, raw: trimmed, display: `HP ${val}%` };
+  const normalizedGrade = grade ? (GRADE_MAP[grade] || grade) : null;
+  const slotIdx = Math.min(3, Math.max(1, Number(slotIndex) || 1));
+
+  function resolveValue(statKey, extractedNum, defaultVal) {
+    if (!normalizedGrade || !GRADE_POTENTIAL_SPECS[normalizedGrade]) {
+      return (extractedNum != null && !isNaN(extractedNum) && extractedNum > 0) ? extractedNum : defaultVal;
+    }
+    const allowed = GRADE_POTENTIAL_SPECS[normalizedGrade]?.slots?.[slotIdx]?.[statKey] || [];
+    if (!allowed.length) {
+      return (extractedNum != null && !isNaN(extractedNum) && extractedNum > 0) ? extractedNum : defaultVal;
+    }
+    if (extractedNum != null && !isNaN(extractedNum) && extractedNum > 0) {
+      let best = allowed[0];
+      let minDiff = Math.abs(extractedNum - best);
+      for (const v of allowed) {
+        const diff = Math.abs(extractedNum - v);
+        if (diff < minDiff) {
+          minDiff = diff;
+          best = v;
+        }
+      }
+      return best;
+    }
+    return slotIdx === 1 ? allowed[allowed.length - 1] : allowed[0];
   }
 
-  // 2. Specific Stat Names (STR, DEX, INT, LUK, 주스탯, 올스탯) with percentage or OCR symbol variants (%, ×, x, X, etc.)
-  const statMatch = trimmed.match(/(?:^|[\s|:·•\-])(STR|DEX|PEX|INT|LUK|주스탯|부스탯|올스탯)[,\s]*([0-9.]+)\s*(?:%|[×xX]|o\/o|\/o)/i);
-  if (statMatch) {
-    let statName = statMatch[1].toUpperCase();
-    if (statName === 'PEX') statName = 'DEX';
-    const val = Number(statMatch[2]);
-    const normalizedMain = (jobMainStat || 'LUK').toUpperCase();
-    const subStatMap = { 'LUK': 'DEX', 'STR': 'DEX', 'DEX': 'STR', 'INT': 'LUK' };
-    const normalizedSub = (jobSubStat || subStatMap[normalizedMain] || 'DEX').toUpperCase();
-
-    if (statName === '올스탯') {
-      return { stat: 'allStatPct', value: val, raw: trimmed, display: `올스탯 ${val}%` };
-    }
-    if (statName === '주스탯' || statName === normalizedMain) {
-      return { stat: 'mainStatPct', value: val, raw: trimmed, display: `${statName} ${val}%` };
-    }
-    if (statName === '부스탯' || statName === normalizedSub) {
-      return { stat: 'subStatPct', value: val, raw: trimmed, display: `${statName} ${val}%` };
-    }
-    // Off-stat is 잡옵 for this job's damage calculation
-    return { stat: 'NONE', value: 0, raw: trimmed, display: `${statName} ${val}% (잡옵)` };
-  }
-
-  // 2.5 Guard against decimal percentages (Cube potentials NEVER have decimals; decimals like 5.7% or 6.2% are base/equipped stats)
+  // Guard against decimal percentages (Cube potentials NEVER have decimals; decimals like 5.7% or 6.2% are base/equipped stats)
   if (/\b\d+\.\d+\s*%/.test(trimmed)) {
     return { stat: 'NONE', value: 0, raw: trimmed, display: '잡옵' };
   }
 
-  // 3. Other Combat & Utility Stats
-  const pctPatterns = [
-    { stat: 'critDamage', re: /(?:크리티컬\s*데미지|크뎀)\s*([0-9.]+)\s*%/i, label: '크뎀' },
-    { stat: 'critRate', re: /(?:크리티컬\s*확률|크확)\s*([0-9.]+)\s*%/i, label: '크확' },
-    { stat: 'bossDamage', re: /(?:보스\s*몬스터\s*공격\s*시\s*데미지|보스\s*데미지|보스\s*공격력|보공)\s*([0-9.]+)\s*%/i, label: '보공' },
-    { stat: 'attackPct', re: /(?:공격력|마력)\s*([0-9.]+)\s*%/i, label: '공%' },
-    { stat: 'damage', re: /(?:데미지|뎀)\s*([0-9.]+)\s*%/i, label: '데미지' },
-    { stat: 'defPen', re: /(?:방어율\s*무시|방어력\s*관통|방무|방관)\s*([0-9.]+)\s*%/i, label: '방관' },
-    { stat: 'cooldownReduction', re: /(?:스킬\s*재사용\s*대기시간\s*감소|재사용\s*대기시간)\s*([0-9.]+)\s*초?/i, label: '쿨감' }
-  ];
-
-  for (const p of pctPatterns) {
-    const match = trimmed.match(p.re);
-    if (match) {
-      const val = Number(match[1]);
-      if (!isNaN(val) && val > 0) {
-        return { stat: p.stat, value: val, raw: trimmed, display: `${p.label} ${val}%` };
-      }
-    }
+  // 1. HP% (최대 HP, HP, 최대 1P, 최대 IP etc.)
+  const hpMatch = trimmed.match(/(?:최대\s*HP|최대\s*1[0-9]|최대\s*IP|HP)\s*([0-9.]*)\s*%?/i);
+  if (hpMatch && !/공격력|데미지|대미지|더미지|크리티컬/.test(trimmed)) {
+    const rawVal = hpMatch[1] ? Number(hpMatch[1]) : null;
+    const val = resolveValue('maxHpPct', rawVal, 15);
+    return { stat: 'maxHpPct', value: val, raw: trimmed, display: `HP ${val}%` };
   }
 
-  // 4. Flat Stats (only when line does not contain % or x/X/×)
-  if (!trimmed.includes('%') && !/[0-9.]+\s*[×xX]/.test(trimmed)) {
-    const flatStatMatch = trimmed.match(/(?:^|[\s|:·•\-])(STR|DEX|PEX|INT|LUK|주스탯|부스탯|올스탯)[,\s]*([0-9,]+)/i);
-    if (flatStatMatch) {
-      let statName = flatStatMatch[1].toUpperCase();
-      if (statName === 'PEX') statName = 'DEX';
-      const val = Number(flatStatMatch[2].replace(/,/g, ''));
-      const normalizedMain = (jobMainStat || 'LUK').toUpperCase();
-      const subStatMap = { 'LUK': 'DEX', 'STR': 'DEX', 'DEX': 'STR', 'INT': 'LUK' };
-      const normalizedSub = (jobSubStat || subStatMap[normalizedMain] || 'DEX').toUpperCase();
+  // 2. Specific Stat Names (STR, DEX, INT, LUK, 주스탯, 부스탯, 올스탯)
+  const statMatch = trimmed.match(/(?:^|[\s|:·•\-])(STR|DEX|PEX|INT|LUK|주스탯|부스탯|올스탯)\s*([0-9.]*)\s*(?:%|[×xX]|o\/o|\/o)?/i);
+  if (statMatch) {
+    let statName = statMatch[1].toUpperCase();
+    if (statName === 'PEX') statName = 'DEX';
+    const rawNum = statMatch[2] ? Number(statMatch[2]) : null;
+    const normalizedMain = (jobMainStat || 'LUK').toUpperCase();
+    const subStatMap = { 'LUK': 'DEX', 'STR': 'DEX', 'DEX': 'STR', 'INT': 'LUK' };
+    const normalizedSub = (jobSubStat || subStatMap[normalizedMain] || 'DEX').toUpperCase();
 
-      if (statName === '올스탯') {
-        return { stat: 'allStat', value: val, raw: trimmed, display: `올스탯(+) ${val}` };
-      }
-      if (statName === '주스탯' || statName === normalizedMain) {
-        return { stat: 'mainStat', value: val, raw: trimmed, display: `${statName}(+) ${val}` };
-      }
-      if (statName === '부스탯' || statName === normalizedSub) {
-        return { stat: 'subStat', value: val, raw: trimmed, display: `${statName}(+) ${val}` };
-      }
-      return { stat: 'NONE', value: 0, raw: trimmed, display: `${statName}(+) ${val} (잡옵)` };
+    // Check if flat stat (e.g. 50, 100, 200, 400, 600, 1000)
+    if (rawNum != null && rawNum >= 50 && !trimmed.includes('%')) {
+      const flatVal = resolveValue('statFlat', rawNum, 200);
+      if (statName === '올스탯') return { stat: 'allStat', value: flatVal, raw: trimmed, display: `올스탯(+) ${flatVal}` };
+      if (statName === '주스탯' || statName === normalizedMain) return { stat: 'mainStat', value: flatVal, raw: trimmed, display: `${statName}(+) ${flatVal}` };
+      if (statName === '부스탯' || statName === normalizedSub) return { stat: 'subStat', value: flatVal, raw: trimmed, display: `${statName}(+) ${flatVal}` };
+      return { stat: 'NONE', value: 0, raw: trimmed, display: `${statName}(+) ${flatVal} (잡옵)` };
     }
 
+    const pctVal = resolveValue('statPct', rawNum, 9);
+    if (statName === '올스탯') {
+      return { stat: 'allStatPct', value: pctVal, raw: trimmed, display: `올스탯 ${pctVal}%` };
+    }
+    if (statName === '주스탯' || statName === normalizedMain) {
+      return { stat: 'mainStatPct', value: pctVal, raw: trimmed, display: `${statName} ${pctVal}%` };
+    }
+    if (statName === '부스탯' || statName === normalizedSub) {
+      return { stat: 'subStatPct', value: pctVal, raw: trimmed, display: `${statName} ${pctVal}%` };
+    }
+    return { stat: 'NONE', value: 0, raw: trimmed, display: `${statName} ${pctVal}% (잡옵)` };
+  }
+
+  // 3. Combat Stats with Fuzzy Keyword & Grade Value Matching
+  // A. Damage (데미지, 대미지, 더미지, 도미지, 태미지, som, dam, dmg, 뎀)
+  if (/(?:데미지|대미지|더미지|도미지|태미지|som|dam|dmg|뎀)/i.test(trimmed) && !/보스|크리티컬/.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('damage', rawNum, 12);
+    return { stat: 'damage', value: val, raw: trimmed, display: `데미지 ${val}%` };
+  }
+
+  // B. Critical Rate (크리티컬 확률, 크확, 크리티컬)
+  if (/(?:크리티컬\s*확률|크확)/i.test(trimmed) || (/크리티컬/i.test(trimmed) && !/데미지|대미지|크뎀/.test(trimmed))) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('critRate', rawNum, 6);
+    return { stat: 'critRate', value: val, raw: trimmed, display: `크확 ${val}%` };
+  }
+
+  // C. Critical Damage (크리티컬 데미지, 크뎀)
+  if (/(?:크리티컬\s*데미지|크뎀)/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('critDamage', rawNum, 10);
+    return { stat: 'critDamage', value: val, raw: trimmed, display: `크뎀 ${val}%` };
+  }
+
+  // D. Cooldown Reduction (스킬 재사용 대기시간 감소, 쿨감, 재사용 대기시간)
+  if (/(?:스킬\s*재사용|재사용\s*대기시간|대기시간\s*감소|쿨감)/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('cooldownReduction', rawNum, 1);
+    return { stat: 'cooldownReduction', value: val, raw: trimmed, display: `쿨감 ${val}초` };
+  }
+
+  // E. Boss Damage (보스 몬스터 공격 시 데미지, 보스 데미지, 보공)
+  if (/(?:보스\s*몬스터\s*공격\s*시\s*데미지|보스\s*데미지|보공)/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('bossDamage', rawNum, 12);
+    return { stat: 'bossDamage', value: val, raw: trimmed, display: `보공 ${val}%` };
+  }
+
+  // F. Attack % (공격력 %, 마력 %)
+  if (/(?:공격력|마력)\s*([0-9.]*)\s*%/i.test(trimmed)) {
+    const numMatch = trimmed.match(/(?:공격력|마력)\s*([0-9.]*)\s*%/i);
+    const rawNum = numMatch && numMatch[1] ? Number(numMatch[1]) : null;
+    const val = resolveValue('attackPct', rawNum, 9);
+    return { stat: 'attackPct', value: val, raw: trimmed, display: `공 ${val}%` };
+  }
+
+  // G. Def Pen (방어율 무시, 방어력 관통, 방관, 방무)
+  if (/(?:방어율\s*무시|방어력\s*관통|방관|방무)\s*([0-9.]*)\s*%?/i.test(trimmed)) {
+    const numMatch = trimmed.match(/([0-9.]+)/);
+    const rawNum = numMatch ? Number(numMatch[1]) : null;
+    const val = resolveValue('defPen', rawNum, 8);
+    return { stat: 'defPen', value: val, raw: trimmed, display: `방관 ${val}%` };
+  }
+
+  // 4. Flat Stats Fallback
+  if (!trimmed.includes('%')) {
     const flatPatterns = [
       { stat: 'attackFlat', re: /(?:공격력|마력)\s*([0-9,]+)/i, label: '공(+)' },
       { stat: 'maxHp', re: /(?:최대\s*HP|HP)\s*([0-9,]+)/i, label: 'HP(+)' }
@@ -295,7 +391,7 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
   }
 
   // 6. Extract up to 3 lines for a potential section
-  function extract3Lines(sec) {
+  function extract3Lines(sec, gradeForLines = 'epic') {
     if (!sec) {
       return [
         { stat: 'NONE', value: 0, display: '잡옵' },
@@ -310,14 +406,15 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
       if (/강화\s*효과|상세보기|장착\s*효과|자동\s*분해|일괄\s*분해|슬롯|보스\s*몬스터/.test(line)) continue;
       if (/^(?:잠재\s*[옵점][션선]?|[점잠]재\s*옵션|옵션|에디셔널)/.test(line)) continue;
       if (/\b\d+\.\d+\s*%/.test(line)) continue; // Cube potentials never contain decimal numbers; decimals are base stats
-      if (!line.includes('%') && /공격력\s+[0-9,]+/.test(line)) continue;
-      if (!line.includes('%') && /최대\s*HP\s+[0-9,]+/.test(line)) continue;
-      if (!line.includes('%') && /방어력\s+[0-9,]+/.test(line)) continue;
+      if (!line.includes('%') && /공격력\s+[0-9,]{4,}/.test(line)) continue;
+      if (!line.includes('%') && /최대\s*HP\s+[0-9,]{4,}/.test(line)) continue;
+      if (!line.includes('%') && /방어력\s+[0-9,]{3,}/.test(line)) continue;
 
-      const isCandidate = /(?:LUK|STR|DEX|PEX|INT|HP|MP|공격력|마력|크리티컬|데미지|보스|방어|최대|[0-9.]+%\s*)/i.test(line);
+      const isCandidate = /(?:LUK|STR|DEX|PEX|INT|HP|MP|공격력|마력|크리티컬|데미지|대미지|더미지|도미지|태미지|som|dmg|dam|뎀|보스|방어|최대|재사용|쿨감|[0-9.]+%\s*)/i.test(line);
       if (!isCandidate) continue;
 
-      const parsed = parsePotentialLine(line, jobMainStat, jobSubStat);
+      const slotIdx = parsedLines.length + 1;
+      const parsed = parsePotentialLine(line, jobMainStat, jobSubStat, gradeForLines, slotIdx);
       parsedLines.push(parsed);
     }
     while (parsedLines.length < 3) {
@@ -330,12 +427,12 @@ export function parseEquipmentOcrText(text, starCount = null, jobMainStat = 'LUK
   const potSec = /(?:잠재\s*[옵점][션선]?|[점잠]재\s*옵션)/i.test(mainSec)
     ? mainSec.split(/(?:잠재\s*[옵점][션선]?|[점잠]재\s*옵션)/i)[1]
     : mainSec;
-  result.potentialLines = extract3Lines(potSec);
+  result.potentialLines = extract3Lines(potSec, result.grade);
 
   // 7. Detect Additional Potential Lines (밑잠 3줄)
   result.hasAdditional = hasAdditional;
   if (hasAdditional && addSec) {
-    result.additionalLines = extract3Lines(addSec);
+    result.additionalLines = extract3Lines(addSec, result.additionalGrade);
   } else {
     result.additionalLines = [];
   }

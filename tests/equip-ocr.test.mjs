@@ -4,7 +4,8 @@ import {
   parseEquipmentOcrText,
   countYellowStarsFromPixels,
   SLOT_DEFINITIONS,
-  GRADE_MAP
+  GRADE_MAP,
+  GRADE_POTENTIAL_SPECS
 } from '../equip-ocr.mjs';
 
 // 1. Potential Line Parsing with Job Intelligence
@@ -197,6 +198,48 @@ assert.equal(leakedRes.additionalLines[1].stat, 'mainStatPct'); // LUK 3%
 assert.equal(leakedRes.additionalLines[2].stat, 'subStatPct'); // DEX 3%
 assert.ok(!leakedRes.additionalLines.some(l => l.raw?.includes('5.7%')), '5.7% must not be in additionalLines');
 
+// 3E. Grade-Aware Resolution & Noisy OCR Recovery Tests
+assert.ok(GRADE_POTENTIAL_SPECS.unique.slots[1].statPct.includes(9));
+assert.ok(GRADE_POTENTIAL_SPECS.unique.slots[2].statPct.includes(6));
+assert.ok(GRADE_POTENTIAL_SPECS.unique.slots[3].damage.includes(12));
+
+const resolvedLuk = parsePotentialLine('LUK 9', 'LUK', 'DEX', 'unique', 1);
+assert.equal(resolvedLuk.stat, 'mainStatPct');
+assert.equal(resolvedLuk.value, 9, 'Missing % must snap to allowed 9% for unique slot 1');
+
+const resolvedCrit = parsePotentialLine('크리티컬 확률 6', 'LUK', 'DEX', 'unique', 2);
+assert.equal(resolvedCrit.stat, 'critRate');
+assert.equal(resolvedCrit.value, 6, 'Missing % must snap to allowed 6% for unique slot 2');
+
+const resolvedDmg = parsePotentialLine('데미지 12', 'LUK', 'DEX', 'unique', 3);
+assert.equal(resolvedDmg.stat, 'damage');
+assert.equal(resolvedDmg.value, 12, 'Missing % must snap to allowed 12% for unique slot 3');
+
+const resolvedFuzzyDmg = parsePotentialLine('som 12.', 'LUK', 'DEX', 'unique', 3);
+assert.equal(resolvedFuzzyDmg.stat, 'damage');
+assert.equal(resolvedFuzzyDmg.value, 12, 'Fuzzy "som 12." must resolve to damage 12%');
+
+const noisyZakumHatOcr = `
+모자 슬롯 강화 효과                     ×
+『7 777 ssvsy glee
+눌러서 옵션 상세보기        ] AY
+i 잠재 옵션               유니크 (Tos
+LUK                  9% |  df
+크리티컬 확률                        6%        ad
+데미지                  12% Bb CTs
+`;
+const hatParsed = parseEquipmentOcrText(noisyZakumHatOcr, 10, 'LUK', 'DEX');
+assert.equal(hatParsed.slotId, 'hat');
+assert.equal(hatParsed.grade, 'unique');
+assert.equal(hatParsed.potentialLines.length, 3);
+assert.equal(hatParsed.potentialLines[0].stat, 'mainStatPct');
+assert.equal(hatParsed.potentialLines[0].value, 9);
+assert.equal(hatParsed.potentialLines[1].stat, 'critRate');
+assert.equal(hatParsed.potentialLines[1].value, 6);
+assert.equal(hatParsed.potentialLines[2].stat, 'damage');
+assert.equal(hatParsed.potentialLines[2].value, 12);
+assert.equal(hatParsed.hasAdditional, false);
+
 // 4. Yellow Star Pixel Counter Test
 const width = 100;
 const height = 10;
@@ -217,4 +260,4 @@ for (const pc of peakCenters) {
 const starCount = countYellowStarsFromPixels(buffer, width, height, 4);
 assert.equal(starCount, 5);
 
-console.log('equip-ocr dual potential (윗잠 & 밑잠) unit tests passed cleanly!');
+console.log('equip-ocr dual potential (윗잠 & 밑잠) and grade-aware unit tests passed cleanly!');
