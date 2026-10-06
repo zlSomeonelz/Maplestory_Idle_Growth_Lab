@@ -245,13 +245,13 @@ function setTargetModeFromContent(id) {
   else if (id === 'guild-raid-zakum') { targetMode = 'guild_content'; targetChapter = '길드 토벌전'; }
   else if (id === 'boss-raid') { targetMode = 'boss_raid'; }
 
-  if (stageModeEl.value !== targetMode) {
-    stageModeEl.value = targetMode;
-    if (typeof window.fillStageChapters === 'function') window.fillStageChapters();
-  }
+  stageModeEl.value = targetMode;
+  if (typeof window.fillStageChapters === 'function') window.fillStageChapters();
   if (targetChapter && stageChapterEl) {
     stageChapterEl.value = targetChapter;
     if (typeof window.fillStages === 'function') window.fillStages();
+  } else if (typeof window.fillStages === 'function') {
+    window.fillStages();
   }
 }
 

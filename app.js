@@ -402,9 +402,41 @@ function snapshot() {
 
 function applySnapshot(s) {
   if (!s) return;
+
+  // 1. Stage mode and chapter must be sequenced so options exist before selecting stage
+  if (s.stageMode && $('stageMode')) {
+    $('stageMode').value = s.stageMode;
+  }
+  if (s.stageChapter !== undefined && $('stageChapter')) {
+    let chVal = String(s.stageChapter).trim();
+    const matchNum = chVal.match(/\d+/);
+    if (matchNum && !isNaN(Number(matchNum[0]))) chVal = matchNum[0];
+    $('stageChapter').value = chVal;
+  }
+  fillStageChapters();
+  if (s.stageChapter !== undefined && $('stageChapter')) {
+    let chVal = String(s.stageChapter).trim();
+    const matchNum = chVal.match(/\d+/);
+    if (matchNum && !isNaN(Number(matchNum[0]))) chVal = matchNum[0];
+    $('stageChapter').value = chVal;
+    fillStages();
+  }
+  if (s.stageSelect && $('stageSelect')) {
+    const sel = $('stageSelect');
+    if ([...sel.options].some(o => o.value === String(s.stageSelect))) {
+      sel.value = String(s.stageSelect);
+      applyStageTarget();
+      renderStageInfo();
+    }
+  }
+
+  // 2. Apply remaining snapshot values (skipping stage selectors handled above)
   Object.entries(s).forEach(([id, v]) => {
     if (id === 'companionSlots') {
       savedCompanionSlots = Array.isArray(v) ? v : [];
+      return;
+    }
+    if (['stageMode', 'stageChapter', 'stageSelect'].includes(id)) {
       return;
     }
     const el = $(id);
@@ -1666,13 +1698,16 @@ function fillStageChapters() {
   });
   const current = sel.value;
   let next = current;
-  if (!next || !chapters.map(String).includes(String(next))) {
+  const normCurrent = String(current || '').match(/\d+/)?.[0];
+  if (normCurrent && chapters.map(String).includes(String(normCurrent))) {
+    next = normCurrent;
+  } else if (!next || !chapters.map(String).includes(String(next))) {
     const playerLv = n('level') || 100;
     const levelMatch = chapters.find(c => typeof c === 'number' && c * 10 >= playerLv);
     next = levelMatch !== undefined ? String(levelMatch) : String(chapters[0] || '');
   }
   sel.innerHTML = '<option value="">구분/챕터 선택</option>' + chapters.map(c => `<option value="${c}">${typeof c === 'number' ? c + '장' : c}</option>`).join('');
-  if (chapters.map(String).includes(String(next))) sel.value = next;
+  if (chapters.map(String).includes(String(next))) sel.value = String(next);
   fillStages();
 }
 
@@ -1707,6 +1742,7 @@ function fillStages() {
   const rows = stageRows().filter(x => !chapter || String(x.chapter) === String(chapter));
   const current = sel.value;
   sel.innerHTML = '<option value="">단계/스테이지 선택</option>' + rows.map(x => `<option value="${x.stage}">${x.stage} · ${x.category || '일반'}</option>`).join('');
+  // When a chapter is selected, only keep current if it actually belongs to this chapter's rows
   if (rows.some(x => String(x.stage) === String(current))) {
     sel.value = current;
   } else if (rows.length > 0) {
@@ -1720,7 +1756,13 @@ function fillStages() {
 
 function selectedStageRow() {
   const stage = $('stageSelect')?.value;
-  return stage ? stageRows().find(x => String(x.stage) === String(stage)) || null : null;
+  if (!stage) return null;
+  const chapter = $('stageChapter')?.value;
+  if (chapter) {
+    const match = stageRows().find(x => String(x.stage) === String(stage) && String(x.chapter) === String(chapter));
+    if (match) return match;
+  }
+  return stageRows().find(x => String(x.stage) === String(stage)) || null;
 }
 
 function applyStageTarget() {
@@ -1864,6 +1906,12 @@ function renderStageInfo() {
 
   if (linkedText) {
     linkedText.innerHTML = `<strong>👾 ${escapeHtml(row.stage)} (${escapeHtml(row.category || '일반')})</strong> — 방어력 ${def} · ${hpDesc}`;
+  }
+  const ct = $('contentTarget');
+  if (ct && (ct.dataset.autoSynced === 'true' || !ct.value)) {
+    const modeLabel = isTrial ? '챕터 도전' : (mode === 'hunt' ? '챕터 사냥' : '');
+    ct.value = modeLabel ? `${modeLabel} ${row.stage}` : row.stage;
+    ct.dataset.autoSynced = 'true';
   }
 }
 
@@ -2055,6 +2103,80 @@ function officialCycleSummary(type) {
   const hp = stageHpAverage(selectedStageRow(), mode);
   const clear = hp !== null && dps > 0 ? ` · HP ${fmt(hp)} 기준 예상 ${(hp / dps).toFixed(1)}초` : '';
   return `주기 참고 DPS ${fmt(dps)}${clear} · 쿨타임 동안 기본 공격 ${attacks}회 + 스킬 1회 · 스킬 계수 ${coefficient}`;
+}
+
+function syncContentTargetToStage() {
+  const ct = $('contentTarget');
+  const raw = ct?.value?.trim();
+  if (!raw) return;
+
+  // 1. Check for stage pattern like "22-10", "22-3", "10-3", "22 - 10"
+  const stageMatch = raw.match(/(\d+)\s*[-~_]\s*(\d+)/);
+  if (stageMatch) {
+    const ch = stageMatch[1];
+    const stNo = stageMatch[2];
+    const targetStage = `${ch}-${stNo}`;
+    if (raw.includes('사냥')) {
+      if ($('stageMode')) $('stageMode').value = 'hunt';
+    } else {
+      if ($('stageMode')) $('stageMode').value = 'trial';
+    }
+    fillStageChapters();
+    if ($('stageChapter')) {
+      $('stageChapter').value = ch;
+      fillStages();
+      if ($('stageSelect')) {
+        const found = [...$('stageSelect').options].some(o => o.value === targetStage);
+        if (found) {
+          $('stageSelect').value = targetStage;
+          applyStageTarget();
+          renderStageInfo();
+          renderCombat();
+        }
+      }
+    }
+    ct.dataset.autoSynced = 'true';
+    return;
+  }
+
+  // 2. Check for chapter pattern like "챕터 도전 22장", "챕터 22", "도전 22장", "22장", "22", "챕터 도전 22"
+  const chMatch = raw.match(/(?:챕터|도전|사냥)?\s*(\d+)\s*(?:장|챕터)?/);
+  if (chMatch && chMatch[1]) {
+    const ch = chMatch[1];
+    if (raw.includes('사냥')) {
+      if ($('stageMode')) $('stageMode').value = 'hunt';
+    } else {
+      if ($('stageMode')) $('stageMode').value = 'trial';
+    }
+    fillStageChapters();
+    if ($('stageChapter')) {
+      const chOptions = [...$('stageChapter').options].map(o => o.value);
+      if (chOptions.includes(ch)) {
+        $('stageChapter').value = ch;
+        fillStages();
+        renderCombat();
+      }
+    }
+    ct.dataset.autoSynced = 'true';
+    return;
+  }
+
+  // 3. Boss raid names
+  const bossNames = ['핑크빈', '자쿰', '블러디 퀸', '피에르', '반반', '벨룸', '혼테일', '반레온'];
+  const matchedBoss = bossNames.find(b => raw.includes(b));
+  if (matchedBoss) {
+    if ($('stageMode')) $('stageMode').value = 'boss_raid';
+    fillStageChapters();
+    if ($('stageChapter')) {
+      const foundCh = [...$('stageChapter').options].find(o => o.value.includes(matchedBoss));
+      if (foundCh) {
+        $('stageChapter').value = foundCh.value;
+        fillStages();
+        renderCombat();
+      }
+    }
+    ct.dataset.autoSynced = 'true';
+  }
 }
 
 function optimizeContent() {
@@ -6412,7 +6534,10 @@ function bind() {
     renderContentGuide();
     optimizeContent();
   });
-  $('contentTarget')?.addEventListener('input', optimizeContent);
+  $('contentTarget')?.addEventListener('input', () => {
+    syncContentTargetToStage();
+    optimizeContent();
+  });
   $('trialTargetSub')?.addEventListener('change', () => {
     applyStageTarget();
     renderStageInfo();
@@ -6441,4 +6566,15 @@ initMekiCubeSystem();
 initWorkflowStepper();
 loadData();
 renderAll();
+
+// Window exports for cross-module integration (content-presets.js) and testing
+if (typeof window !== 'undefined') {
+  window.fillStageChapters = fillStageChapters;
+  window.fillStages = fillStages;
+  window.applySnapshot = applySnapshot;
+  window.applyStageTarget = applyStageTarget;
+  window.renderStageInfo = renderStageInfo;
+  window.syncContentTargetToStage = syncContentTargetToStage;
+  window.DATA = DATA;
+}
 
