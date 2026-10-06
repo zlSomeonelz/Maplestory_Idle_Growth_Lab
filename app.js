@@ -6092,9 +6092,6 @@ function initSpecupTab() {
   initCubeEditModal();
   initEquipOcr();
   renderSpecupEquipTable();
-  $('specupPreset120Btn')?.addEventListener('click', () => applySpecupPreset(120));
-  $('specupPreset100Btn')?.addEventListener('click', () => applySpecupPreset(100));
-  $('specupPreset140Btn')?.addEventListener('click', () => applySpecupPreset(140));
   $('runSpecupOptimizerBtn')?.addEventListener('click', handleRunSpecupOptimizer);
   $('runSfStandaloneBtn')?.addEventListener('click', handleRunSfStandalone);
   $('runScrollStandaloneBtn')?.addEventListener('click', handleRunScrollStandalone);
